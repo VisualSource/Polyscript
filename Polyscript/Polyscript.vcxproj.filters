@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\lexer">
+      <UniqueIdentifier>{a54fb636-9aa1-4324-bd2d-0873e0af230d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\parser">
+      <UniqueIdentifier>{9a1bdf75-0bf3-4475-93a2-f02f57b9d8d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shared">
+      <UniqueIdentifier>{e431c542-f191-4874-9493-de04b6c6f8d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\lexer">
+      <UniqueIdentifier>{96b2ef36-59ba-487a-8956-e7140f6b384d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\parser">
+      <UniqueIdentifier>{604ca1e5-ac42-4590-bb64-b4a70e98cb8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\shared">
+      <UniqueIdentifier>{17af8049-025e-4f17-9eec-83bdf1fc1d81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\errors">
+      <UniqueIdentifier>{6a44afa6-2d15-48f9-bd96-9196a93004d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\errors">
+      <UniqueIdentifier>{fe325592-0768-4289-ab52-50f690c88b6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\shared\token">
+      <UniqueIdentifier>{7dfd7ef3-9b1d-4dea-a168-0f9569bf8f4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shared\token">
+      <UniqueIdentifier>{f72dc2ac-5dcd-47b5-985c-4340834d7ffb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\nodes">
+      <UniqueIdentifier>{9b634a07-73de-4c45-9363-2c8907e8ac24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\nodes">
+      <UniqueIdentifier>{2e555f94-411b-4a6a-852e-3adc07ed6f28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\interperter">
+      <UniqueIdentifier>{47190d8a-ca33-48aa-9924-6231cfe5d5d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interperter">
+      <UniqueIdentifier>{577ad703-b737-4e90-ab9c-b4364915e966}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interperter\types">
+      <UniqueIdentifier>{de9cf55e-b67c-499b-87dc-b85651cd085b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\interperter\types">
+      <UniqueIdentifier>{09b531ce-15dc-444c-9410-5ec9a2a72775}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Polyscript.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Lexer.cpp">
+      <Filter>Source Files\lexer</Filter>
+    </ClCompile>
+    <ClCompile Include="PolyscriptError.cpp">
+      <Filter>Source Files\errors</Filter>
+    </ClCompile>
+    <ClCompile Include="IllegalCharError.cpp">
+      <Filter>Source Files\errors</Filter>
+    </ClCompile>
+    <ClCompile Include="Position.cpp">
+      <Filter>Source Files\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser.cpp">
+      <Filter>Source Files\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="Token.cpp">
+      <Filter>Source Files\shared\token</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenEnum.cpp">
+      <Filter>Source Files\shared\token</Filter>
+    </ClCompile>
+    <ClCompile Include="NumberNode.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="BinOpNode.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="NodeUtils.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="InvalidSyntaxError.cpp">
+      <Filter>Source Files\errors</Filter>
+    </ClCompile>
+    <ClCompile Include="ParseResult.cpp">
+      <Filter>Source Files\parser</Filter>
+    </ClCompile>
+    <ClCompile Include="UnaryOpNode.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="Interpreter.cpp">
+      <Filter>Source Files\interperter</Filter>
+    </ClCompile>
+    <ClCompile Include="Integer.cpp">
+      <Filter>Source Files\interperter\types</Filter>
+    </ClCompile>
+    <ClCompile Include="Float.cpp">
+      <Filter>Source Files\interperter\types</Filter>
+    </ClCompile>
+    <ClCompile Include="RuntimeError.cpp">
+      <Filter>Source Files\errors</Filter>
+    </ClCompile>
+    <ClCompile Include="Context.cpp">
+      <Filter>Source Files\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="VarAccessNode.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="VarAssignNode.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="SymbolTable.cpp">
+      <Filter>Source Files\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="ExpectedCharError.cpp">
+      <Filter>Source Files\errors</Filter>
+    </ClCompile>
+    <ClCompile Include="IfNode.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="ForNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WhileNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Lexer.h">
+      <Filter>Header Files\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="PolyscriptError.h">
+      <Filter>Header Files\errors</Filter>
+    </ClInclude>
+    <ClInclude Include="IllegalCharError.h">
+      <Filter>Header Files\errors</Filter>
+    </ClInclude>
+    <ClInclude Include="Position.h">
+      <Filter>Header Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser.h">
+      <Filter>Header Files\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="Token.h">
+      <Filter>Header Files\shared\token</Filter>
+    </ClInclude>
+    <ClInclude Include="TokenEnum.h">
+      <Filter>Header Files\shared\token</Filter>
+    </ClInclude>
+    <ClInclude Include="NumberNode.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BinOpNode.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeUtils.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="ParseResult.h">
+      <Filter>Header Files\parser</Filter>
+    </ClInclude>
+    <ClInclude Include="InvalidSyntaxError.h">
+      <Filter>Header Files\errors</Filter>
+    </ClInclude>
+    <ClInclude Include="UnaryOpNode.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="Integer.h">
+      <Filter>Header Files\interperter\types</Filter>
+    </ClInclude>
+    <ClInclude Include="Interpreter.h">
+      <Filter>Header Files\interperter</Filter>
+    </ClInclude>
+    <ClInclude Include="Float.h">
+      <Filter>Header Files\interperter\types</Filter>
+    </ClInclude>
+    <ClInclude Include="RuntimeError.h">
+      <Filter>Header Files\errors</Filter>
+    </ClInclude>
+    <ClInclude Include="Context.h">
+      <Filter>Header Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="VarAccessNode.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="VarAssignNode.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="SymbolTable.h">
+      <Filter>Header Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="ExpectedCharError.h">
+      <Filter>Header Files\errors</Filter>
+    </ClInclude>
+    <ClInclude Include="IfNode.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="ForNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WhileNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test.ps">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".gitignore">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
