@@ -180,6 +180,7 @@
     <ClInclude Include="Interpreter.h" />
     <ClInclude Include="InvalidSyntaxError.h" />
     <ClInclude Include="Lexer.h" />
+    <ClInclude Include="Nodes.h" />
     <ClInclude Include="NodeUtils.h" />
     <ClInclude Include="NumberNode.h" />
     <ClInclude Include="Parser.h" />
@@ -196,7 +197,6 @@
     <ClInclude Include="WhileNode.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include=".gitignore" />
     <None Include="test.ps" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

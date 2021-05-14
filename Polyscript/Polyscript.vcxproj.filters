@@ -61,6 +61,30 @@
     <Filter Include="Header Files\interperter\types">
       <UniqueIdentifier>{09b531ce-15dc-444c-9410-5ec9a2a72775}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\nodes\variable">
+      <UniqueIdentifier>{fa4264f8-efc2-4106-8dc3-9923b5c40a88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\nodes\keywords">
+      <UniqueIdentifier>{eba24995-fea5-42b0-a48e-35cd9684c609}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\nodes\types">
+      <UniqueIdentifier>{4b03ad57-3149-42c6-8b76-bc13d26504e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\nodes\operations">
+      <UniqueIdentifier>{ee91a5f9-d032-4ada-abfe-b1d487f0673a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\nodes\keywords">
+      <UniqueIdentifier>{151cd9d0-eb3d-4928-9da2-fd7bd2aba892}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\nodes\varible">
+      <UniqueIdentifier>{db53468d-0f9d-4e20-a71b-161953a0ebee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\nodes\types">
+      <UniqueIdentifier>{ee53c113-ea7d-456b-8cfc-15e7bb3e0f4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\nodes\operations">
+      <UniqueIdentifier>{882ed36a-d274-4c88-96ed-876abd029782}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Polyscript.cpp">
@@ -87,23 +111,11 @@
     <ClCompile Include="TokenEnum.cpp">
       <Filter>Source Files\shared\token</Filter>
     </ClCompile>
-    <ClCompile Include="NumberNode.cpp">
-      <Filter>Source Files\nodes</Filter>
-    </ClCompile>
-    <ClCompile Include="BinOpNode.cpp">
-      <Filter>Source Files\nodes</Filter>
-    </ClCompile>
-    <ClCompile Include="NodeUtils.cpp">
-      <Filter>Source Files\nodes</Filter>
-    </ClCompile>
     <ClCompile Include="InvalidSyntaxError.cpp">
       <Filter>Source Files\errors</Filter>
     </ClCompile>
     <ClCompile Include="ParseResult.cpp">
       <Filter>Source Files\parser</Filter>
-    </ClCompile>
-    <ClCompile Include="UnaryOpNode.cpp">
-      <Filter>Source Files\nodes</Filter>
     </ClCompile>
     <ClCompile Include="Interpreter.cpp">
       <Filter>Source Files\interperter</Filter>
@@ -120,12 +132,6 @@
     <ClCompile Include="Context.cpp">
       <Filter>Source Files\shared</Filter>
     </ClCompile>
-    <ClCompile Include="VarAccessNode.cpp">
-      <Filter>Source Files\nodes</Filter>
-    </ClCompile>
-    <ClCompile Include="VarAssignNode.cpp">
-      <Filter>Source Files\nodes</Filter>
-    </ClCompile>
     <ClCompile Include="SymbolTable.cpp">
       <Filter>Source Files\shared</Filter>
     </ClCompile>
@@ -133,13 +139,31 @@
       <Filter>Source Files\errors</Filter>
     </ClCompile>
     <ClCompile Include="IfNode.cpp">
+      <Filter>Source Files\nodes\keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="NodeUtils.cpp">
       <Filter>Source Files\nodes</Filter>
     </ClCompile>
     <ClCompile Include="ForNode.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\nodes\keywords</Filter>
     </ClCompile>
     <ClCompile Include="WhileNode.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\nodes\keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="VarAssignNode.cpp">
+      <Filter>Source Files\nodes\varible</Filter>
+    </ClCompile>
+    <ClCompile Include="VarAccessNode.cpp">
+      <Filter>Source Files\nodes\varible</Filter>
+    </ClCompile>
+    <ClCompile Include="NumberNode.cpp">
+      <Filter>Source Files\nodes\types</Filter>
+    </ClCompile>
+    <ClCompile Include="BinOpNode.cpp">
+      <Filter>Source Files\nodes\operations</Filter>
+    </ClCompile>
+    <ClCompile Include="UnaryOpNode.cpp">
+      <Filter>Source Files\nodes\operations</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -164,23 +188,11 @@
     <ClInclude Include="TokenEnum.h">
       <Filter>Header Files\shared\token</Filter>
     </ClInclude>
-    <ClInclude Include="NumberNode.h">
-      <Filter>Header Files\nodes</Filter>
-    </ClInclude>
-    <ClInclude Include="BinOpNode.h">
-      <Filter>Header Files\nodes</Filter>
-    </ClInclude>
-    <ClInclude Include="NodeUtils.h">
-      <Filter>Header Files\nodes</Filter>
-    </ClInclude>
     <ClInclude Include="ParseResult.h">
       <Filter>Header Files\parser</Filter>
     </ClInclude>
     <ClInclude Include="InvalidSyntaxError.h">
       <Filter>Header Files\errors</Filter>
-    </ClInclude>
-    <ClInclude Include="UnaryOpNode.h">
-      <Filter>Header Files\nodes</Filter>
     </ClInclude>
     <ClInclude Include="Integer.h">
       <Filter>Header Files\interperter\types</Filter>
@@ -197,34 +209,46 @@
     <ClInclude Include="Context.h">
       <Filter>Header Files\shared</Filter>
     </ClInclude>
-    <ClInclude Include="VarAccessNode.h">
-      <Filter>Header Files\nodes</Filter>
-    </ClInclude>
-    <ClInclude Include="VarAssignNode.h">
-      <Filter>Header Files\nodes</Filter>
-    </ClInclude>
     <ClInclude Include="SymbolTable.h">
       <Filter>Header Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="ExpectedCharError.h">
       <Filter>Header Files\errors</Filter>
     </ClInclude>
+    <ClInclude Include="WhileNode.h">
+      <Filter>Header Files\nodes\keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="VarAssignNode.h">
+      <Filter>Header Files\nodes\variable</Filter>
+    </ClInclude>
+    <ClInclude Include="VarAccessNode.h">
+      <Filter>Header Files\nodes\variable</Filter>
+    </ClInclude>
     <ClInclude Include="IfNode.h">
-      <Filter>Header Files\nodes</Filter>
+      <Filter>Header Files\nodes\keywords</Filter>
     </ClInclude>
     <ClInclude Include="ForNode.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\nodes\keywords</Filter>
     </ClInclude>
-    <ClInclude Include="WhileNode.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="NumberNode.h">
+      <Filter>Header Files\nodes\types</Filter>
+    </ClInclude>
+    <ClInclude Include="UnaryOpNode.h">
+      <Filter>Header Files\nodes\operations</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeUtils.h">
+      <Filter>Header Files\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="BinOpNode.h">
+      <Filter>Header Files\nodes\operations</Filter>
+    </ClInclude>
+    <ClInclude Include="Nodes.h">
+      <Filter>Header Files\nodes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.ps">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include=".gitignore">
-      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -1,4 +1,12 @@
 #include "NodeUtils.h"
+#include "BinOpNode.h"
+#include "NumberNode.h"
+#include "UnaryOpNode.h"
+#include "VarAssignNode.h"
+#include "VarAccessNode.h"
+#include "IfNode.h"
+#include "WhileNode.h"
+#include "ForNode.h"
 
 
 ostream& NodeUtils::printNode(std::ostream& lhs, const any& node) {
@@ -46,3 +54,14 @@ bool NodeUtils::isIfNode(const any& node)
 {
 	return node.type() == typeid(IfNode);
 }
+
+bool NodeUtils::isWhileNode(const any& node)
+{
+	return node.type() == typeid(WhileNode);
+}
+
+bool NodeUtils::isForNode(const any& node)
+{
+	return node.type() == typeid(ForNode);
+}
+

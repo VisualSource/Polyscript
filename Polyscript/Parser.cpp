@@ -1,9 +1,16 @@
 #include "Parser.h"
+#include <optional>
 #include "UnaryOpNode.h"
 #include "IfNode.h"
 #include "NodeUtils.h"
 #include "InvalidSyntaxError.h"
-#include <optional>
+#include "ForNode.h"
+#include "WhileNode.h"
+#include "VarAccessNode.h"
+#include "VarAssignNode.h"
+#include "NumberNode.h"
+#include "UnaryOpNode.h"
+#include "BinOpNode.h"
 
 
 Parser::Parser(vector<Token> tokens): tokens(tokens) {
@@ -42,9 +49,15 @@ ParseResult Parser::atom(){
 		}
 	} else if (tok.matches(TypeToken::KEYWORD,"if")){
 		any expr_if = res.Register(exprIf());
-
 		return res.success(expr_if);
-	
+	}
+	else if (tok.matches(TypeToken::KEYWORD, "for")) {
+		any expr_if = res.Register(forExpr());
+		return res.success(expr_if);
+	}
+	else if (tok.matches(TypeToken::KEYWORD, "while")) {
+		any expr_if = res.Register(whileExpr());
+		return res.success(expr_if);
 	}
 
 	throw InvalidSyntaxError("Expected int or float, '+', '-', or '(' ", tok.GetStart().value(), tok.GetEnd().value());
@@ -269,6 +282,98 @@ ParseResult Parser::exprIf()
 
 
 	return res.success(IfNode(cases, else_case));
+}
+
+// Creation of a for loop block
+// Grammer
+// for IDENTIFIER = NUMBER to NUMBER { EXPR }
+ParseResult Parser::forExpr()
+{
+	ParseResult res;
+	
+	if (!current_token.matches(TypeToken::KEYWORD, "for")) {
+		throw InvalidSyntaxError("Expected 'for'",current_token.GetStart().value(),current_token.GetEnd().value());
+	}
+
+	advance();
+
+	if(!current_token.isToken(TypeToken::IDENTIFIER)){
+		throw InvalidSyntaxError("Expected identifier", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+
+	Token varName = current_token;
+	advance();
+
+	if (!current_token.isToken(TypeToken::EQ)) {
+		throw InvalidSyntaxError("Expected '='",current_token.GetStart().value(),current_token.GetEnd().value());
+	}
+	advance();
+
+	any start_value = res.Register(this->expr());
+
+	if (!current_token.matches(TypeToken::KEYWORD, "to")) {
+		throw InvalidSyntaxError("Expected 'to'",current_token.GetStart().value(),current_token.GetEnd().value());
+	}
+
+	advance();
+
+	any end_value = res.Register(this->expr());
+
+	any step_value;
+	if (current_token.matches(TypeToken::KEYWORD, "step")) {
+		advance();
+
+		step_value = res.Register(this->expr());
+	}
+
+	if (!current_token.isToken(TypeToken::SCOPESTART)) {
+		throw InvalidSyntaxError("Expected '{'", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+
+	advance();
+
+	any body = res.Register(this->expr());
+
+
+	if (!current_token.isToken(TypeToken::SCOPEEND)) {
+		throw InvalidSyntaxError("Expected '}'", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+
+	advance();
+
+
+	return res.success(ForNode(varName,start_value,end_value,body,step_value));
+}
+
+// Grammer
+// while <condition> { expr }
+ParseResult Parser::whileExpr()
+{
+	ParseResult res;
+
+	if(!current_token.matches(TypeToken::KEYWORD,"while")){
+		throw InvalidSyntaxError("Expected 'while'", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+
+	advance();
+
+	any condition = res.Register(this->expr());
+
+	if (!current_token.isToken(TypeToken::SCOPESTART)) {
+		throw InvalidSyntaxError("Expected '{'", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+
+	advance();
+
+	any body = res.Register(this->expr());
+
+	if (!current_token.isToken(TypeToken::SCOPEEND)) {
+		throw InvalidSyntaxError("Expected '{'", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+
+	advance();
+
+	return res.success(WhileNode(condition,body));
 }
 
 

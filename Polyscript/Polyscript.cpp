@@ -18,7 +18,7 @@
 using namespace std;
 
 
-void run(string fn, string text, SymbolTable* scope, bool showTokens, bool showAST){
+void run(string fn, string text, SymbolTable* scope, bool showTokens){
 	try {
 		Lexer lexer(text,fn);
 		vector<Token> tokens = lexer.makeTokens();
@@ -32,12 +32,6 @@ void run(string fn, string text, SymbolTable* scope, bool showTokens, bool showA
 		Parser parser(tokens);
 
 		ParseResult ast = parser.parse();
-
-		if(showAST) {
-			cout << "AST: ";
-			NodeUtils::printNode(cout, ast.GetNode());
-			cout << endl;
-		}
 
 		if (ast.hasErr()) {
 			throw ast.GetErr();
@@ -78,18 +72,10 @@ void run(string fn, string text, SymbolTable* scope, bool showTokens, bool showA
 
 int main(int argc, char* argv[]) {
 	bool showTokens = false;
-	bool showAST = false;
-	bool fromFile = false;
 	string file_name;
 
 	for (int i = 1; i < argc; i++) {
 		if (!strcmp(argv[i], "--showTokens")) showTokens = true;
-		if (!strcmp(argv[i], "--showAST")) showAST = true;
-		if (!strcmp(argv[i], "--file")) {
-			file_name = argv[i + 1];
-			fromFile = true;
-			i++;
-		}
 	}
 
 	SymbolTable* globalscope = new SymbolTable();
@@ -98,7 +84,6 @@ int main(int argc, char* argv[]) {
 	globalscope->add("false", Integer(0));
 	globalscope->add("true", Integer(1));
 
-	if (!fromFile) {
 		cout << "Polyscript \x1B[94mV0.1.0\033[0m | use exit() to exit." << endl;
 
 		while (true) {
@@ -106,22 +91,10 @@ int main(int argc, char* argv[]) {
 			string input;
 			getline(cin, input);
 			if (input == "exit()") break;
-			run("<stdin>", input, globalscope, showTokens, showAST);
+			run("<stdin>", input, globalscope, showTokens);
 		}
-	}
-	else {
-		fstream wfile;
-		wfile.open(file_name);
-		string line;
-		if(wfile.is_open()){
-			while (!wfile.eof()){
-				getline(wfile, line);
-				run(file_name, line, globalscope, showTokens, showAST);
-				line.clear();
-			}
-		}
-		wfile.close();
-	}
+	
+
 	return 0;
 }
 

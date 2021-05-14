@@ -23,7 +23,8 @@ class SymbolTable {
 		bool isEmpty() const;
 		bool hasVar(string key) const;
 		Var get(string key) const;
-		void add(string key, Var value);
+		void setValue(string key, Var value, bool searchParent = true);
+		void add(string key, Var value, bool serachParent = true);
 		void setParent(SymbolTable* parent);
 	private:
 		SymbolTable* parent = nullptr;

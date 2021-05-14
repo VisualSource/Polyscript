@@ -1,12 +1,6 @@
 #pragma once
 #include <ostream>
 #include <any>
-#include "BinOpNode.h"
-#include "NumberNode.h"
-#include "UnaryOpNode.h"
-#include "VarAssignNode.h"
-#include "VarAccessNode.h"
-#include "IfNode.h"
 
 using namespace std;
 
@@ -18,4 +12,6 @@ namespace NodeUtils {
 	bool isVarAccessNode(const any& node);
 	bool isAssignNode(const any& node);
 	bool isIfNode(const any& node);
+	bool isWhileNode(const any& node);
+	bool isForNode(const any& node);
 }

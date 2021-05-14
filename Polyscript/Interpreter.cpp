@@ -6,6 +6,7 @@
 #include "PolyscriptError.h"
 #include "RuntimeError.h"
 #include "SymbolTable.h"
+#include "Nodes.h"
 
 bool InterTypes::isFloat(const any& node){
 	return node.type() == typeid(Float);
@@ -44,6 +45,12 @@ any Interpreter::visit(const any& node, Context* context) {
 	}
 	else if (NodeUtils::isIfNode(node)) {
 		return visit_IfNode(any_cast<IfNode>(node), context);
+	}
+	else if (NodeUtils::isForNode(node)) {
+		return visit_ForNode(any_cast<ForNode>(node), context);
+	}
+	else if (NodeUtils::isWhileNode(node)) {
+		return visit_WhileNode(any_cast<WhileNode>(node), context);
 	}
 	else {
 		throw PolyscriptError("Undefined Operation", "No Visit Method", Position(), Position());
@@ -386,5 +393,79 @@ any Interpreter::visit_IfNode(const IfNode& node, Context* context)
 	}
 
 
+	return any();
+}
+
+any Interpreter::visit_ForNode(const ForNode& node, Context* context)
+{
+	try
+	{
+		Integer start_value = any_cast<Integer>(visit(node.GetStartValueNode(), context));
+		Integer end_value = any_cast<Integer>(visit(node.GetEndValueNode(), context));
+
+		int step_value = 1;
+
+		if (node.GetStep().has_value()) {
+			step_value = any_cast<Integer>(visit(node.GetStep(), context)).GetValue();
+		}
+
+		int i = start_value.GetValue();
+
+		string var_name = node.GetVarTokenName().GetValue().value();
+
+
+		SymbolTable* forscope = new SymbolTable();
+		forscope->add(var_name,start_value,false);
+		forscope->setParent(context->GetScope());
+		Context* forctx = new Context("for", forscope, context);
+
+		if (step_value >= 0) {
+			while (i < end_value.GetValue()) {
+				forctx->GetScope()->setValue(var_name, Integer(i),false);
+				i += step_value;
+				visit(node.GetBodyNode(), forctx);
+			}
+		}
+		else {
+			while (i > end_value.GetValue()) {
+				forctx->GetScope()->setValue(var_name, Integer(i),false);
+				i += step_value;
+				visit(node.GetBodyNode(), forctx);
+			}
+		}
+
+
+		delete forctx;
+		delete forscope;
+	}
+	catch (const std::bad_any_cast&)
+	{
+		throw RuntimeError("Invaild start, end, or step value",context,node.GetStart(),node.GetEnd());
+	}
+
+	return any();
+}
+
+any Interpreter::visit_WhileNode(const WhileNode& node, Context* context)
+{
+	SymbolTable* whilescope = new SymbolTable();
+	whilescope->setParent(context->GetScope());
+	Context* whilectx = new Context("while", whilescope, context);
+	try {
+		while (true) {
+			Integer condition = any_cast<Integer>(visit(node.GetConditionNode(), whilectx));
+
+			if (condition.isTrue()) {
+				break;
+			}
+
+			visit(node.GetBodyNode(), whilectx);
+		}
+	}catch(const std::bad_any_cast&){
+		throw RuntimeError("Invaild while loop condition", whilectx, node.GetStart(), node.GetEnd());
+	}
+
+	delete whilectx;
+	delete whilescope;
 	return any();
 }

@@ -21,6 +21,8 @@ class Parser {
 		ParseResult compExpr();
 		ParseResult arithExpr();
 		ParseResult exprIf();
+		ParseResult forExpr();
+		ParseResult whileExpr();
 		Token current_token;
 		vector<Token> tokens;
 		int tok_idx = 1;

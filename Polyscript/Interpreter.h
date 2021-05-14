@@ -3,6 +3,8 @@
 #include <ostream>
 #include "NodeUtils.h"
 #include "Context.h"
+#include "Nodes.h"
+
 
 class Interpreter {
 	public:
@@ -15,6 +17,8 @@ class Interpreter {
 		any visit_VarAccessNode(const VarAccessNode& node, Context* context);
 		any visit_VarAssignNode(const VarAssignNode& node, Context* context);
 		any visit_IfNode(const IfNode& node, Context* context);
+		any visit_ForNode(const ForNode& node, Context* context);
+		any visit_WhileNode(const WhileNode& node, Context* context);
 };
 
 namespace InterTypes {

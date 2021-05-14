@@ -91,8 +91,30 @@ Var SymbolTable::get(string key) const
 	
 }
 
-void SymbolTable::add(string key, Var value)
+void SymbolTable::setValue(string key, Var value, bool searchParent)
 {
+	if(!hasVar(key)) throw runtime_error("'" + key + "' is undefined");
+	NodePtr npp = head;
+	NodePtr npc = head->next;
+	while (npc != nullptr) {
+		if (npc->key == key) {
+			npc->value = value;
+			return;
+		}
+		npp = npc;
+		npc = npc->next;
+	}
+	if (parent != nullptr && searchParent) {
+		parent->setValue(key,value);
+	}
+}
+
+void SymbolTable::add(string key, Var value, bool serachParent)
+{
+	if (hasVar(key)) {
+		this->setValue(key, value, serachParent);
+		return;
+	}
 	this->insert(key, value);
 }
 
