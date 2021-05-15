@@ -7,3 +7,8 @@
 #include "IfNode.h"
 #include "VarAccessNode.h"
 #include "VarAssignNode.h"
+#include "FuncCallNode.h"
+#include "FuncDefNode.h"
+#include "StringNode.h"
+#include "ListNode.h"
+#include "ListAccessNode.h"

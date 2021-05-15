@@ -10,7 +10,7 @@ class PolyscriptError {
 		PolyscriptError();
 		PolyscriptError(string name, string details, Position start, Position end);
 		Position GetStart() const { return start; };
-		string as_str();
+		string as_str(string ad = "");
 		friend std::ostream& operator<<(std::ostream& lhs, const PolyscriptError& token);
 	private:
 		Position start;

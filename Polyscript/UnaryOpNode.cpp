@@ -10,8 +10,8 @@ std::ostream& operator<<(std::ostream& lhs, const UnaryOpNode& token) {
 }
 
 UnaryOpNode::UnaryOpNode(Token op_tok, any node): op_tok(op_tok), node(node) {
-    start = op_tok.GetStart().value();
-    end = op_tok.GetEnd().value();
+    SetStart(op_tok.GetStart().value());
+    SetEnd(NodeUtils::GetEndFromNode(node));
 }
 
 Token UnaryOpNode::GetToken() const {

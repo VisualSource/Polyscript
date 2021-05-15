@@ -1,6 +1,6 @@
 #include "Lexer.h"
-#include "TokenEnum.h"
 #include <cctype>
+#include "TokenEnum.h"
 #include "IllegalCharError.h"
 #include "ExpectedCharError.h"
 
@@ -40,6 +40,10 @@ vector<Token> Lexer::makeTokens() {
 			advance();
 		} else if(isdigit(current_char)){
 			tokens.push_back(makeNumber());
+		}
+		else if (current_char == '\n') {
+			tokens.push_back(Token(TypeToken::NEWLINE, nullopt, pos));
+			advance();
 		} else if (iscntrl(current_char)) {
 			advance();
 		} else if (isalpha(current_char) || current_char == '_') {
@@ -61,8 +65,7 @@ vector<Token> Lexer::makeTokens() {
 			tokens.push_back(Token(TypeToken::PLUS, nullopt,pos));
 			advance();
 		} else if (current_char == '-') {
-			tokens.push_back(Token(TypeToken::MINUS, nullopt,pos));
-			advance();
+			tokens.push_back(MakeMinusORRArrow());
 		} else if (current_char == '*') {
 			tokens.push_back(Token(TypeToken::MUL, nullopt, pos));
 			advance();
@@ -71,6 +74,10 @@ vector<Token> Lexer::makeTokens() {
 			advance();
 		} else if (current_char == '(') {
 			tokens.push_back(Token(TypeToken::LPAREN,nullopt,pos));
+			advance();
+		}
+		else if (current_char == ',') {
+			tokens.push_back(Token(TypeToken::COMMA, nullopt, pos));
 			advance();
 		}
 		else if (current_char == ')') {
@@ -105,6 +112,17 @@ vector<Token> Lexer::makeTokens() {
 		}
 		else if (current_char == '>') {
 			tokens.push_back(makeGreaterThan());
+		}
+		else if (current_char == '"') {
+			tokens.push_back(makeString());
+		}
+		else if (current_char == '[') {
+			tokens.push_back(Token(TypeToken::LBRACKET, nullopt, pos));
+			advance();
+		}
+		else if (current_char == ']') {
+			tokens.push_back(Token(TypeToken::RBRACKET, nullopt, pos));
+			advance();
 		}
 		else {
 			Position start(pos);
@@ -233,4 +251,33 @@ Token Lexer::makeLogicAND()
 	}
 	advance();
 	throw ExpectedCharError("'&' after '&'", start, pos);
+}
+
+Token Lexer::MakeMinusORRArrow()
+{
+	TypeToken type = TypeToken::MINUS;
+	Position start(pos);
+	advance();
+
+	if (current_char == '>') {
+		advance();
+		type = TypeToken::FATARROW;
+	}
+
+	return Token(type,nullopt,start,pos);
+}
+
+Token Lexer::makeString()
+{
+	string value = "";
+	Position start(pos);
+	advance();
+
+	while (current_char != '\0' && current_char != '"') {
+		value.push_back(current_char);
+		advance();
+	}
+
+	advance();
+	return Token(TypeToken::STRING,value,start,pos);
 }

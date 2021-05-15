@@ -1,20 +1,16 @@
 #include "WhileNode.h"
+#include "NodeUtils.h"
 
 WhileNode::WhileNode(any conditon, any body): conditon_node(conditon), body_node(body)
 {
-	// TODO make function to get postion from node
-	start = Position(); // from condition
-	end = Position(); // from end
-}
-
-Position WhileNode::GetStart() const
-{
-	return start;
-}
-
-Position WhileNode::GetEnd() const
-{
-	return end;
+	SetStart(NodeUtils::GetStartFromNode(conditon));
+	if (body.has_value()) {
+		SetEnd(NodeUtils::GetEndFromNode(body));
+	}
+	else {
+		SetEnd(NodeUtils::GetEndFromNode(conditon));
+	}
+	
 }
 
 any WhileNode::GetConditionNode() const

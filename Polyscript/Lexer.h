@@ -20,6 +20,8 @@ class Lexer {
 		Token makeGreaterThan();
 		Token makeLogicOR();
 		Token makeLogicAND();
+		Token MakeMinusORRArrow();
+		Token makeString();
 		string text;
 		string fn;
 		Position pos;

@@ -1,17 +1,18 @@
 #include "VarAssignNode.h"
+#include "NodeUtils.h"
 
 VarAssignNode::VarAssignNode(Token var_token, any node, optional<Token> varType): var_token(var_token), node(node)
 {
-	start = var_token.GetStart().value();
+	SetStart(var_token.GetStart().value());
 
 
 	if (varType.has_value()) {
 		type = varType.value().GetType();
-		end = varType.value().GetEnd().value();
+		SetEnd(varType.value().GetEnd().value());
 	}
 	else {
 		type = var_token.GetType();
-		end = var_token.GetEnd().value();
+		SetEnd(NodeUtils::GetEndFromNode(node));
 	}
 }
 
@@ -28,16 +29,6 @@ any VarAssignNode::GetNode() const
 Token VarAssignNode::GetToken() const
 {
 	return var_token;
-}
-
-Position VarAssignNode::GetStart() const
-{
-	return start;
-}
-
-Position VarAssignNode::GetEnd() const
-{
-	return end;
 }
 
 std::ostream& operator<<(std::ostream& lhs, const VarAssignNode& token)

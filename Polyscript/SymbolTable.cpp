@@ -1,12 +1,14 @@
 #include "SymbolTable.h"
 
-struct Node {
+using namespace ScopeTypes;
+
+struct ScopeTypes::Node {
 	string key;
-	Var value;
+	ScopeTypes::Var value;
 	Node* next;
 };
 
-static NodePtr createNode(string key, Var value, NodePtr p){
+static ScopeTypes::NodePtr createNode(string key, Var value, NodePtr p){
 	
 	NodePtr n = new Node;
 
@@ -153,4 +155,40 @@ void SymbolTable::remove(string key)
 		npp = npc;
 		npc = npc->next;
 	}
+}
+
+bool ScopeTypes::isInteger(const Var& value)
+{
+	auto* v = std::get_if<Integer>(&value);
+	return v != nullptr;
+}
+
+bool ScopeTypes::isFloat(const Var& value)
+{
+	auto* v = std::get_if<Float>(&value);
+	return v != nullptr;
+}
+
+bool ScopeTypes::isString(const Var& value)
+{
+	auto* v = std::get_if<String>(&value);
+	return v != nullptr;
+}
+
+bool ScopeTypes::isList(const Var& value)
+{
+	auto* v = std::get_if<List>(&value);
+	return v != nullptr;
+}
+
+bool ScopeTypes::isBuiltIn(const Var& value)
+{
+	auto* v = std::get_if<BuiltInFunction>(&value);
+	return v != nullptr;
+}
+
+bool ScopeTypes::isFunction(const Var& value)
+{
+	auto* v = std::get_if<Function>(&value);
+	return v != nullptr;
 }

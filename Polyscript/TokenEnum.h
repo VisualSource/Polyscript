@@ -4,33 +4,41 @@
 using namespace std;
 
 enum class TypeToken {
-	DIV,
-	MUL,
-	PLUS,
-	MINUS,
-	POWER,
+	DIV, // '/' Division
+	MUL, // '*' Multiplication
+	PLUS, // '+': Addition
+	MINUS, // '-' Subtraction, Negation
+	POWER, // '^'
 	INT,
 	FLOAT,
-	LPAREN,
-	RPAREN,
+	STRING,
+	LPAREN, // '('
+	RPAREN, // ')'
+	LBRACKET, // '['
+	RBRACKET, // ']'
 	IDENTIFIER,
 	KEYWORD,
-	CONDITIONAL,
-	ENDSTATEMENT,
+	CONDITIONAL, // ':' Various separators TODO: rename Colon
+	ENDSTATEMENT, // ';' TODO rename 'Semi' Terminator for various items and statements, Array types
 	SCOPESTART,
-	SCOPEEND,
-	NOT,
-	AND,
-	OR,
-	EQ,
+	PATHSEP, // '::' Path separator
+	SCOPEEND, // '}'
+	NOT, // '!'
+	AND, // '&&'
+	OR, // '||'
+	EQ, // '='
+	COMMA, // ','
+	RARROW, // Function return type, Closure return type, Function pointer type
+	FATARROW, // Match arms, Macros
 	EE, // ==
 	NE, // !=
 	LT, // <
 	GT, // >
 	LTE, // <=,
 	GTE, // >=
-	T_EOF,
-	T_UNDEFINED
+	T_EOF, // '\0'
+	T_UNDEFINED,
+	NEWLINE
 };
 
 namespace TokenUtils {

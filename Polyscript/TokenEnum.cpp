@@ -52,6 +52,24 @@ string TokenUtils::printTokenType(TypeToken token) {
 			return "SCOPESTART";
 		case TypeToken::SCOPEEND:
 			return "SCOPEEND";
+		case TypeToken::COMMA:
+			return "COMMA";
+		case TypeToken::PATHSEP:
+			return "PATHSEP";
+		case TypeToken::FATARROW:
+			return "FATARROW";
+		case TypeToken::RARROW:
+			return "RARROW";
+		case TypeToken::STRING:
+			return "STRING";
+		case TypeToken::LBRACKET:
+			return "LBRACKET";
+		case TypeToken::RBRACKET:
+			return "RBRACKET";
+		case TypeToken::NEWLINE:
+			return "NEWLINE";
+		case TypeToken::ENDSTATEMENT:
+			return "ENDSTATEMENT";
 		default:
 			return "[TOKEN NOT DEFINED]";
 	}

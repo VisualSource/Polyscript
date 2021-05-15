@@ -2,8 +2,8 @@
 #include "NodeUtils.h"
 
 BinOpNode::BinOpNode(any left_node, Token op_token, any right_node): left_node(left_node), op_token(op_token), right_node(right_node) {
-    start = op_token.GetStart().value();
-    end = op_token.GetEnd().value();
+    SetStart(NodeUtils::GetStartFromNode(left_node));
+    SetEnd(NodeUtils::GetEndFromNode(right_node));
 }
 
 Token BinOpNode::GetOpToken() const {

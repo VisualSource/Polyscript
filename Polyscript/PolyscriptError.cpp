@@ -8,10 +8,10 @@ PolyscriptError::PolyscriptError() {
 PolyscriptError::PolyscriptError(string name, string details, Position start, Position end): name(name), details(details), start(start), end(end) {
 }
 
-string PolyscriptError::as_str()
+string PolyscriptError::as_str(string ad)
 {
     string error;
-    error += name + "'" + details + "' at Ln: " + to_string(start.GetLn() + 1) + " Col: " + to_string(start.GetCol()) + " in file: " + start.GetFn();
+    error += name + "'" + details + ad + "' at Ln: " + to_string(start.GetLn() + 1) + " Col: " + to_string(start.GetCol()) + " in file: " + start.GetFn();
     return error;
 }
 

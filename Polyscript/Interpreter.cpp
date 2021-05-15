@@ -1,27 +1,16 @@
 #include "Interpreter.h"
+#include "InterpreterUtils.h"
 #include <string>
 #include <variant>
 #include "Integer.h"
 #include "Float.h"
+#include "String.h"
+#include "List.h"
+#include "BuiltInFunction.h"
 #include "PolyscriptError.h"
 #include "RuntimeError.h"
 #include "SymbolTable.h"
 #include "Nodes.h"
-
-bool InterTypes::isFloat(const any& node){
-	return node.type() == typeid(Float);
-}
-bool InterTypes::isInteger(const any& node) {
-	return node.type() == typeid(Integer);
-}
-
-void InterTypes::print(ostream& rhs, const any& node) {
-	if (InterTypes::isFloat(node)) {
-		rhs << any_cast<Float>(node);
-	}else if(InterTypes::isInteger(node)){
-		rhs << any_cast<Integer>(node);
-	}
-}
 
 Interpreter::Interpreter() {
 }
@@ -52,8 +41,21 @@ any Interpreter::visit(const any& node, Context* context) {
 	else if (NodeUtils::isWhileNode(node)) {
 		return visit_WhileNode(any_cast<WhileNode>(node), context);
 	}
+	else if (NodeUtils::isFuncDefNode(node)) {
+		return visit_FuncDefNode(any_cast<FuncDefNode>(node), context);
+	}else if(NodeUtils::isFuncCallNode(node)){
+		return visit_FuncCallNode(any_cast<FuncCallNode>(node), context);
+	} else if(NodeUtils::isStringNode(node)){
+		return visit_StringNode(any_cast<StringNode>(node), context);
+	}
+	else if (NodeUtils::isListNode(node)) {
+		return visit_ListNode(any_cast<ListNode>(node), context);
+	}
+	else if (NodeUtils::isListAccessNode(node)) {
+		return visit_ListAccessNode(any_cast<ListAccessNode>(node), context);
+	}
 	else {
-		throw PolyscriptError("Undefined Operation", "No Visit Method", Position(), Position());
+		throw PolyscriptError("Undefined Operation", "No Visit Method for: " + string(node.type().name()), Position(), Position());
 	}
 
 }
@@ -62,13 +64,13 @@ any Interpreter::visit_NumberNode(const NumberNode& node, Context* context) {
 	Token n = node.GetToken();
 	if (n.isToken(TypeToken::INT)) {
 		Integer number(std::stoi(n.GetValue().value()));
-		number.set_context(context);
-		number.set_pos(n.GetStart(),n.GetEnd());
+		number.SetContext(context);
+		number.SetPostion(n.GetStart().value(),n.GetEnd().value());
 		return number;
 	} else if (n.isToken(TypeToken::FLOAT)) {
 		Float number(std::stod(n.GetValue().value()));
-		number.set_pos(n.GetStart(), n.GetEnd());
-		number.set_context(context);
+		number.SetPostion(n.GetStart().value(), n.GetEnd().value());
+		number.SetContext(context);
 		return number;
 	}
 	else {
@@ -80,6 +82,7 @@ any Interpreter::visit_NumberNode(const NumberNode& node, Context* context) {
 any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 	using InterTypes::isFloat;
 	using InterTypes::isInteger;
+	using InterTypes::isString;
 	any left = visit(node.GetLeftNode(),context);
 	any right = visit(node.GetRightNode(),context);
 
@@ -94,8 +97,14 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				Integer leftInt = any_cast<Integer>(left);
 				Integer rightInt = any_cast<Integer>(right);
 				return leftInt + rightInt;
-			} else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(),node.GetOpToken().GetEnd().value());
+			}
+			else if (isString(left) && isString(right)) {
+				String leftInt = any_cast<String>(left);
+				String rightInt = any_cast<String>(right);
+				return leftInt + rightInt;
+			}
+			else {
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(),node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::MINUS: {
@@ -110,7 +119,7 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				return leftInt - rightInt;
 			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::MUL: {
@@ -125,7 +134,7 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				return leftInt * rightInt;
 			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::DIV: {
@@ -140,7 +149,7 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				return leftInt / rightInt;
 			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::POWER: {
@@ -155,7 +164,7 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				return leftInt.power(rightInt);
 			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::EE: {
@@ -169,8 +178,13 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				Integer rightInt = any_cast<Integer>(right);
 				return leftInt == rightInt;
 			}
+			else if (isString(left) && isString(right)) {
+				String leftInt = any_cast<String>(left);
+				String rightInt = any_cast<String>(right);
+				return leftInt == rightInt;
+			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::NE: {
@@ -184,15 +198,20 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				Integer rightInt = any_cast<Integer>(right);
 				return leftInt != rightInt;
 			}
+			else if (isString(left) && isString(right)) {
+				String leftInt = any_cast<String>(left);
+				String rightInt = any_cast<String>(right);
+				return leftInt != rightInt;
+			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::LT: {
 			if (isFloat(left) && isFloat(right)) {
 				Float leftFloat = any_cast<Float>(left);
 				Float rightFloat = any_cast<Float>(right);
-				return Integer(int(leftFloat < rightFloat)).set_context(context);;
+				return leftFloat < rightFloat;
 			}
 			else if (isInteger(left) && isInteger(right)) {
 				Integer leftInt = any_cast<Integer>(left);
@@ -200,14 +219,14 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				return leftInt < rightInt;
 			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::GT: {
 			if (isFloat(left) && isFloat(right)) {
 				Float leftFloat = any_cast<Float>(left);
 				Float rightFloat = any_cast<Float>(right);
-				return Integer(int(leftFloat > rightFloat)).set_context(context);;
+				return leftFloat > rightFloat;
 			}
 			else if (isInteger(left) && isInteger(right)) {
 				Integer leftInt = any_cast<Integer>(left);
@@ -215,14 +234,14 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				return leftInt > rightInt;
 			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::LTE: {
 			if (isFloat(left) && isFloat(right)) {
 				Float leftFloat = any_cast<Float>(left);
 				Float rightFloat = any_cast<Float>(right);
-				return Integer(int(leftFloat >= rightFloat)).set_context(context);;
+				return leftFloat >= rightFloat;
 			}
 			else if (isInteger(left) && isInteger(right)) {
 				Integer leftInt = any_cast<Integer>(left);
@@ -230,14 +249,14 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				return leftInt >= rightInt;
 			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::GTE: {
 			if (isFloat(left) && isFloat(right)) {
 				Float leftFloat = any_cast<Float>(left);
 				Float rightFloat = any_cast<Float>(right);
-				return Integer(int(leftFloat <= rightFloat)).set_context(context);;
+				return leftFloat <= rightFloat;
 			}
 			else if (isInteger(left) && isInteger(right)) {
 				Integer leftInt = any_cast<Integer>(left);
@@ -245,7 +264,7 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				return leftInt <= rightInt;
 			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::AND: {
@@ -259,7 +278,7 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				return leftInt && rightInt;
 			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		case TypeToken::OR: {
@@ -274,11 +293,11 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 				return leftInt || rightInt;
 			}
 			else {
-				throw RuntimeError("Left does not match right", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 			}
 		}
 		default:
-			throw RuntimeError("Unknow Operator", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
+			throw RuntimeError("Undefined Operation", context, node.GetOpToken().GetStart().value(), node.GetOpToken().GetEnd().value());
 	}
 }
 
@@ -319,20 +338,39 @@ any Interpreter::visit_UnaryOpNode(const UnaryOpNode& node, Context* context) {
 any Interpreter::visit_VarAccessNode(const VarAccessNode& node, Context* context)
 {
 	string var_name = node.GetToken().GetValue().value();
-	Var value = context->GetScope()->get(var_name);
+	ScopeTypes::Var value = context->GetScope()->get(var_name);
 
 	auto* typeA = std::get_if<Integer>(&value);
 	if (typeA != nullptr) {
-		return *typeA;
+		return (*typeA).SetContext(context);
+	}
+
+	auto* typeString = get_if<String>(&value);
+	if (typeString != nullptr) {
+		return (*typeString).SetContext(context);
 	}
 
 	auto* typeB = std::get_if<Float>(&value);
 	if (typeB != nullptr) {
-		return *typeB;
+		return (*typeB).SetContext(context);
 	}
 
-	return value;
+	auto* func = std::get_if<Function>(&value);
+	if (func != nullptr) {
+		return *func;
+	}
 
+	auto* list = get_if<List>(&value);
+	if (list != nullptr) {
+		return (*list).SetContext(context);
+	}
+
+	auto* builtin = get_if<BuiltInFunction>(&value);
+	if (builtin != nullptr) {
+		return *builtin;
+	}
+
+	throw RuntimeError("Failed to access variable", context,node.GetStart(),node.GetEnd());
 }
 
 any Interpreter::visit_VarAssignNode(const VarAssignNode& node, Context* context)
@@ -343,23 +381,50 @@ any Interpreter::visit_VarAssignNode(const VarAssignNode& node, Context* context
 
 	
 	if (InterTypes::isInteger(value)) {
-		if (node.GetToken().GetType() != node.GetVarType()) {
+		if (node.GetToken().GetType() != TypeToken::FLOAT) {
 			Float realF = Float::cast(any_cast<Integer>(value));
 			context->GetScope()->add(var_name, realF);
 			return realF;
-		} else {
+		} else if(InterTypes::isString(value)){
+			String real = String::cast(any_cast<Integer>(value));
+			context->GetScope()->add(var_name, real);
+			return real;
+		}else {
 			context->GetScope()->add(var_name, any_cast<Integer>(value));
 		}
 	}
 	else if (InterTypes::isFloat(value)) {
-			if (node.GetToken().GetType() != node.GetVarType()) {
+			if (node.GetToken().GetType() != TypeToken::INT) {
 				Integer realF = Integer::cast(any_cast<Float>(value));
 				context->GetScope()->add(var_name, realF);
 				return realF;
 			}
+			else if (InterTypes::isString(value)) {
+				String real = String::cast(any_cast<Float>(value));
+				context->GetScope()->add(var_name, real);
+				return real;
+			}
 			else {
 				context->GetScope()->add(var_name, any_cast<Float>(value));
 			}
+	}
+	else if (InterTypes::isString(value)) {
+		if (node.GetToken().GetType() == TypeToken::INT) {
+			Integer real = Integer::cast(any_cast<String>(value));
+			context->GetScope()->add(var_name, real);
+			return real;
+		}
+		else if (node.GetToken().GetType() == TypeToken::FLOAT) {
+			Float real = Float::cast(any_cast<String>(value));
+			context->GetScope()->add(var_name, real);
+			return real;
+		}
+		else {
+			context->GetScope()->add(var_name, any_cast<String>(value));
+		}
+	}
+	else if (InterTypes::isList(value)) {
+		context->GetScope()->add(var_name, any_cast<List>(value));
 	}
 	else {
 		throw RuntimeError("Can't create varable of give type", context, node.GetStart(), node.GetEnd());
@@ -378,17 +443,25 @@ any Interpreter::visit_IfNode(const IfNode& node, Context* context)
 			if (any_cast<Integer>(condition).isTrue()) {
 				SymbolTable* ifscope = new SymbolTable();
 				ifscope->setParent(context->GetScope());
-				Context* ifctx = new Context("if", ifscope, context);
+				Context* ifctx = new Context("<if scope>", ifscope, context);
 				return visit(statment.expr,ifctx);
 			}
-		}else {
-			throw RuntimeError("Failed to create comparition",context,node.GetStart(),node.GetEnd());
+		}else if(InterTypes::isString(condition)){
+			if (any_cast<String>(condition).IsTrue()) {
+				SymbolTable* ifscope = new SymbolTable();
+				ifscope->setParent(context->GetScope());
+				Context* ifctx = new Context("<if scope>", ifscope, context);
+				return visit(statment.expr, ifctx);
+			}
+		}
+		else {
+			throw RuntimeError("Failed to create comparition", context, node.GetStart(), node.GetEnd());
 		}
 	}
 	if (node.GetElseStatment().has_value()) {
 		SymbolTable* ifscope = new SymbolTable();
 		ifscope->setParent(context->GetScope());
-		Context* ifctx = new Context("else", ifscope, context);
+		Context* ifctx = new Context("<else scope>", ifscope, context);
 		return visit(node.GetElseStatment(), ifctx);
 	}
 
@@ -417,7 +490,7 @@ any Interpreter::visit_ForNode(const ForNode& node, Context* context)
 		SymbolTable* forscope = new SymbolTable();
 		forscope->add(var_name,start_value,false);
 		forscope->setParent(context->GetScope());
-		Context* forctx = new Context("for", forscope, context);
+		Context* forctx = new Context("<for scope>", forscope, context);
 
 		if (step_value >= 0) {
 			while (i < end_value.GetValue()) {
@@ -450,7 +523,7 @@ any Interpreter::visit_WhileNode(const WhileNode& node, Context* context)
 {
 	SymbolTable* whilescope = new SymbolTable();
 	whilescope->setParent(context->GetScope());
-	Context* whilectx = new Context("while", whilescope, context);
+	Context* whilectx = new Context("<while scope>", whilescope, context);
 	try {
 		while (true) {
 			Integer condition = any_cast<Integer>(visit(node.GetConditionNode(), whilectx));
@@ -469,3 +542,104 @@ any Interpreter::visit_WhileNode(const WhileNode& node, Context* context)
 	delete whilescope;
 	return any();
 }
+
+any Interpreter::visit_FuncDefNode(const FuncDefNode& node, Context* context)
+{
+	string name = "<anonymous>";
+	any body = node.GetBody();
+	vector<string> arg_names;
+	if (node.GetName().has_value()) {
+		name = node.GetName().value().GetValue().value();
+	}
+
+	for (auto token : node.GetArgs()) {
+		arg_names.push_back(token.GetValue().value());
+	}
+
+	Function func_value(body,arg_names,name);
+	func_value.SetContext(context);
+	func_value.SetPostion(node.GetStart(),node.GetEnd());
+
+	if (name != "<anonymous>") {
+		context->GetScope()->add(name, func_value);
+	}
+	
+	return func_value;
+}
+
+any Interpreter::visit_FuncCallNode(const FuncCallNode& node, Context* context)
+{
+	try
+	{
+		vector<any> args;
+		any value_call = visit(node.GetCallNode(), context);
+
+		if (InterTypes::isFunction(value_call)) {
+			Function func = any_cast<Function>(value_call);
+
+			func.SetPostion(node.GetStart(), node.GetEnd()).SetContext(context);
+
+			for (auto node : node.GetArgNodes()) {
+				args.push_back(visit(node, context));
+			}
+
+			return func.exceute(args);
+		}
+		else if (InterTypes::isBuiltin(value_call)) {
+			BuiltInFunction func = any_cast<BuiltInFunction>(value_call);
+
+			func.SetPostion(node.GetStart(), node.GetEnd()).SetContext(context);
+
+			for (auto node : node.GetArgNodes()) {
+				args.push_back(visit(node, context));
+			}
+
+			return func.exceute(args);
+		}
+		else {
+			throw bad_any_cast();
+		}
+	}
+	catch (const std::bad_any_cast&)
+	{
+		throw RuntimeError("Expected Function call", context, node.GetStart(), node.GetEnd());
+	}
+}
+
+any Interpreter::visit_StringNode(const StringNode& node, Context* context)
+{
+	return String(node.GetToken().GetValue().value()).SetContext(context).SetPostion(node.GetStart(),node.GetEnd());
+}
+
+any Interpreter::visit_ListNode(const ListNode& node, Context* context)
+{
+	vector<any> elements;
+
+	for (auto el : node.GetElements()) {
+		elements.push_back(visit(el, context));
+	}
+
+	return List(elements).SetContext(context).SetPostion(node.GetStart(),node.GetEnd());
+}
+
+any Interpreter::visit_ListAccessNode(const ListAccessNode& node, Context* context)
+{
+	using namespace InterTypes;
+	try
+	{
+		Integer index = any_cast<Integer>(visit(node.GetIndex(), context));
+
+		List list = get<List>(context->GetScope()->get(node.GetVarName()));
+
+		return list.GetElement(index);
+
+	}
+	catch (std::bad_variant_access const&) {
+		throw RuntimeError("Variable was not a list", context, node.GetStart(), node.GetEnd());
+	}
+	catch (const std::bad_any_cast&)
+	{
+		throw RuntimeError("Invaild list index", context, node.GetStart(), node.GetEnd());
+	}
+}
+

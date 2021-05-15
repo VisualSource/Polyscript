@@ -1,8 +1,8 @@
 #include "NumberNode.h"
 
 NumberNode::NumberNode(Token token): token(token) {
-	start = token.GetStart().value();
-	end = token.GetEnd().value();
+	SetStart(token.GetStart().value());
+	SetEnd(token.GetEnd().value());
 }
 
 Token NumberNode::GetToken() const {

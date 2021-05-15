@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <any>
+#include "InterpreterUtils.h"
 #include "SymbolTable.h"
 #include "Context.h"
 #include "IllegalCharError.h"
@@ -12,8 +13,7 @@
 #include "Parser.h"
 #include "Interpreter.h"
 #include "NodeUtils.h"
-
-
+#include "BuiltInFunction.h"
 
 using namespace std;
 
@@ -31,16 +31,14 @@ void run(string fn, string text, SymbolTable* scope, bool showTokens){
 
 		Parser parser(tokens);
 
-		ParseResult ast = parser.parse();
-
-		if (ast.hasErr()) {
-			throw ast.GetErr();
-		}
+		any ast = parser.parse();
 
 		Context* context = new Context("<program>", scope);
 		Interpreter interpreter;
-		any result = interpreter.visit(ast.GetNode(),context);
-		InterTypes::print(cout,result);
+		List result = any_cast<List>(interpreter.visit(ast,context));
+		if (result.GetElements().size() != 0) {
+			InterTypes::print(cout, result.GetElement(result.GetElements().size() - 1));
+		}
 		cout << endl;
 		delete context;
 
@@ -62,6 +60,9 @@ void run(string fn, string text, SymbolTable* scope, bool showTokens){
 	catch (runtime_error e) {
 		cerr << e.what() << endl;
 	}
+	catch (out_of_range e) {
+		cerr << e.what() << endl;
+	}
 	catch (logic_error e) {
 		cerr << e.what() << endl;
 	}
@@ -78,11 +79,19 @@ int main(int argc, char* argv[]) {
 		if (!strcmp(argv[i], "--showTokens")) showTokens = true;
 	}
 
+	vector<string> bulitin = { "__input" };
 	SymbolTable* globalscope = new SymbolTable();
-	globalscope->add("__name__", Integer(0));
+	globalscope->add("__name__", String("main"));
 	globalscope->add("null", Integer(0));
 	globalscope->add("false", Integer(0));
 	globalscope->add("true", Integer(1));
+	globalscope->add("print", BuiltInFunction("print", bulitin));
+	globalscope->add("clear", BuiltInFunction("clear", vector<string>()));
+	globalscope->add("isInteger", BuiltInFunction("isInteger", bulitin));
+	globalscope->add("isFloat", BuiltInFunction("isFloat", bulitin));
+	globalscope->add("isFunction", BuiltInFunction("print", bulitin));
+	globalscope->add("isList", BuiltInFunction("isList", bulitin));
+	globalscope->add("isString", BuiltInFunction("isString", bulitin));
 
 		cout << "Polyscript \x1B[94mV0.1.0\033[0m | use exit() to exit." << endl;
 
@@ -91,6 +100,10 @@ int main(int argc, char* argv[]) {
 			string input;
 			getline(cin, input);
 			if (input == "exit()") break;
+			if (input.size() == 0) {
+				cout << "\x1B[90mundefined\033[0m" << endl;
+				continue; 
+			}
 			run("<stdin>", input, globalscope, showTokens);
 		}
 	

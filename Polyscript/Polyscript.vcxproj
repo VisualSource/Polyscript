@@ -141,59 +141,83 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseFunction.cpp" />
     <ClCompile Include="BinOpNode.cpp" />
+    <ClCompile Include="BuiltInFunction.cpp" />
     <ClCompile Include="Context.cpp" />
     <ClCompile Include="ExpectedCharError.cpp" />
     <ClCompile Include="Float.cpp" />
     <ClCompile Include="ForNode.cpp" />
+    <ClCompile Include="FuncCallNode.cpp" />
+    <ClCompile Include="FuncDefNode.cpp" />
+    <ClCompile Include="Function.cpp" />
     <ClCompile Include="IfNode.cpp" />
     <ClCompile Include="IllegalCharError.cpp" />
     <ClCompile Include="Integer.cpp" />
     <ClCompile Include="Interpreter.cpp" />
+    <ClCompile Include="InterpreterUtils.cpp" />
     <ClCompile Include="InvalidSyntaxError.cpp" />
     <ClCompile Include="Lexer.cpp" />
+    <ClCompile Include="List.cpp" />
+    <ClCompile Include="ListAccessNode.cpp" />
+    <ClCompile Include="ListNode.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="NodeUtils.cpp" />
     <ClCompile Include="NumberNode.cpp" />
     <ClCompile Include="Parser.cpp" />
-    <ClCompile Include="ParseResult.cpp" />
     <ClCompile Include="Polyscript.cpp" />
     <ClCompile Include="PolyscriptError.cpp" />
     <ClCompile Include="Position.cpp" />
     <ClCompile Include="RuntimeError.cpp" />
+    <ClCompile Include="String.cpp" />
+    <ClCompile Include="StringNode.cpp" />
     <ClCompile Include="SymbolTable.cpp" />
     <ClCompile Include="Token.cpp" />
     <ClCompile Include="TokenEnum.cpp" />
     <ClCompile Include="UnaryOpNode.cpp" />
     <ClCompile Include="VarAccessNode.cpp" />
     <ClCompile Include="VarAssignNode.cpp" />
+    <ClCompile Include="Variable.cpp" />
     <ClCompile Include="WhileNode.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseFunction.h" />
     <ClInclude Include="BinOpNode.h" />
+    <ClInclude Include="BuiltInFunction.h" />
     <ClInclude Include="Context.h" />
     <ClInclude Include="ExpectedCharError.h" />
     <ClInclude Include="Float.h" />
     <ClInclude Include="ForNode.h" />
+    <ClInclude Include="FuncCallNode.h" />
+    <ClInclude Include="FuncDefNode.h" />
+    <ClInclude Include="Function.h" />
     <ClInclude Include="IfNode.h" />
     <ClInclude Include="IllegalCharError.h" />
     <ClInclude Include="Integer.h" />
     <ClInclude Include="Interpreter.h" />
+    <ClInclude Include="InterpreterUtils.h" />
     <ClInclude Include="InvalidSyntaxError.h" />
     <ClInclude Include="Lexer.h" />
+    <ClInclude Include="List.h" />
+    <ClInclude Include="ListAccessNode.h" />
+    <ClInclude Include="ListNode.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="Nodes.h" />
     <ClInclude Include="NodeUtils.h" />
     <ClInclude Include="NumberNode.h" />
     <ClInclude Include="Parser.h" />
-    <ClInclude Include="ParseResult.h" />
     <ClInclude Include="PolyscriptError.h" />
     <ClInclude Include="Position.h" />
     <ClInclude Include="RuntimeError.h" />
+    <ClInclude Include="String.h" />
+    <ClInclude Include="StringNode.h" />
     <ClInclude Include="SymbolTable.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="TokenEnum.h" />
     <ClInclude Include="UnaryOpNode.h" />
     <ClInclude Include="VarAccessNode.h" />
     <ClInclude Include="VarAssignNode.h" />
+    <ClInclude Include="Variable.h" />
     <ClInclude Include="WhileNode.h" />
   </ItemGroup>
   <ItemGroup>

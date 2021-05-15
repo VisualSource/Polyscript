@@ -1,9 +1,23 @@
 #include "ForNode.h"
+#include "NodeUtils.h"
 
+/*
+	FOR expr TO expr (STEP expr)? { expr }
+*/
 ForNode::ForNode(Token var_token_name, any start, any end, any body, any step): var_token_name(var_token_name), start_value_node(start), end_value_node(end), body_node(body), step(step)
 {
-	start = var_token_name.GetStart().value();
-	end = var_token_name.GetEnd().value(); // TODO get end from body
+	this->SetStart(var_token_name.GetStart().value());
+
+	if (body.has_value()) {
+		this->SetEnd(NodeUtils::GetEndFromNode(body));
+	}
+	else if (step.has_value()) {
+		this->SetEnd(NodeUtils::GetEndFromNode(step));
+	}
+	else {
+		this->SetEnd(NodeUtils::GetEndFromNode(end));
+	}
+
 }
 
 Token ForNode::GetVarTokenName() const
@@ -31,12 +45,3 @@ any ForNode::GetBodyNode() const
 	return body_node;
 }
 
-Position ForNode::GetStart() const
-{
-	return start;
-}
-
-Position ForNode::GetEnd() const
-{
-	return end;
-}
