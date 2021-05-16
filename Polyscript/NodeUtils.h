@@ -24,4 +24,10 @@ namespace NodeUtils {
 	bool isStringNode(const any& node);
 	bool isListNode(const any& node);
 	bool isListAccessNode(const any& node);
+	bool isReturnNode(const any& node);
+	bool isBreakNode(const any& node);
+	bool isContinueNode(const any& node);
+	bool isEnumNode(const any& node);
+	bool isPathAccessNode(const any& node);
+	bool isVarReasignNode(const any& node);
 }

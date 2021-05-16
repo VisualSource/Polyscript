@@ -1,18 +1,13 @@
 #pragma once
 #include <variant>
 #include <string>
-#include "Integer.h"
-#include "Float.h"
-#include "Function.h"
-#include "String.h"
-#include "List.h"
-#include "BuiltInFunction.h"
+#include "Types.h"
 
 using namespace std;
 
 namespace ScopeTypes {
 	struct  Node;
-	typedef variant<monostate, Integer, Float, Function, String, List, BuiltInFunction> Var;
+	typedef variant<monostate, Integer, Float, Function, String, List, BuiltInFunction, Enum> Var;
 	typedef Node* NodePtr;
 	bool isInteger(const Var& value);
 	bool isFloat(const Var& value);
@@ -21,9 +16,10 @@ namespace ScopeTypes {
 	bool isString(const Var& value);
 	bool isList(const Var& value);
 	bool isBuiltIn(const Var& value);
+	bool isEnum(const Var& value);
 }
 
-
+class Context;
 const string HEAD_OF_LIST = "-1";
 
 class SymbolTable {
@@ -34,9 +30,9 @@ class SymbolTable {
 		~SymbolTable();
 		bool isEmpty() const;
 		bool hasVar(string key) const;
-		ScopeTypes::Var get(string key) const;
-		void setValue(string key, ScopeTypes::Var value, bool searchParent = true);
-		void add(string key, ScopeTypes::Var value, bool serachParent = true);
+		ScopeTypes::Var get(string key, Context* context) const;
+		void set(string key, ScopeTypes::Var value, Context* context);
+		void add(string key, ScopeTypes::Var value, Context* context);
 		void setParent(SymbolTable* parent);
 	private:
 		SymbolTable* parent = nullptr;

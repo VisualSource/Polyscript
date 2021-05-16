@@ -38,7 +38,13 @@ enum class TypeToken {
 	GTE, // >=
 	T_EOF, // '\0'
 	T_UNDEFINED,
-	NEWLINE
+	NEWLINE,
+	PLUS_EQ,
+	MINUS_EQ,
+	DIV_EQ,
+	MUL_EQ,
+	PLUS_PLUS,
+	MINUS_MINUS
 };
 
 namespace TokenUtils {

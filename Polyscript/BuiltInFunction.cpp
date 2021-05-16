@@ -20,12 +20,39 @@ any BuiltInFunction::exceute(vector<any> args)
         
     string func = this->GetName();
 
+
     if (func == "print") {
         try{
-            String input = get<String>(ctx->GetScope()->get("__input"));
-            cout << input;
+            using namespace InterTypes;
+            ScopeTypes::Var value = ctx->GetScope()->get("__input",ctx);
+            auto* v = std::get_if<Integer>(&value);
+            if (v != nullptr) {
+                cout << get<Integer>(value) << endl;
+                return any();
+            }
+            auto* s = std::get_if<String>(&value);
+            if (s != nullptr) {
+                cout << get<String>(value) << endl;;
+                return any();
+            }
+            auto* f = std::get_if<Float>(&value);
+            if (f != nullptr) {
+                cout << get<Float>(value) << endl;;
+                return any();
+            }
+            auto* fn = std::get_if<Function>(&value);
+            if (fn != nullptr) {
+                cout << get<Function>(value) << endl;;
+                return any();
+            }
+            auto* l = std::get_if<List>(&value);
+            if (l != nullptr) {
+                cout << get<List>(value) << endl;;
+                return any();
+            }
+            
         } catch (bad_variant_access const&){
-            throw RuntimeError("Print arg must be a string",ctx,start,end);
+            throw RuntimeError("Invaild input",ctx,start,end);
         }
     }
     else if (func == "clear") {
@@ -34,7 +61,7 @@ any BuiltInFunction::exceute(vector<any> args)
     else if (func == "isFloat") {
         Integer out(0);
         out.SetContext(context).PrintBool(true);
-        ScopeTypes::Var value = ctx->GetScope()->get("__input");
+        ScopeTypes::Var value = ctx->GetScope()->get("__input",ctx);
         auto* v = std::get_if<Float>(&value);
         if (v != nullptr) {
             return !out;
@@ -44,7 +71,7 @@ any BuiltInFunction::exceute(vector<any> args)
     else if (func == "isInteger") {
         Integer out(0);
         out.SetContext(context).PrintBool(true);
-        ScopeTypes::Var value = ctx->GetScope()->get("__input");
+        ScopeTypes::Var value = ctx->GetScope()->get("__input", ctx);
         auto* v = std::get_if<Integer>(&value);
         if (v != nullptr) {
             return !out;
@@ -56,7 +83,7 @@ any BuiltInFunction::exceute(vector<any> args)
     else if(func == "isFunction"){
         Integer out(0);
         out.SetContext(context).PrintBool(true);
-        ScopeTypes::Var value = ctx->GetScope()->get("__input");
+        ScopeTypes::Var value = ctx->GetScope()->get("__input", ctx);
         auto* v = std::get_if<Function>(&value);
         if (v != nullptr) {
             return !out;
@@ -68,7 +95,7 @@ any BuiltInFunction::exceute(vector<any> args)
     else if (func == "isList") {
         Integer out(0);
         out.SetContext(context).PrintBool(true);
-        ScopeTypes::Var value = ctx->GetScope()->get("__input");
+        ScopeTypes::Var value = ctx->GetScope()->get("__input", ctx);
         auto* v = std::get_if<List>(&value);
         if (v != nullptr) {
             return !out;
@@ -78,7 +105,7 @@ any BuiltInFunction::exceute(vector<any> args)
     else if (func == "isString") {
         Integer out(0);
         out.SetContext(context).PrintBool(true);
-        ScopeTypes::Var value = ctx->GetScope()->get("__input");
+        ScopeTypes::Var value = ctx->GetScope()->get("__input", ctx);
         auto* v = std::get_if<String>(&value);
         if (v != nullptr) {
             return !out;
@@ -87,7 +114,15 @@ any BuiltInFunction::exceute(vector<any> args)
             return out;
         }
     }
-   
+    else if (func == "length") {  
+        try {
+            List len = get<List>(ctx->GetScope()->get("__input", ctx));
+            return Integer(len.GetElements().size());
+        }
+        catch (bad_variant_access const&) {
+            throw RuntimeError("Expected a list", ctx, start, end);
+        }
+    }
     return any();
 }
 /*

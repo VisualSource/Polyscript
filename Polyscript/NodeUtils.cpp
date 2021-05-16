@@ -64,6 +64,24 @@ Position NodeUtils::GetStartFromNode(const any& node)
 	else if (isListAccessNode(node)) {
 		return any_cast<ListAccessNode>(node).GetStart();
 	}
+	else if (isReturnNode(node)) {
+		return any_cast<ReturnNode>(node).GetStart();
+	}
+	else if (isBreakNode(node)) {
+		return any_cast<BreakNode>(node).GetStart();
+	}
+	else if (isContinueNode(node)) {
+		return any_cast<ContinueNode>(node).GetStart();
+	}
+	else if (isEnumNode(node)) {
+		return any_cast<EnumNode>(node).GetStart();
+	}
+	else if (isPathAccessNode(node)) {
+		return any_cast<PathAccessNode>(node).GetStart();
+	}
+	else if (isVarReasignNode(node)) {
+		return any_cast<VarReasignNode>(node).GetStart();
+	}
 
 	return Position();
 }
@@ -109,6 +127,24 @@ Position NodeUtils::GetEndFromNode(const any& node)
 	}
 	else if (isListAccessNode(node)) {
 		return any_cast<ListAccessNode>(node).GetEnd();
+	}
+	else if (isReturnNode(node)) {
+		return any_cast<ReturnNode>(node).GetEnd();
+	}
+	else if (isBreakNode(node)) {
+		return any_cast<BreakNode>(node).GetEnd();
+	}
+	else if (isContinueNode(node)) {
+		return any_cast<ContinueNode>(node).GetEnd();
+	}
+	else if (isEnumNode(node)) {
+		return any_cast<EnumNode>(node).GetEnd();
+	}
+	else if (isPathAccessNode(node)) {
+		return any_cast<PathAccessNode>(node).GetEnd();
+	}
+	else if (isVarReasignNode(node)) {
+		return any_cast<VarReasignNode>(node).GetEnd();
 	}
 	return Position();
 }
@@ -173,5 +209,35 @@ bool NodeUtils::isListNode(const any& node)
 bool NodeUtils::isListAccessNode(const any& node)
 {
 	return node.type() == typeid(ListAccessNode);
+}
+
+bool NodeUtils::isReturnNode(const any& node)
+{
+	return node.type() == typeid(ReturnNode);
+}
+
+bool NodeUtils::isBreakNode(const any& node)
+{
+	return node.type() == typeid(BreakNode);
+}
+
+bool NodeUtils::isContinueNode(const any& node)
+{
+	return node.type() == typeid(ContinueNode);
+}
+
+bool NodeUtils::isEnumNode(const any& node)
+{
+	return node.type() == typeid(EnumNode);
+}
+
+bool NodeUtils::isPathAccessNode(const any& node)
+{
+	return node.type() == typeid(PathAccessNode);
+}
+
+bool NodeUtils::isVarReasignNode(const any& node)
+{
+	return node.type() == typeid(VarReasignNode);
 }
 

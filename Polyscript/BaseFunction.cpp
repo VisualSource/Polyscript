@@ -47,27 +47,27 @@ void BaseFunction::populate_args(const vector<string>& arg_names, const vector<a
 		if (InterTypes::isInteger(arg_value)) {
 			Integer iv = any_cast<Integer>(arg_value);
 			iv.SetContext(ctx);
-			ctx->GetScope()->add(arg_name, iv);
+			ctx->GetScope()->add(arg_name, iv,ctx);
 		}
 		else if (InterTypes::isFloat(arg_value)) {
 			Float fl = any_cast<Float>(arg_value);
 			fl.SetContext(ctx);
-			ctx->GetScope()->add(arg_name, fl);
+			ctx->GetScope()->add(arg_name, fl, ctx);
 		}
 		else if (InterTypes::isString(arg_value)) {
 			String fl = any_cast<String>(arg_value);
 			fl.SetContext(ctx);
-			ctx->GetScope()->add(arg_name, fl);
+			ctx->GetScope()->add(arg_name, fl, ctx);
 		}
 		else if (InterTypes::isFunction(arg_value)) {
 			Function fl = any_cast<Function>(arg_value);
 			fl.SetContext(ctx);
-			ctx->GetScope()->add(arg_name, fl);
+			ctx->GetScope()->add(arg_name, fl, ctx);
 		}
 		else if (InterTypes::isList(arg_value)) {
 			List fl = any_cast<List>(arg_value);
 			fl.SetContext(ctx);
-			ctx->GetScope()->add(arg_name, fl);
+			ctx->GetScope()->add(arg_name, fl, ctx);
 		}
 		else {
 			throw RuntimeError("Failed to create function argument", ctx, this->start, this->end);
@@ -84,6 +84,7 @@ void BaseFunction::check_and_populate(const vector<string>& arg_names, const vec
 Context* BaseFunction::NewContext()
 {
 	SymbolTable* scope = new SymbolTable();
+	scope->setParent(this->context->GetScope());
 	Context* ctx = new Context(this->name,scope,this->context,this->start);
 	return ctx;
 }

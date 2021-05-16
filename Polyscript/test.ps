@@ -1,1 +1,24 @@
-if true { 4 + 4; }
+
+enum Test {
+	Ok,
+	Error,
+	None
+}
+
+fn getFile(file) {
+
+	 if !isString(file) {
+		 return Test::Error;
+	 }
+
+	 return Test::Ok;
+
+}
+let result = getFile("./import.ps");
+if result == Test::Ok {
+ print("Got File");
+} else {
+  print("Errored");
+}
+
+

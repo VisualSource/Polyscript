@@ -7,18 +7,21 @@ VarAssignNode::VarAssignNode(Token var_token, any node, optional<Token> varType)
 
 
 	if (varType.has_value()) {
-		type = varType.value().GetType();
+		type = varType.value();
 		SetEnd(varType.value().GetEnd().value());
 	}
 	else {
-		type = var_token.GetType();
+		type = nullopt;
 		SetEnd(NodeUtils::GetEndFromNode(node));
 	}
 }
 
-TypeToken VarAssignNode::GetVarType() const
+Token VarAssignNode::GetVarType() const
 {
-	return type;
+	if (type.has_value()) {
+		return type.value();
+	}
+	return var_token;
 }
 
 any VarAssignNode::GetNode() const

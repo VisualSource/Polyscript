@@ -26,6 +26,11 @@ bool Token::matches(const TypeToken& token, string value) {
 	return token == type && value == this->value.value();
 }
 
+bool Token::matchesKeyWord(string value)
+{
+	return matches(TypeToken::KEYWORD,value);
+}
+
 bool Token::isToken(const TypeToken& token) {
 	return type == token;
 }

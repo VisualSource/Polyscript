@@ -6,8 +6,6 @@
 
 using namespace std;
 
-struct IfCases;
-
 class Parser {
 	public:
 		Parser(vector<Token> tokens);
@@ -15,6 +13,7 @@ class Parser {
 	private:
 		Token& advance();
 		any statements();
+		any statement();
 		any atom();
 		any call();
 		any power();
@@ -24,9 +23,8 @@ class Parser {
 		any compExpr();
 		any arithExpr();
 		any exprIf();
-		IfCases exprElseIf();
-		any exprElse();
 		any forExpr();
+		any enumExpr();
 		any whileExpr();
 		any funcDef();
 		any listExpr();

@@ -1,4 +1,6 @@
 #include "SymbolTable.h"
+#include "RuntimeError.h"
+#include "Context.h"
 
 using namespace ScopeTypes;
 
@@ -73,7 +75,7 @@ bool SymbolTable::hasVar(string key) const
 	return foundKey;
 }
 
-Var SymbolTable::get(string key) const
+Var SymbolTable::get(string key, Context* context) const
 {
 	if (hasVar(key)) {
 		NodePtr npp = head;
@@ -87,15 +89,16 @@ Var SymbolTable::get(string key) const
 		}
 	}
 	if (parent != nullptr) {
-		return parent->get(key);
+		return parent->get(key,context);
 	}
-	throw runtime_error("'" + key + "' is undefined");
+
+	throw RuntimeError(key + " is undefined",context, context->GetPostion(),Position());
 	
 }
 
-void SymbolTable::setValue(string key, Var value, bool searchParent)
+void SymbolTable::set(string key, Var value, Context* context)
 {
-	if(!hasVar(key)) throw runtime_error("'" + key + "' is undefined");
+	if (!hasVar(key)) throw RuntimeError(key + " is undefined",context,context->GetPostion(),context->GetPostion());
 	NodePtr npp = head;
 	NodePtr npc = head->next;
 	while (npc != nullptr) {
@@ -106,16 +109,15 @@ void SymbolTable::setValue(string key, Var value, bool searchParent)
 		npp = npc;
 		npc = npc->next;
 	}
-	if (parent != nullptr && searchParent) {
-		parent->setValue(key,value);
+	if (parent != nullptr) {
+		parent->set(key,value,context);
 	}
 }
 
-void SymbolTable::add(string key, Var value, bool serachParent)
+void SymbolTable::add(string key, Var value, Context* context)
 {
 	if (hasVar(key)) {
-		this->setValue(key, value, serachParent);
-		return;
+		throw RuntimeError(key + " is already defined",context,context->GetPostion(),context->GetPostion());
 	}
 	this->insert(key, value);
 }
@@ -184,6 +186,12 @@ bool ScopeTypes::isList(const Var& value)
 bool ScopeTypes::isBuiltIn(const Var& value)
 {
 	auto* v = std::get_if<BuiltInFunction>(&value);
+	return v != nullptr;
+}
+
+bool ScopeTypes::isEnum(const Var& value)
+{
+	auto* v = std::get_if<Enum>(&value);
 	return v != nullptr;
 }
 

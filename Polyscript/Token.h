@@ -16,6 +16,7 @@ class Token {
 		optional<Position> GetEnd() const { return end; };
 		TypeToken GetType() const { return type; };
 		bool matches(const TypeToken& token, string value);
+		bool matchesKeyWord(string value);
 		bool isToken(const TypeToken& token);
 		friend std::ostream& operator<<(std::ostream& lhs, const Token& token);
 	private:

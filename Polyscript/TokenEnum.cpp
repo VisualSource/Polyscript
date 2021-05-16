@@ -70,6 +70,18 @@ string TokenUtils::printTokenType(TypeToken token) {
 			return "NEWLINE";
 		case TypeToken::ENDSTATEMENT:
 			return "ENDSTATEMENT";
+		case TypeToken::PLUS_EQ:
+			return "PLUS_EQ";
+		case TypeToken::MINUS_EQ:
+			return "MINUS_EQ";
+		case TypeToken::DIV_EQ:
+			return "DIV_EQ";
+		case TypeToken::MUL_EQ:
+			return "MUL_EQ";
+		case TypeToken::PLUS_PLUS:
+			return "PLUS_PLUS";
+		case TypeToken::MINUS_MINUS:
+			return "MINUS_MINUS";
 		default:
 			return "[TOKEN NOT DEFINED]";
 	}

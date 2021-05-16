@@ -143,8 +143,12 @@
   <ItemGroup>
     <ClCompile Include="BaseFunction.cpp" />
     <ClCompile Include="BinOpNode.cpp" />
+    <ClCompile Include="BreakNode.cpp" />
     <ClCompile Include="BuiltInFunction.cpp" />
     <ClCompile Include="Context.cpp" />
+    <ClCompile Include="ContinueNode.cpp" />
+    <ClCompile Include="Enum.cpp" />
+    <ClCompile Include="EnumNode.cpp" />
     <ClCompile Include="ExpectedCharError.cpp" />
     <ClCompile Include="Float.cpp" />
     <ClCompile Include="ForNode.cpp" />
@@ -165,9 +169,11 @@
     <ClCompile Include="NodeUtils.cpp" />
     <ClCompile Include="NumberNode.cpp" />
     <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="PathAccessNode.cpp" />
     <ClCompile Include="Polyscript.cpp" />
     <ClCompile Include="PolyscriptError.cpp" />
     <ClCompile Include="Position.cpp" />
+    <ClCompile Include="ReturnNode.cpp" />
     <ClCompile Include="RuntimeError.cpp" />
     <ClCompile Include="String.cpp" />
     <ClCompile Include="StringNode.cpp" />
@@ -178,13 +184,18 @@
     <ClCompile Include="VarAccessNode.cpp" />
     <ClCompile Include="VarAssignNode.cpp" />
     <ClCompile Include="Variable.cpp" />
+    <ClCompile Include="VarReasignNode.cpp" />
     <ClCompile Include="WhileNode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseFunction.h" />
     <ClInclude Include="BinOpNode.h" />
+    <ClInclude Include="BreakNode.h" />
     <ClInclude Include="BuiltInFunction.h" />
     <ClInclude Include="Context.h" />
+    <ClInclude Include="ContinueNode.h" />
+    <ClInclude Include="Enum.h" />
+    <ClInclude Include="EnumNode.h" />
     <ClInclude Include="ExpectedCharError.h" />
     <ClInclude Include="Float.h" />
     <ClInclude Include="ForNode.h" />
@@ -206,18 +217,22 @@
     <ClInclude Include="NodeUtils.h" />
     <ClInclude Include="NumberNode.h" />
     <ClInclude Include="Parser.h" />
+    <ClInclude Include="PathAccessNode.h" />
     <ClInclude Include="PolyscriptError.h" />
     <ClInclude Include="Position.h" />
+    <ClInclude Include="ReturnNode.h" />
     <ClInclude Include="RuntimeError.h" />
     <ClInclude Include="String.h" />
     <ClInclude Include="StringNode.h" />
     <ClInclude Include="SymbolTable.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="TokenEnum.h" />
+    <ClInclude Include="Types.h" />
     <ClInclude Include="UnaryOpNode.h" />
     <ClInclude Include="VarAccessNode.h" />
     <ClInclude Include="VarAssignNode.h" />
     <ClInclude Include="Variable.h" />
+    <ClInclude Include="VarReasignNode.h" />
     <ClInclude Include="WhileNode.h" />
   </ItemGroup>
   <ItemGroup>

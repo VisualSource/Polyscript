@@ -11,6 +11,14 @@ Parser::Parser(vector<Token> tokens): tokens(tokens) {
 	advance();
 }
 
+any Parser::parse() {
+	any res = statements();
+	if (!current_token.isToken(TypeToken::T_EOF)) {
+		throw InvalidSyntaxError("Expected ;", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+	return res;
+}
+
 Token& Parser::advance() {
 	tok_idx++;
 	if(tok_idx < (int)tokens.size()){
@@ -27,7 +35,7 @@ any Parser::statements()
 		advance();
 	}
 
-	statements.push_back(this->expr());
+	statements.push_back(this->statement());
 
 	bool more_statments = true;
 	
@@ -42,7 +50,7 @@ any Parser::statements()
 		}
 		if (!more_statments) break;
 		int reset = tok_idx;
-		any statement = this->expr();
+		any statement = this->statement();
 		if (!statement.has_value()) {
 			tok_idx = reset;
 			current_token = tokens.at(tok_idx);
@@ -57,8 +65,37 @@ any Parser::statements()
 
 	return ListNode(statements,start,current_token.GetEnd().value());
 }
+
+any Parser::statement()
+{
+	Position start(current_token.GetStart().value());
+
+	if (current_token.matches(TypeToken::KEYWORD, "return")) {
+		advance();
+
+		int reset = tok_idx;
+		any statement = this->expr();
+		if (!statement.has_value()) {
+			tok_idx = reset;
+			current_token = tokens.at(tok_idx);
+		}
+		return ReturnNode(statement, start, current_token.GetEnd().value());
+
+	}
+	if (current_token.matches(TypeToken::KEYWORD, "continue")) {
+		advance();
+		return ContinueNode(start, current_token.GetEnd().value());
+	}
+	if (current_token.matches(TypeToken::KEYWORD, "break")) {
+		advance();
+		return BreakNode(start, current_token.GetEnd().value());
+	}
+
+	return this->expr();
+}
 any Parser::atom(){
 	Token tok = current_token;
+	Position start(tok.GetStart().value());
 
 	if (tok.isToken(TypeToken::INT) || tok.isToken(TypeToken::FLOAT)) {
 		advance();
@@ -69,7 +106,6 @@ any Parser::atom(){
 		return StringNode(tok);
 	}
 	else if (tok.isToken(TypeToken::IDENTIFIER)) {
-		Position start(tok.GetStart().value());
 		advance();
 
 		if(current_token.isToken(TypeToken::LBRACKET)){
@@ -84,6 +120,34 @@ any Parser::atom(){
 
 			return ListAccessNode(tok, index,start,current_token.GetEnd().value());
 		
+		}
+		else if (current_token.isToken(TypeToken::PATHSEP)) {
+			vector<Token> path;
+			path.push_back(tok);
+
+			while (current_token.isToken(TypeToken::PATHSEP))
+			{
+				advance();
+				if (!current_token.isToken(TypeToken::IDENTIFIER)) {
+					throw InvalidSyntaxError("Expected IDENTIFIER", current_token.GetStart().value(), current_token.GetEnd().value());
+				}
+				path.push_back(current_token);
+				advance();
+			}
+
+			//advance();
+
+			return PathAccessNode(path,start,current_token.GetEnd().value());
+		}
+		else if(current_token.isToken(TypeToken::PLUS_EQ) || current_token.isToken(TypeToken::MINUS_EQ) 
+				|| current_token.isToken(TypeToken::MUL_EQ) || current_token.isToken(TypeToken::DIV_EQ) || current_token.isToken(TypeToken::EQ)){
+			Token op = current_token;
+			advance();
+
+			any value = this->expr();
+
+			return VarReasignNode(tok,op,value,start,current_token.GetEnd().value());
+
 		}
 
 		return VarAccessNode(tok);
@@ -112,6 +176,9 @@ any Parser::atom(){
 	}
 	else if(tok.matches(TypeToken::KEYWORD,"fn")){
 		return funcDef();
+	}
+	else if (tok.matchesKeyWord("enum")) {
+		return enumExpr();
 	}
 
 	return any();
@@ -164,13 +231,6 @@ any Parser::power() {
 	}
 	return left;
 }
-any Parser::parse() {
-	any res = statements();
-	if (!current_token.isToken(TypeToken::T_EOF)) {
-		throw InvalidSyntaxError("Expected ;", current_token.GetStart().value(), current_token.GetEnd().value());
-	}
-	return res;
-}
 
 any Parser::factor(){
 	Token tok = current_token;
@@ -197,6 +257,14 @@ any Parser::term(){
 	return left;
 }
 
+
+/*
+ Creation of 
+
+ KEYWORD:let IDENETIFER (CONDIONAL KEYWORD)? EQ expr
+ AND|OR
+
+*/
 any Parser::expr() {
 	if (current_token.matches(TypeToken::KEYWORD, "let")) {
 		advance();
@@ -210,7 +278,7 @@ any Parser::expr() {
 		optional<Token> varType = nullopt;
 		if (current_token.isToken(TypeToken::CONDITIONAL)) {
 			advance();
-			if (current_token.matches(TypeToken::KEYWORD, "int") || current_token.matches(TypeToken::KEYWORD, "float")) {
+			if (current_token.matches(TypeToken::KEYWORD, "int") || current_token.matches(TypeToken::KEYWORD, "float") || current_token.matches(TypeToken::KEYWORD, "string") || current_token.matches(TypeToken::KEYWORD,"bool")) {
 				varType = current_token;
 				advance();
 			} else {
@@ -352,16 +420,6 @@ any Parser::exprIf()
 	return IfNode(cases, else_case);
 }
 
-IfCases Parser::exprElseIf()
-{
-	return IfCases();
-}
-
-any Parser::exprElse()
-{
-	return any();
-}
-
 // Creation of a for loop block
 // Grammer: KEYWORD:for IDENTIFIER EQ expr KEYWORD:to expr SCOPESTART expr SCOPEEND
 any Parser::forExpr()
@@ -419,6 +477,56 @@ any Parser::forExpr()
 
 
 	return ForNode(varName,start_value,end_value,body,step_value);
+}
+
+/*
+Grammer 
+
+KEYWORLD:enum IDENTIFIER SCOPESTART (IDENTIFER (COMMA)?)? SCOPEEND
+
+*/
+any Parser::enumExpr()
+{
+	Position start(current_token.GetStart().value());
+	if (!current_token.matchesKeyWord("enum")) {
+		throw InvalidSyntaxError("Expected keyworld 'enum'", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+	advance();
+
+	if (!current_token.isToken(TypeToken::IDENTIFIER)) {
+		throw InvalidSyntaxError("Expected Identifier", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+	string name = current_token.GetValue().value();
+	advance();
+
+	if (!current_token.isToken(TypeToken::SCOPESTART)) {
+		throw InvalidSyntaxError("Expected Identifier", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+	advance();
+	vector<Token> enumsKeys;
+	while (!current_token.isToken(TypeToken::SCOPEEND))
+	{
+		if (current_token.isToken(TypeToken::NEWLINE)) {
+			advance();
+			continue;
+		}
+		else if (current_token.isToken(TypeToken::IDENTIFIER)) {
+			enumsKeys.push_back(current_token);
+			advance();
+			if (current_token.isToken(TypeToken::COMMA)) {
+				advance();
+			}
+		}else {
+			throw InvalidSyntaxError("Expected Identifier or ','", current_token.GetStart().value(), current_token.GetEnd().value());
+		}
+	}
+
+	if (!current_token.isToken(TypeToken::SCOPEEND)) {
+		throw InvalidSyntaxError("Expected '}'", current_token.GetStart().value(), current_token.GetEnd().value());
+	}
+	advance();
+
+	return EnumNode(name,enumsKeys,start,current_token.GetEnd().value());
 }
 
 // Grammer: KEYWORD:while expr SCOPESTART expr SCOPEEND
@@ -506,7 +614,7 @@ any Parser::funcDef()
 
 	advance();
 
-	any return_node = this->expr();
+	any return_node = this->statements();
 
 	if (!current_token.isToken(TypeToken::SCOPEEND)) {
 		throw InvalidSyntaxError("Expected '{'", current_token.GetStart().value(), current_token.GetEnd().value());

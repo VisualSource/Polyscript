@@ -213,6 +213,27 @@
     <ClCompile Include="BaseFunction.cpp">
       <Filter>Source Files\interperter\types\function</Filter>
     </ClCompile>
+    <ClCompile Include="BreakNode.cpp">
+      <Filter>Source Files\nodes\keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="ContinueNode.cpp">
+      <Filter>Source Files\nodes\keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="ReturnNode.cpp">
+      <Filter>Source Files\nodes\keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="Enum.cpp">
+      <Filter>Source Files\interperter\types</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumNode.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="PathAccessNode.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="VarReasignNode.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lexer.h">
@@ -328,6 +349,30 @@
     </ClInclude>
     <ClInclude Include="BuiltInFunction.h">
       <Filter>Header Files\interperter\types\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="ReturnNode.h">
+      <Filter>Header Files\nodes\keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="ContinueNode.h">
+      <Filter>Header Files\nodes\keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="BreakNode.h">
+      <Filter>Header Files\nodes\keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumNode.h">
+      <Filter>Header Files\nodes\types</Filter>
+    </ClInclude>
+    <ClInclude Include="Enum.h">
+      <Filter>Header Files\interperter\types</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>Header Files\interperter</Filter>
+    </ClInclude>
+    <ClInclude Include="PathAccessNode.h">
+      <Filter>Header Files\nodes\variable</Filter>
+    </ClInclude>
+    <ClInclude Include="VarReasignNode.h">
+      <Filter>Header Files\nodes\variable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

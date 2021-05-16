@@ -22,6 +22,7 @@ class Lexer {
 		Token makeLogicAND();
 		Token MakeMinusORRArrow();
 		Token makeString();
+		void MakeComment();
 		string text;
 		string fn;
 		Position pos;

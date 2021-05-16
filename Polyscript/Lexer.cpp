@@ -5,14 +5,14 @@
 #include "ExpectedCharError.h"
 
 static bool isKeyWorld(const string& key) {
-	if (key == "import") {
+	if (key == "import" || key == "from" || key == "return" || key == "break" || key == "continue") {
 		return true;
 	}
 	// functions 
 	if (key == "match" || key == "for" || key == "to" || key == "step" || key == "while" || key == "fn" || key == "if" || key == "else") return true;
 	
 	// Var/Types
-	if (key == "let" || key == "int" || key == "float" || key == "bool") return true;
+	if (key == "let" || key == "int" || key == "float" || key == "bool" || key == "string" || key == "enum") return true;
 	
 	return false;
 }
@@ -50,14 +50,30 @@ vector<Token> Lexer::makeTokens() {
 			tokens.push_back(makeIndentifier());
 		}
 		else if (current_char == ':') {
-			tokens.push_back(Token(TypeToken::CONDITIONAL, nullopt, pos));
+			TypeToken type = TypeToken::CONDITIONAL;
 			advance();
+			if (current_char == ':') {
+				type = TypeToken::PATHSEP;
+				advance();
+			}
+			tokens.push_back(Token(type, nullopt, pos));
 		} else if (current_char == '^') {
 			tokens.push_back(Token(TypeToken::POWER,nullopt,pos));
 			advance();
 		}else if (current_char == '+') {
-			tokens.push_back(Token(TypeToken::PLUS, nullopt,pos));
+			TypeToken type = TypeToken::PLUS;
 			advance();
+
+			if (current_char == '+') {
+				type = TypeToken::PLUS_PLUS;
+				advance();
+			}
+			else if (current_char == '=') {
+				type = TypeToken::PLUS_EQ;
+				advance();
+			}
+
+			tokens.push_back(Token(type, nullopt,pos));
 		}else if (current_char == '^') {
 			tokens.push_back(Token(TypeToken::POWER,nullopt,pos));
 			advance();
@@ -67,11 +83,28 @@ vector<Token> Lexer::makeTokens() {
 		} else if (current_char == '-') {
 			tokens.push_back(MakeMinusORRArrow());
 		} else if (current_char == '*') {
-			tokens.push_back(Token(TypeToken::MUL, nullopt, pos));
+			TypeToken type = TypeToken::MUL;
 			advance();
+
+			if (current_char == '=') {
+				type = TypeToken::MUL_EQ;
+				advance();
+			}
+
+			tokens.push_back(Token(type, nullopt, pos));
 		} else if (current_char == '/') {
-			tokens.push_back(Token(TypeToken::DIV,nullopt,pos));
+			TypeToken type = TypeToken::DIV;
 			advance();
+			if (current_char == '/') {
+				MakeComment();
+				continue;
+			}
+			else if (current_char == '=') {
+				type = TypeToken::DIV_EQ;
+				advance();
+			}
+
+			tokens.push_back(Token(type,nullopt,pos));
 		} else if (current_char == '(') {
 			tokens.push_back(Token(TypeToken::LPAREN,nullopt,pos));
 			advance();
@@ -263,6 +296,14 @@ Token Lexer::MakeMinusORRArrow()
 		advance();
 		type = TypeToken::FATARROW;
 	}
+	else if (current_char == '=') {
+		type = TypeToken::MINUS_EQ;
+		advance();
+	}
+	else if (current_char == '-') {
+		type = TypeToken::MINUS_MINUS;
+		advance();
+	}
 
 	return Token(type,nullopt,start,pos);
 }
@@ -280,4 +321,16 @@ Token Lexer::makeString()
 
 	advance();
 	return Token(TypeToken::STRING,value,start,pos);
+}
+
+void Lexer::MakeComment()
+{
+	advance();
+
+	while (current_char != '\n')
+	{
+		advance();
+	}
+
+	advance();
 }

@@ -12,7 +12,6 @@
 
 Function::Function(any body_node, vector<string> arg_names, string name): body_node(body_node), arg_names(arg_names), BaseFunction(name)
 {
-	// TODO: Get start end from body
 	start = NodeUtils::GetStartFromNode(body_node);
 	end = NodeUtils::GetEndFromNode(body_node);
 }
