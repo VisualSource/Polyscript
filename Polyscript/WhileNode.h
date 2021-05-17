@@ -7,7 +7,7 @@ using namespace std;
 class WhileNode: public Node
 {
 	public:
-		WhileNode(any conditon, any body);
+		WhileNode(any conditon, any body, Position start, Position end);
 		any GetConditionNode() const;
 		any GetBodyNode() const;
 	private:

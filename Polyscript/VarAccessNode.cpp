@@ -1,9 +1,7 @@
 #include "VarAccessNode.h"
 
-VarAccessNode::VarAccessNode(Token var_token): var_token(var_token)
+VarAccessNode::VarAccessNode(Token var_token, Position start, Position end): Node(start,end), var_token(var_token)
 {
-	SetStart(var_token.GetStart().value());
-	SetEnd(var_token.GetEnd().value());
 }
 
 Token VarAccessNode::GetToken() const

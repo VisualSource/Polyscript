@@ -3,12 +3,9 @@
 class Node
 {
 	public:
-		Node();
+		Node(Position start, Position end);
 		Position GetStart() const;
 		Position GetEnd() const;
-	protected:
-		void SetStart(Position pos);
-		void SetEnd(Position pos);
 	private:
 		Position start;
 		Position end;

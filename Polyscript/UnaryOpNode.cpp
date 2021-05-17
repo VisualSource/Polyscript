@@ -9,9 +9,7 @@ std::ostream& operator<<(std::ostream& lhs, const UnaryOpNode& token) {
     return lhs;
 }
 
-UnaryOpNode::UnaryOpNode(Token op_tok, any node): op_tok(op_tok), node(node) {
-    SetStart(op_tok.GetStart().value());
-    SetEnd(NodeUtils::GetEndFromNode(node));
+UnaryOpNode::UnaryOpNode(Token op_tok, any node, Position start, Position end): Node(start, end), op_tok(op_tok), node(node) {
 }
 
 Token UnaryOpNode::GetToken() const {

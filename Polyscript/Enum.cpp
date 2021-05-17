@@ -1,4 +1,5 @@
 #include "Enum.h"
+#include "EnumValue.h"
 #include "RuntimeError.h"
 
 
@@ -19,13 +20,13 @@ Enum& Enum::SetPostion(Position start, Position end)
 	this->end = end;
 	return *this;
 }
-Integer Enum::get(string key) const
+EnumValue Enum::get(string key) const
 {
 	if (!hasKey(key)) throw RuntimeError(key + " Is not defined in Enum " + name, context, this->start, this->end);
 	size_t index = 0;
 	while (index < this->keys.size()) {
 		if (this->keys.at(index) == key) {
-			return Integer(index);
+			return EnumValue(this->name,this->keys.at(index), index).SetContext(this->context).SetPostion(this->start,this->end);
 		}
 		index++;
 	}

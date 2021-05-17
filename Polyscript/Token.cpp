@@ -5,16 +5,17 @@ Token::Token() {
 	type = TypeToken::T_UNDEFINED;
 }
 
-Token::Token(TypeToken type, optional<string> value, optional<Position> start, optional<Position> end): type(type), value(value){
+Token::Token(TypeToken type, Position start, optional<Position> end, optional<string> value): type(type), value(value){
 
-	if (start.has_value()) {
 		this->start = start;
-		this->end = start;
-		this->end.value().advance('\0');
-	}
-	if (end.has_value()) {
-		this->end = end;
-	}
+
+		if (end.has_value()) {
+			this->end = end.value();
+		}
+		else {
+			this->end = start;
+			this->end.advance('\0');
+		}
 }
 
 optional<string> Token::GetValue() const {

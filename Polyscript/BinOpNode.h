@@ -7,7 +7,7 @@ using namespace std;
 
 class BinOpNode: public Node {
 	public:
-		BinOpNode(any left_node, Token op_token, any right_node);
+		BinOpNode(any left_node, Token op_token, any right_node, Position start, Position end);
 		Token GetOpToken() const;
 		any GetRightNode() const;
 		any GetLeftNode() const;

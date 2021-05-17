@@ -5,7 +5,7 @@
 #include "ExpectedCharError.h"
 
 static bool isKeyWorld(const string& key) {
-	if (key == "import" || key == "from" || key == "return" || key == "break" || key == "continue") {
+	if (key == "import" || key == "return" || key == "break" || key == "continue" || key == "namespace") {
 		return true;
 	}
 	// functions 
@@ -42,7 +42,7 @@ vector<Token> Lexer::makeTokens() {
 			tokens.push_back(makeNumber());
 		}
 		else if (current_char == '\n') {
-			tokens.push_back(Token(TypeToken::NEWLINE, nullopt, pos));
+			tokens.push_back(Token(TypeToken::NEWLINE, pos));
 			advance();
 		} else if (iscntrl(current_char)) {
 			advance();
@@ -56,9 +56,9 @@ vector<Token> Lexer::makeTokens() {
 				type = TypeToken::PATHSEP;
 				advance();
 			}
-			tokens.push_back(Token(type, nullopt, pos));
+			tokens.push_back(Token(type, pos));
 		} else if (current_char == '^') {
-			tokens.push_back(Token(TypeToken::POWER,nullopt,pos));
+			tokens.push_back(Token(TypeToken::POWER,pos));
 			advance();
 		}else if (current_char == '+') {
 			TypeToken type = TypeToken::PLUS;
@@ -73,12 +73,12 @@ vector<Token> Lexer::makeTokens() {
 				advance();
 			}
 
-			tokens.push_back(Token(type, nullopt,pos));
+			tokens.push_back(Token(type,pos));
 		}else if (current_char == '^') {
-			tokens.push_back(Token(TypeToken::POWER,nullopt,pos));
+			tokens.push_back(Token(TypeToken::POWER,pos));
 			advance();
 		}else if (current_char == '+') {
-			tokens.push_back(Token(TypeToken::PLUS, nullopt,pos));
+			tokens.push_back(Token(TypeToken::PLUS, pos));
 			advance();
 		} else if (current_char == '-') {
 			tokens.push_back(MakeMinusORRArrow());
@@ -91,7 +91,7 @@ vector<Token> Lexer::makeTokens() {
 				advance();
 			}
 
-			tokens.push_back(Token(type, nullopt, pos));
+			tokens.push_back(Token(type, pos));
 		} else if (current_char == '/') {
 			TypeToken type = TypeToken::DIV;
 			advance();
@@ -104,29 +104,29 @@ vector<Token> Lexer::makeTokens() {
 				advance();
 			}
 
-			tokens.push_back(Token(type,nullopt,pos));
+			tokens.push_back(Token(type, pos));
 		} else if (current_char == '(') {
-			tokens.push_back(Token(TypeToken::LPAREN,nullopt,pos));
+			tokens.push_back(Token(TypeToken::LPAREN, pos));
 			advance();
 		}
 		else if (current_char == ',') {
-			tokens.push_back(Token(TypeToken::COMMA, nullopt, pos));
+			tokens.push_back(Token(TypeToken::COMMA, pos));
 			advance();
 		}
 		else if (current_char == ')') {
-			tokens.push_back(Token(TypeToken::RPAREN, nullopt, pos));
+			tokens.push_back(Token(TypeToken::RPAREN, pos));
 			advance();
 		}
 		else if (current_char == '{') {
-			tokens.push_back(Token(TypeToken::SCOPESTART, nullopt, pos));
+			tokens.push_back(Token(TypeToken::SCOPESTART, pos));
 			advance();
 		}
 		else if (current_char == '}') {
-			tokens.push_back(Token(TypeToken::SCOPEEND, nullopt, pos));
+			tokens.push_back(Token(TypeToken::SCOPEEND, pos));
 			advance();
 		}
 		else if(current_char == ';'){
-			tokens.push_back(Token(TypeToken::ENDSTATEMENT, nullopt, pos));
+			tokens.push_back(Token(TypeToken::ENDSTATEMENT, pos));
 			advance();
 		}
 		else if (current_char == '|') {
@@ -150,11 +150,11 @@ vector<Token> Lexer::makeTokens() {
 			tokens.push_back(makeString());
 		}
 		else if (current_char == '[') {
-			tokens.push_back(Token(TypeToken::LBRACKET, nullopt, pos));
+			tokens.push_back(Token(TypeToken::LBRACKET, pos));
 			advance();
 		}
 		else if (current_char == ']') {
-			tokens.push_back(Token(TypeToken::RBRACKET, nullopt, pos));
+			tokens.push_back(Token(TypeToken::RBRACKET, pos));
 			advance();
 		}
 		else {
@@ -165,7 +165,7 @@ vector<Token> Lexer::makeTokens() {
 		}
 	} 
 
-	tokens.push_back(Token(TypeToken::T_EOF, nullopt,pos));
+	tokens.push_back(Token(TypeToken::T_EOF, pos));
 	return tokens;
 }
 
@@ -186,9 +186,9 @@ Token Lexer::makeNumber() {
 	}
 
 	if(dot_count == 0){
-		return Token(TypeToken::INT, num_str, start, pos);
+		return Token(TypeToken::INT, start, pos, num_str);
 	} else {
-		return Token(TypeToken::FLOAT, num_str, start, pos);
+		return Token(TypeToken::FLOAT, start, pos, num_str);
 	}
 }
 
@@ -201,7 +201,7 @@ Token Lexer::makeIndentifier() {
 		advance();
 	}
 
-	return Token(isKeyWorld(id_str) ? TypeToken::KEYWORD : TypeToken::IDENTIFIER, id_str,pos,start);
+	return Token(isKeyWorld(id_str) ? TypeToken::KEYWORD : TypeToken::IDENTIFIER, start, pos, id_str);
 }
 
 Token Lexer::makeEquals()
@@ -214,8 +214,12 @@ Token Lexer::makeEquals()
 		advance();
 		type = TypeToken::EE;
 	}
+	else if (current_char == '>') {
+		advance();
+		type = TypeToken::FATARROW;
+	}
 
-	return Token(type,nullopt,start,pos);
+	return Token(type,start,pos);
 }
 
 Token Lexer::makeNotEquals()
@@ -229,7 +233,7 @@ Token Lexer::makeNotEquals()
 		type = TypeToken::NE;
 	}
 
-	return Token(type, nullopt, start, pos);
+	return Token(type, start, pos);
 }
 
 Token Lexer::makeLessThan()
@@ -243,7 +247,7 @@ Token Lexer::makeLessThan()
 		type = TypeToken::LTE;
 	}
 
-	return Token(type, nullopt, start, pos);
+	return Token(type, start, pos);
 }
 
 Token Lexer::makeGreaterThan()
@@ -257,7 +261,7 @@ Token Lexer::makeGreaterThan()
 		type = TypeToken::GTE;
 	}
 
-	return Token(type, nullopt, start, pos);
+	return Token(type, start, pos);
 }
 
 Token Lexer::makeLogicOR()
@@ -267,7 +271,7 @@ Token Lexer::makeLogicOR()
 
 	if (current_char == '|') {
 		advance();
-		return Token(TypeToken::OR, nullopt, start, pos);
+		return Token(TypeToken::OR, start, pos);
 	}
 	advance();
 	throw ExpectedCharError("'|' after '|'", start, pos);
@@ -280,7 +284,7 @@ Token Lexer::makeLogicAND()
 
 	if (current_char == '&') {
 		advance();
-		return Token(TypeToken::AND, nullopt, start, pos);
+		return Token(TypeToken::AND, start, pos);
 	}
 	advance();
 	throw ExpectedCharError("'&' after '&'", start, pos);
@@ -305,7 +309,7 @@ Token Lexer::MakeMinusORRArrow()
 		advance();
 	}
 
-	return Token(type,nullopt,start,pos);
+	return Token(type, start,pos);
 }
 
 Token Lexer::makeString()
@@ -320,7 +324,7 @@ Token Lexer::makeString()
 	}
 
 	advance();
-	return Token(TypeToken::STRING,value,start,pos);
+	return Token(TypeToken::STRING,start,pos, value);
 }
 
 void Lexer::MakeComment()

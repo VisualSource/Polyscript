@@ -4,5 +4,8 @@
 #include "String.h"
 #include "List.h"
 #include "Enum.h"
+#include "EnumValue.h"
 #include "BuiltInFunction.h"
 #include "Function.h"
+#include "Namespace.h"
+#include "Null.h"

@@ -97,6 +97,24 @@
     <Filter Include="Source Files\interperter\types\function">
       <UniqueIdentifier>{edee14e4-66a6-4a87-99c1-a74be58fd9cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\interperter\types\enum">
+      <UniqueIdentifier>{6ed08c20-917a-466a-adb0-4216a04e5712}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\interperter\types\definitions">
+      <UniqueIdentifier>{95105440-55df-44e4-90a4-b6183a0529f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\interperter\types\collections">
+      <UniqueIdentifier>{155121e5-2a30-4be8-bf86-3cffb74a7a45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interperter\types\collections">
+      <UniqueIdentifier>{6800e07b-2f72-466e-bfcf-011150b9fce4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interperter\types\defintions">
+      <UniqueIdentifier>{98aef10f-a0ed-4064-b3ef-900a41d01f09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interperter\types\enum">
+      <UniqueIdentifier>{7e0c71de-a19a-48e5-8241-515957f02bd6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Polyscript.cpp">
@@ -198,9 +216,6 @@
     <ClCompile Include="ListNode.cpp">
       <Filter>Source Files\nodes\types</Filter>
     </ClCompile>
-    <ClCompile Include="List.cpp">
-      <Filter>Source Files\interperter\types</Filter>
-    </ClCompile>
     <ClCompile Include="Function.cpp">
       <Filter>Source Files\interperter\types\function</Filter>
     </ClCompile>
@@ -222,17 +237,38 @@
     <ClCompile Include="ReturnNode.cpp">
       <Filter>Source Files\nodes\keywords</Filter>
     </ClCompile>
-    <ClCompile Include="Enum.cpp">
-      <Filter>Source Files\interperter\types</Filter>
-    </ClCompile>
     <ClCompile Include="EnumNode.cpp">
-      <Filter>Source Files\nodes</Filter>
+      <Filter>Source Files\nodes\keywords</Filter>
     </ClCompile>
     <ClCompile Include="PathAccessNode.cpp">
-      <Filter>Source Files\nodes</Filter>
+      <Filter>Source Files\nodes\operations</Filter>
     </ClCompile>
     <ClCompile Include="VarReasignNode.cpp">
-      <Filter>Source Files\nodes</Filter>
+      <Filter>Source Files\nodes\varible</Filter>
+    </ClCompile>
+    <ClCompile Include="ImportNode.cpp">
+      <Filter>Source Files\nodes\keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="List.cpp">
+      <Filter>Source Files\interperter\types\collections</Filter>
+    </ClCompile>
+    <ClCompile Include="Namespace.cpp">
+      <Filter>Source Files\interperter\types\defintions</Filter>
+    </ClCompile>
+    <ClCompile Include="Enum.cpp">
+      <Filter>Source Files\interperter\types\enum</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumValue.cpp">
+      <Filter>Source Files\interperter\types\enum</Filter>
+    </ClCompile>
+    <ClCompile Include="NamespaceNode.cpp">
+      <Filter>Source Files\nodes\keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="Null.cpp">
+      <Filter>Source Files\interperter\types</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchNode.cpp">
+      <Filter>Source Files\nodes\func</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -335,9 +371,6 @@
     <ClInclude Include="ListNode.h">
       <Filter>Header Files\nodes\types</Filter>
     </ClInclude>
-    <ClInclude Include="List.h">
-      <Filter>Header Files\interperter\types</Filter>
-    </ClInclude>
     <ClInclude Include="ListAccessNode.h">
       <Filter>Header Files\nodes\variable</Filter>
     </ClInclude>
@@ -362,9 +395,6 @@
     <ClInclude Include="EnumNode.h">
       <Filter>Header Files\nodes\types</Filter>
     </ClInclude>
-    <ClInclude Include="Enum.h">
-      <Filter>Header Files\interperter\types</Filter>
-    </ClInclude>
     <ClInclude Include="Types.h">
       <Filter>Header Files\interperter</Filter>
     </ClInclude>
@@ -374,10 +404,42 @@
     <ClInclude Include="VarReasignNode.h">
       <Filter>Header Files\nodes\variable</Filter>
     </ClInclude>
+    <ClInclude Include="Enum.h">
+      <Filter>Header Files\interperter\types\enum</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumValue.h">
+      <Filter>Header Files\interperter\types\enum</Filter>
+    </ClInclude>
+    <ClInclude Include="NamespaceNode.h">
+      <Filter>Header Files\nodes\keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="ImportNode.h">
+      <Filter>Header Files\nodes\keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="Namespace.h">
+      <Filter>Header Files\interperter\types\definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="List.h">
+      <Filter>Header Files\interperter\types\collections</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchNode.h">
+      <Filter>Header Files\nodes\func</Filter>
+    </ClInclude>
+    <ClInclude Include="Null.h">
+      <Filter>Header Files\interperter\types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.ps">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="std.ps">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="TODO.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

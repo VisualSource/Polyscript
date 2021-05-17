@@ -10,10 +10,10 @@ using namespace std;
 class Token {
 	public:
 		Token();
-		Token(TypeToken type, optional<string> value = nullopt, optional<Position> start = nullopt, optional<Position> end = nullopt);
+		Token(TypeToken type, Position start, optional<Position> end = nullopt, optional<string> value = nullopt);
 		optional<string> GetValue() const;
-		optional<Position> GetStart() const { return start; };
-		optional<Position> GetEnd() const { return end; };
+		Position GetStart() const { return start; };
+		Position GetEnd() const { return end; };
 		TypeToken GetType() const { return type; };
 		bool matches(const TypeToken& token, string value);
 		bool matchesKeyWord(string value);
@@ -22,7 +22,7 @@ class Token {
 	private:
 		TypeToken type;
 		optional<string> value = nullopt;
-		optional<Position> start = nullopt;
-		optional<Position> end = nullopt;
+		Position start;
+		Position end;
 };
 

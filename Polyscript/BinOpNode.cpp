@@ -1,9 +1,8 @@
 #include "BinOpNode.h"
 #include "NodeUtils.h"
 
-BinOpNode::BinOpNode(any left_node, Token op_token, any right_node): left_node(left_node), op_token(op_token), right_node(right_node) {
-    SetStart(NodeUtils::GetStartFromNode(left_node));
-    SetEnd(NodeUtils::GetEndFromNode(right_node));
+BinOpNode::BinOpNode(any left_node, Token op_token, any right_node, Position start, Position end): Node(start,end), left_node(left_node), op_token(op_token), right_node(right_node) {
+
 }
 
 Token BinOpNode::GetOpToken() const {

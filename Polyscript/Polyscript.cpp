@@ -110,9 +110,9 @@ int main(int argc, char* argv[]) {
 	vector<string> bulitin = { "__input" };
 	SymbolTable* globalscope = new SymbolTable();
 	globalscope->add("__name__", String("main"), nullptr);
-	globalscope->add("null", Integer(0), nullptr);
-	globalscope->add("false", Integer(0), nullptr);
-	globalscope->add("true", Integer(1), nullptr);
+	globalscope->add("null", Null(), nullptr);
+	globalscope->add("false", Integer(0).PrintBool(true), nullptr);
+	globalscope->add("true", Integer(1).PrintBool(true), nullptr);
 	globalscope->add("print", BuiltInFunction("print", bulitin),nullptr);
 	globalscope->add("clear", BuiltInFunction("clear", vector<string>()), nullptr);
 	globalscope->add("isInteger", BuiltInFunction("isInteger", bulitin), nullptr);
@@ -120,10 +120,12 @@ int main(int argc, char* argv[]) {
 	globalscope->add("isFunction", BuiltInFunction("print", bulitin), nullptr);
 	globalscope->add("isList", BuiltInFunction("isList", bulitin), nullptr);
 	globalscope->add("isString", BuiltInFunction("isString", bulitin), nullptr);
+	globalscope->add("isEnum", BuiltInFunction("isEnum", bulitin), nullptr);
+	globalscope->add("isNull", BuiltInFunction("isNull", bulitin), nullptr);
 	globalscope->add("length", BuiltInFunction("length", bulitin), nullptr);
 
 	if (!fromFile) {
-		cout << "Polyscript \x1B[94mV0.2.1\033[0m | use exit() to exit." << endl;
+		cout << "Polyscript \x1B[94mV0.3.0\033[0m | use exit() to exit." << endl;
 
 		while (true) {
 			cout << "> ";
@@ -131,7 +133,7 @@ int main(int argc, char* argv[]) {
 			getline(cin, input);
 			if (input == "exit()") break;
 			if (input.size() == 0) {
-				cout << "\x1B[90mundefined\033[0m" << endl;
+				cout << "\x1B[90mnull\033[0m" << endl;
 				continue;
 			}
 			run("<stdin>", input, globalscope, showTokens, false);

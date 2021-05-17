@@ -1,9 +1,7 @@
 #include "VarReasignNode.h"
 
-VarReasignNode::VarReasignNode(Token ident, Token op, any expr, Position start, Position end): identifer(ident), opeartor(op), expr(expr)
+VarReasignNode::VarReasignNode(Token ident, Token op, any expr, Position start, Position end): Node(start,end), identifer(ident), opeartor(op), expr(expr)
 {
-	SetStart(start);
-	SetEnd(end);
 }
 
 Token VarReasignNode::GetIdentifer() const

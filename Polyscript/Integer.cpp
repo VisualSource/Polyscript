@@ -4,6 +4,7 @@
 #include "RuntimeError.h"
 #include "Context.h"
 #include "String.h"
+#include "EnumValue.h"
 
 Integer Integer::cast(const Float& value)
 {
@@ -14,6 +15,7 @@ Integer Integer::cast(const String& value)
 {
 	return Integer(stoi(value.GetValue()));
 }
+
 
 Integer::Integer(int value): value(value) {
 }

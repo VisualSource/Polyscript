@@ -41,6 +41,9 @@ class Interpreter {
 		any visit_ListAccessNode(const ListAccessNode& node, Context* context);
 		any visit_ReturnNode(const ReturnNode& node, Context* context);
 		any visit_EnumDefNode(const EnumNode& node, Context* context);
+		any visit_NamespaceNode(const NamespaceNode& node, Context* context);
+		any visit_ImportNode(const ImportNode& node, Context* context);
+		any visit_MatchNode(const MatchNode& node, Context* context);
 };
 
 

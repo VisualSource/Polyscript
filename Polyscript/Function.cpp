@@ -10,10 +10,10 @@
 #include "NodeUtils.h"
 
 
-Function::Function(any body_node, vector<string> arg_names, string name): body_node(body_node), arg_names(arg_names), BaseFunction(name)
+Function::Function(any body_node, vector<string> arg_names, Position start, Position end, string name): body_node(body_node), arg_names(arg_names), BaseFunction(name)
 {
-	start = NodeUtils::GetStartFromNode(body_node);
-	end = NodeUtils::GetEndFromNode(body_node);
+	this->end = end;
+	this->start = start;
 }
 
 any Function::exceute(vector<any> args)

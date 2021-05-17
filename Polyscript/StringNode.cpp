@@ -1,6 +1,6 @@
 #include "StringNode.h"
 
-StringNode::StringNode(Token token): token(token)
+StringNode::StringNode(Token token, Position start, Position end): Node(start,end), token(token)
 {
 }
 

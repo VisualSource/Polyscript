@@ -1,6 +1,6 @@
 #include "Node.h"
 
-Node::Node()
+Node::Node(Position start, Position end): start(start), end(end)
 {
 }
 
@@ -14,12 +14,3 @@ Position Node::GetEnd() const
     return end;
 }
 
-void Node::SetStart(Position pos)
-{
-    start = pos;
-}
-
-void Node::SetEnd(Position pos)
-{
-    end = pos;
-}

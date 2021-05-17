@@ -1,0 +1,6 @@
+- ++ and -- 
+- OBECT 
+- CLASS OBJECT
+- casting
+- std libary
+- JSON PARSE and stringify

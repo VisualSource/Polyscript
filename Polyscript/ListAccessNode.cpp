@@ -1,9 +1,7 @@
 #include "ListAccessNode.h"
 
-ListAccessNode::ListAccessNode(Token variable, any index, const Position& start, const Position& end): varName(variable), index(index)
+ListAccessNode::ListAccessNode(Token variable, any index, const Position& start, const Position& end): Node(start,end), varName(variable), index(index)
 {
-	SetStart(start);
-	SetEnd(end);
 }
 
 string ListAccessNode::GetVarName() const

@@ -1,24 +1,9 @@
 
-enum Test {
-	Ok,
-	Error,
-	None
-}
 
-fn getFile(file) {
-
-	 if !isString(file) {
-		 return Test::Error;
-	 }
-
-	 return Test::Ok;
-
-}
-let result = getFile("./import.ps");
-if result == Test::Ok {
- print("Got File");
+let b  = if(isString(1)){
+	print("Hello World");
 } else {
-  print("Errored");
+	print("NO World");
 }
 
-
+print(b);

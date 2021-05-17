@@ -4,7 +4,7 @@
 
 class NumberNode: public Node {
 	public:
-		NumberNode(Token token);
+		NumberNode(Token token, Position start, Position end);
 		Token GetToken() const;
 		friend std::ostream& operator<<(std::ostream& lhs, const NumberNode& token);
 	private:

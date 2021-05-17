@@ -9,7 +9,7 @@ using namespace std;
 class VarAssignNode: public Node
 {
 	public:
-		VarAssignNode(Token var_token, any node, optional<Token> varType = nullopt);
+		VarAssignNode(Token var_token, any node, Position start, Position end, optional<Token> varType = nullopt);
 		Token GetVarType() const;
 		any GetNode() const;
 		Token GetToken() const;

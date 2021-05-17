@@ -1,18 +1,12 @@
 #include "VarAssignNode.h"
 #include "NodeUtils.h"
 
-VarAssignNode::VarAssignNode(Token var_token, any node, optional<Token> varType): var_token(var_token), node(node)
+VarAssignNode::VarAssignNode(Token var_token, any node, Position start, Position end, optional<Token> varType): Node(start,end), var_token(var_token), node(node)
 {
-	SetStart(var_token.GetStart().value());
-
-
 	if (varType.has_value()) {
 		type = varType.value();
-		SetEnd(varType.value().GetEnd().value());
-	}
-	else {
+	} else {
 		type = nullopt;
-		SetEnd(NodeUtils::GetEndFromNode(node));
 	}
 }
 

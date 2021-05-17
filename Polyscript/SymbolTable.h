@@ -7,7 +7,7 @@ using namespace std;
 
 namespace ScopeTypes {
 	struct  Node;
-	typedef variant<monostate, Integer, Float, Function, String, List, BuiltInFunction, Enum> Var;
+	typedef variant<monostate, Integer, Float, Function, String, List, BuiltInFunction, Enum, EnumValue, Namespace, Null> Var;
 	typedef Node* NodePtr;
 	bool isInteger(const Var& value);
 	bool isFloat(const Var& value);

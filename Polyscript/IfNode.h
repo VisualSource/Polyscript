@@ -14,7 +14,7 @@ struct IfCases {
 class IfNode: public Node
 {
 	public:
-		IfNode(const vector<IfCases>& statments, optional<any> else_statment);
+		IfNode(const vector<IfCases>& statments, optional<any> else_statment, Position start, Position end);
 		const vector<IfCases>& GetIfStatments() const { return ifStatements; };
 		any GetElseStatment() const { return else_statment; };
 	private:

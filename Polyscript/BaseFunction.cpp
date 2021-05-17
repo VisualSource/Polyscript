@@ -40,32 +40,43 @@ void BaseFunction::check_args(const vector<string>& arg_names, const vector<any>
 
 void BaseFunction::populate_args(const vector<string>& arg_names, const vector<any>& args, Context* ctx)
 {
+	using InterTypes::isTypeOf;
 	for (size_t i = 0; i < args.size(); i++) {
 		string arg_name = arg_names.at(i);
 		any arg_value = args.at(i);
 
-		if (InterTypes::isInteger(arg_value)) {
+		if (isTypeOf<Integer>(arg_value)) {
 			Integer iv = any_cast<Integer>(arg_value);
 			iv.SetContext(ctx);
 			ctx->GetScope()->add(arg_name, iv,ctx);
 		}
-		else if (InterTypes::isFloat(arg_value)) {
+		else if (isTypeOf<Float>(arg_value)) {
 			Float fl = any_cast<Float>(arg_value);
 			fl.SetContext(ctx);
 			ctx->GetScope()->add(arg_name, fl, ctx);
 		}
-		else if (InterTypes::isString(arg_value)) {
+		else if (isTypeOf<String>(arg_value)) {
 			String fl = any_cast<String>(arg_value);
 			fl.SetContext(ctx);
 			ctx->GetScope()->add(arg_name, fl, ctx);
 		}
-		else if (InterTypes::isFunction(arg_value)) {
+		else if (isTypeOf<Function>(arg_value)) {
 			Function fl = any_cast<Function>(arg_value);
 			fl.SetContext(ctx);
 			ctx->GetScope()->add(arg_name, fl, ctx);
 		}
-		else if (InterTypes::isList(arg_value)) {
+		else if (isTypeOf<List>(arg_value)) {
 			List fl = any_cast<List>(arg_value);
+			fl.SetContext(ctx);
+			ctx->GetScope()->add(arg_name, fl, ctx);
+		}
+		else if (isTypeOf<EnumValue>(arg_value)) {
+			EnumValue fl = any_cast<EnumValue>(arg_value);
+			fl.SetContext(ctx);
+			ctx->GetScope()->add(arg_name, fl, ctx);
+		}
+		else if (isTypeOf<Null>(arg_value)) {
+			Null fl = any_cast<Null>(arg_value);
 			fl.SetContext(ctx);
 			ctx->GetScope()->add(arg_name, fl, ctx);
 		}

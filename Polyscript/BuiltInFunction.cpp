@@ -27,28 +27,38 @@ any BuiltInFunction::exceute(vector<any> args)
             ScopeTypes::Var value = ctx->GetScope()->get("__input",ctx);
             auto* v = std::get_if<Integer>(&value);
             if (v != nullptr) {
-                cout << get<Integer>(value) << endl;
-                return any();
+                cout << *v << endl;
+                return Null();
             }
             auto* s = std::get_if<String>(&value);
             if (s != nullptr) {
-                cout << get<String>(value) << endl;;
-                return any();
+                cout << *s << endl;;
+                return Null();
             }
             auto* f = std::get_if<Float>(&value);
             if (f != nullptr) {
-                cout << get<Float>(value) << endl;;
-                return any();
+                cout << *f << endl;;
+                return Null();
             }
             auto* fn = std::get_if<Function>(&value);
             if (fn != nullptr) {
-                cout << get<Function>(value) << endl;;
-                return any();
+                cout << *fn << endl;;
+                return Null();
             }
             auto* l = std::get_if<List>(&value);
             if (l != nullptr) {
-                cout << get<List>(value) << endl;;
-                return any();
+                cout << *l << endl;;
+                return Null();
+            }
+            auto* e = std::get_if<EnumValue>(&value);
+            if (e != nullptr) {
+                cout << *e << endl;;
+                return Null();
+            }
+            auto* isNull = std::get_if<Null>(&value);
+            if (isNull != nullptr) {
+                cout << *isNull << endl;;
+                return Null();
             }
             
         } catch (bad_variant_access const&){
@@ -114,6 +124,30 @@ any BuiltInFunction::exceute(vector<any> args)
             return out;
         }
     }
+    else if (func == "isEnum") {
+        Integer out(0);
+        out.SetContext(context).PrintBool(true);
+        ScopeTypes::Var value = ctx->GetScope()->get("__input", ctx);
+        auto* v = std::get_if<EnumValue>(&value);
+        if (v != nullptr) {
+            return !out;
+        }
+        else {
+            return out;
+        }
+    }
+    else if (func == "isNull") {
+        Integer out(0);
+        out.SetContext(context).PrintBool(true);
+        ScopeTypes::Var value = ctx->GetScope()->get("__input", ctx);
+        auto* v = std::get_if<Null>(&value);
+        if (v != nullptr) {
+            return !out;
+        }
+        else {
+            return out;
+        }
+    }
     else if (func == "length") {  
         try {
             List len = get<List>(ctx->GetScope()->get("__input", ctx));
@@ -123,40 +157,7 @@ any BuiltInFunction::exceute(vector<any> args)
             throw RuntimeError("Expected a list", ctx, start, end);
         }
     }
-    return any();
+    return Null();
 }
-/*
-auto* typeA = std::get_if<Integer>(&value);
-    if (typeA != nullptr) {
-        return *typeA;
-    }
-
-    auto* typeString = get_if<String>(&value);
-    if (typeString != nullptr) {
-        return *typeString;
-    }
-
-    auto* typeB = std::get_if<Float>(&value);
-    if (typeB != nullptr) {
-        return *typeB;
-    }
-
-    auto* func = std::get_if<Function>(&value);
-    if (func != nullptr) {
-        return *func;
-    }
-
-    auto* list = get_if<List>(&value);
-    if (list != nullptr) {
-        return *list;
-    }
-
-    auto* builtin = get_if<BuiltInFunction>(&value);
-    if (builtin != nullptr) {
-        return *builtin;
-    }
-
-    throw RuntimeError("Failed to access variable", context,node.GetStart(),node.GetEnd());
 
 
-*/

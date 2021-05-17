@@ -8,7 +8,7 @@ using namespace std;
 class ForNode: public Node
 {
 	public:
-		ForNode(Token var_token_name, any start, any end, any body, any step);
+		ForNode(Token var_token_name, any start, any end, any body, any step, Position startPos, Position endPos);
 		Token GetVarTokenName() const;
 		any GetStartValueNode() const;
 		any GetEndValueNode() const;

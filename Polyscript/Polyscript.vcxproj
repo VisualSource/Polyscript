@@ -149,6 +149,7 @@
     <ClCompile Include="ContinueNode.cpp" />
     <ClCompile Include="Enum.cpp" />
     <ClCompile Include="EnumNode.cpp" />
+    <ClCompile Include="EnumValue.cpp" />
     <ClCompile Include="ExpectedCharError.cpp" />
     <ClCompile Include="Float.cpp" />
     <ClCompile Include="ForNode.cpp" />
@@ -157,6 +158,7 @@
     <ClCompile Include="Function.cpp" />
     <ClCompile Include="IfNode.cpp" />
     <ClCompile Include="IllegalCharError.cpp" />
+    <ClCompile Include="ImportNode.cpp" />
     <ClCompile Include="Integer.cpp" />
     <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="InterpreterUtils.cpp" />
@@ -165,8 +167,12 @@
     <ClCompile Include="List.cpp" />
     <ClCompile Include="ListAccessNode.cpp" />
     <ClCompile Include="ListNode.cpp" />
+    <ClCompile Include="MatchNode.cpp" />
+    <ClCompile Include="Namespace.cpp" />
+    <ClCompile Include="NamespaceNode.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="NodeUtils.cpp" />
+    <ClCompile Include="Null.cpp" />
     <ClCompile Include="NumberNode.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="PathAccessNode.cpp" />
@@ -196,6 +202,7 @@
     <ClInclude Include="ContinueNode.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="EnumNode.h" />
+    <ClInclude Include="EnumValue.h" />
     <ClInclude Include="ExpectedCharError.h" />
     <ClInclude Include="Float.h" />
     <ClInclude Include="ForNode.h" />
@@ -204,6 +211,7 @@
     <ClInclude Include="Function.h" />
     <ClInclude Include="IfNode.h" />
     <ClInclude Include="IllegalCharError.h" />
+    <ClInclude Include="ImportNode.h" />
     <ClInclude Include="Integer.h" />
     <ClInclude Include="Interpreter.h" />
     <ClInclude Include="InterpreterUtils.h" />
@@ -212,9 +220,13 @@
     <ClInclude Include="List.h" />
     <ClInclude Include="ListAccessNode.h" />
     <ClInclude Include="ListNode.h" />
+    <ClInclude Include="MatchNode.h" />
+    <ClInclude Include="Namespace.h" />
+    <ClInclude Include="NamespaceNode.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Nodes.h" />
     <ClInclude Include="NodeUtils.h" />
+    <ClInclude Include="Null.h" />
     <ClInclude Include="NumberNode.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="PathAccessNode.h" />
@@ -236,7 +248,11 @@
     <ClInclude Include="WhileNode.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="std.ps" />
     <None Include="test.ps" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="TODO.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

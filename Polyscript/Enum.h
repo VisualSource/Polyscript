@@ -7,13 +7,14 @@
 
 using namespace std;
 
+class EnumValue;
 
 class Enum : public Variable {
 	public:
 		Enum(const vector<Token>& keys, string name);
 		virtual Enum& SetContext(Context* context);
 		virtual Enum& SetPostion(Position start, Position end);
-		Integer get(string key) const;
+		EnumValue get(string key) const;
 		bool empty() const;
 		bool hasKey(string key) const;
 		size_t len() const;

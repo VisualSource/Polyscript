@@ -4,6 +4,7 @@
 #include "NodeUtils.h"
 #include "InvalidSyntaxError.h"
 #include "TokenEnum.h"
+#include "Token.h"
 
 
 Parser::Parser(vector<Token> tokens): tokens(tokens) {
@@ -14,7 +15,7 @@ Parser::Parser(vector<Token> tokens): tokens(tokens) {
 any Parser::parse() {
 	any res = statements();
 	if (!current_token.isToken(TypeToken::T_EOF)) {
-		throw InvalidSyntaxError("Expected ;", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected ;", current_token.GetStart(), current_token.GetEnd());
 	}
 	return res;
 }
@@ -29,7 +30,7 @@ Token& Parser::advance() {
 any Parser::statements()
 {
 	vector<any> statements;
-	Position start(current_token.GetStart().value());
+	Position start(current_token.GetStart());
 
 	while (current_token.isToken(TypeToken::NEWLINE)){
 		advance();
@@ -63,12 +64,12 @@ any Parser::statements()
 
 	}
 
-	return ListNode(statements,start,current_token.GetEnd().value());
+	return ListNode(statements,start,current_token.GetEnd());
 }
 
 any Parser::statement()
 {
-	Position start(current_token.GetStart().value());
+	Position start(current_token.GetStart());
 
 	if (current_token.matches(TypeToken::KEYWORD, "return")) {
 		advance();
@@ -79,78 +80,35 @@ any Parser::statement()
 			tok_idx = reset;
 			current_token = tokens.at(tok_idx);
 		}
-		return ReturnNode(statement, start, current_token.GetEnd().value());
+		return ReturnNode(statement, start, current_token.GetEnd());
 
 	}
 	if (current_token.matches(TypeToken::KEYWORD, "continue")) {
 		advance();
-		return ContinueNode(start, current_token.GetEnd().value());
+		return ContinueNode(start, current_token.GetEnd());
 	}
 	if (current_token.matches(TypeToken::KEYWORD, "break")) {
 		advance();
-		return BreakNode(start, current_token.GetEnd().value());
+		return BreakNode(start, current_token.GetEnd());
 	}
 
 	return this->expr();
 }
+
 any Parser::atom(){
 	Token tok = current_token;
-	Position start(tok.GetStart().value());
+	Position start(tok.GetStart());
 
 	if (tok.isToken(TypeToken::INT) || tok.isToken(TypeToken::FLOAT)) {
 		advance();
-		return NumberNode(tok);
+		return NumberNode(tok,start,tok.GetEnd());
 	}
 	else if (tok.isToken(TypeToken::STRING)) {
 		advance();
-		return StringNode(tok);
+		return StringNode(tok, start, tok.GetEnd());
 	}
 	else if (tok.isToken(TypeToken::IDENTIFIER)) {
-		advance();
-
-		if(current_token.isToken(TypeToken::LBRACKET)){
-			advance();
-
-			any index = this->expr();
-
-			if (!current_token.isToken(TypeToken::RBRACKET)) {
-				throw InvalidSyntaxError("Expected ']'", current_token.GetStart().value(), current_token.GetEnd().value());
-			}
-			advance();
-
-			return ListAccessNode(tok, index,start,current_token.GetEnd().value());
-		
-		}
-		else if (current_token.isToken(TypeToken::PATHSEP)) {
-			vector<Token> path;
-			path.push_back(tok);
-
-			while (current_token.isToken(TypeToken::PATHSEP))
-			{
-				advance();
-				if (!current_token.isToken(TypeToken::IDENTIFIER)) {
-					throw InvalidSyntaxError("Expected IDENTIFIER", current_token.GetStart().value(), current_token.GetEnd().value());
-				}
-				path.push_back(current_token);
-				advance();
-			}
-
-			//advance();
-
-			return PathAccessNode(path,start,current_token.GetEnd().value());
-		}
-		else if(current_token.isToken(TypeToken::PLUS_EQ) || current_token.isToken(TypeToken::MINUS_EQ) 
-				|| current_token.isToken(TypeToken::MUL_EQ) || current_token.isToken(TypeToken::DIV_EQ) || current_token.isToken(TypeToken::EQ)){
-			Token op = current_token;
-			advance();
-
-			any value = this->expr();
-
-			return VarReasignNode(tok,op,value,start,current_token.GetEnd().value());
-
-		}
-
-		return VarAccessNode(tok);
+		return Identifer();
 	}
 	else if (tok.isToken(TypeToken::LPAREN)) {
 		advance();
@@ -159,7 +117,7 @@ any Parser::atom(){
 			advance();
 			return expr;
 		} else {
-			throw InvalidSyntaxError("Expected ')'", current_token.GetStart().value(), current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected ')'", current_token.GetStart(), current_token.GetEnd());
 		}
 	}
 	else if (tok.isToken(TypeToken::LBRACKET)) {
@@ -180,6 +138,15 @@ any Parser::atom(){
 	else if (tok.matchesKeyWord("enum")) {
 		return enumExpr();
 	}
+	else if (tok.matchesKeyWord("namespace")) {
+		return namespaceDef();
+	}
+	else if (tok.matchesKeyWord("import")) {
+		return importDef();
+	}
+	else if (tok.matchesKeyWord("match")) {
+		return matchExpr();
+	}
 
 	return any();
 }
@@ -190,6 +157,7 @@ atom (LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN)?
 */
 any Parser::call()
 {
+	Position start(current_token.GetStart());
 	any atom = this->atom();
 
 	if (current_token.isToken(TypeToken::LPAREN)) {
@@ -203,31 +171,32 @@ any Parser::call()
 				arg_nodes.push_back(this->expr());
 			}
 			catch (InvalidSyntaxError){
-				throw InvalidSyntaxError("Expected ')' 'let', 'if', 'for', 'while', 'fn', int, float, identifier" , current_token.GetStart().value(), current_token.GetEnd().value());
+				throw InvalidSyntaxError("Expected ')' 'let', 'if', 'for', 'while', 'fn', int, float, identifier" , current_token.GetStart(), current_token.GetEnd());
 			}
 			while (current_token.isToken(TypeToken::COMMA)) {
 				advance();
 				arg_nodes.push_back(this->expr());
 			}
 			if (!current_token.isToken(TypeToken::RPAREN)) {
-				throw InvalidSyntaxError("Expected identifier or ')'", current_token.GetStart().value(), current_token.GetEnd().value());
+				throw InvalidSyntaxError("Expected identifier or ')'", current_token.GetStart(), current_token.GetEnd());
 			}
 			advance();
 		}
-		return FuncCallNode(atom,arg_nodes);
+		return FuncCallNode(atom,arg_nodes, start,current_token.GetEnd());
 	}
 
 	
 	return atom;
 }
 any Parser::power() {
+	Position start(current_token.GetStart());
 	any left = this->call();
 
 	while (current_token.isToken(TypeToken::POWER)) {
 		Token op_tok = current_token;
 		advance();
 		any right = factor();
-		left = BinOpNode(left, op_tok, right);
+		left = BinOpNode(left, op_tok, right, start, current_token.GetEnd());
 	}
 	return left;
 }
@@ -238,21 +207,21 @@ any Parser::factor(){
 	if (tok.isToken(TypeToken::PLUS) || tok.isToken(TypeToken::MINUS)) {
 		advance();
 		any factor = this->factor();
-		return UnaryOpNode(tok, factor);
+		return UnaryOpNode(tok, factor,tok.GetStart(),current_token.GetEnd());
 	} 
 
 	return power();
 }
 
 any Parser::term(){
-
+	Position start(current_token.GetStart());
 	any left = factor();
 
 	while (current_token.isToken(TypeToken::MUL) || current_token.isToken(TypeToken::DIV)) {
 		Token op_tok = current_token;
 		advance();
 		any right = factor();
-		left = BinOpNode(left,op_tok,right);
+		left = BinOpNode(left,op_tok,right,start,current_token.GetEnd());
 	}
 	return left;
 }
@@ -266,11 +235,12 @@ any Parser::term(){
 
 */
 any Parser::expr() {
+	Position start(current_token.GetStart());
 	if (current_token.matches(TypeToken::KEYWORD, "let")) {
 		advance();
 
 		if (!current_token.isToken(TypeToken::IDENTIFIER)) {
-			throw InvalidSyntaxError("Expected identifier", current_token.GetStart().value(), current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected identifier", current_token.GetStart(), current_token.GetEnd());
 		}
 		Token varName = current_token;
 		advance();
@@ -282,18 +252,18 @@ any Parser::expr() {
 				varType = current_token;
 				advance();
 			} else {
-				throw InvalidSyntaxError("Expected Type identifier", current_token.GetStart().value(), current_token.GetEnd().value());
+				throw InvalidSyntaxError("Expected Type identifier", current_token.GetStart(), current_token.GetEnd());
 			}
 		}
 
 		if (!current_token.isToken(TypeToken::EQ)) {
-			throw InvalidSyntaxError("Expected assigment", current_token.GetStart().value(), current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected assigment", current_token.GetStart(), current_token.GetEnd());
 		}
 		advance();
 
 		any expr = this->expr();
 		
-		return VarAssignNode(varName,expr,varType);
+		return VarAssignNode(varName,expr,start,current_token.GetEnd(),varType);
 	}
 
 
@@ -303,19 +273,19 @@ any Parser::expr() {
 		Token op_tok = current_token;
 		advance();
 		any right = compExpr();
-		left = BinOpNode(left, op_tok, right);
+		left = BinOpNode(left, op_tok, right,start,current_token.GetEnd());
 	}
 	return left;
 }
 
 any Parser::compExpr()
 {
-	
+	Position start(current_token.GetStart());
 	if (current_token.isToken(TypeToken::NOT)) {
 		Token op_tok = current_token;
 		advance();
 		any node = compExpr();
-		return UnaryOpNode(op_tok,node);
+		return UnaryOpNode(op_tok,node,start,current_token.GetEnd());
 	}
 
 	any left = arithExpr();
@@ -325,7 +295,7 @@ any Parser::compExpr()
 		Token op_tok = current_token;
 		advance();
 		any right = arithExpr();
-		left = BinOpNode(left, op_tok, right);
+		left = BinOpNode(left, op_tok, right,start,current_token.GetEnd());
 	}
 
 	return left;
@@ -333,13 +303,14 @@ any Parser::compExpr()
 
 any Parser::arithExpr()
 {
+	Position start(current_token.GetStart());
 	any left = term();
 
 	while (current_token.isToken(TypeToken::PLUS) || current_token.isToken(TypeToken::MINUS)){
 		Token op_tok = current_token;
 		advance();
 		any right = term();
-		left = BinOpNode(left, op_tok, right);
+		left = BinOpNode(left, op_tok, right,start,current_token.GetEnd());
 	}
 
 	return left;
@@ -348,11 +319,12 @@ any Parser::arithExpr()
 // Grammer KEYWORD:if expr { (expr*)? } (else (if {}) 
 any Parser::exprIf()
 {
+	Position start(current_token.GetStart());
 	vector<IfCases> cases;
 	any else_case;
 
 	if (!current_token.matches(TypeToken::KEYWORD, "if")) {
-		throw InvalidSyntaxError("Expexted 'if'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expexted 'if'", current_token.GetStart(), current_token.GetEnd());
 	}
 
 	advance();
@@ -360,7 +332,7 @@ any Parser::exprIf()
 	any condition = expr();
 
 	if (!current_token.isToken(TypeToken::SCOPESTART)) {
-		throw InvalidSyntaxError("Expected '{'",current_token.GetStart().value(),current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '{'",current_token.GetStart(),current_token.GetEnd());
 	}
 
 	advance();
@@ -375,7 +347,7 @@ any Parser::exprIf()
 	
 
 	if (!current_token.isToken(TypeToken::SCOPEEND)) {
-		throw InvalidSyntaxError("Expected '}'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '}'", current_token.GetStart(), current_token.GetEnd());
 	}
 	advance();
 
@@ -385,7 +357,7 @@ any Parser::exprIf()
 			advance();
 			any condition = expr();
 			if (!current_token.isToken(TypeToken::SCOPESTART)) {
-				throw InvalidSyntaxError("Expected '{'", current_token.GetStart().value(), current_token.GetEnd().value());
+				throw InvalidSyntaxError("Expected '{'", current_token.GetStart(), current_token.GetEnd());
 			}
 			advance();
 			any expra = statements();
@@ -397,7 +369,7 @@ any Parser::exprIf()
 			}
 
 			if (!current_token.isToken(TypeToken::SCOPEEND)) {
-				throw InvalidSyntaxError("Expected '}'", current_token.GetStart().value(), current_token.GetEnd().value());
+				throw InvalidSyntaxError("Expected '}'", current_token.GetStart(), current_token.GetEnd());
 			}
 			advance();
 		}
@@ -406,47 +378,47 @@ any Parser::exprIf()
 			else_case = statements();
 
 			if (!current_token.isToken(TypeToken::SCOPEEND)) {
-				throw InvalidSyntaxError("Expected '}'", current_token.GetStart().value(), current_token.GetEnd().value());
+				throw InvalidSyntaxError("Expected '}'", current_token.GetStart(), current_token.GetEnd());
 			}
 			advance();
 		}
 		else {
-			throw InvalidSyntaxError("Expected 'if' or '{'",current_token.GetStart().value(),current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected 'if' or '{'",current_token.GetStart(),current_token.GetEnd());
 		}
 		
 	}
 
 
-	return IfNode(cases, else_case);
+	return IfNode(cases, else_case,start,current_token.GetEnd());
 }
 
 // Creation of a for loop block
 // Grammer: KEYWORD:for IDENTIFIER EQ expr KEYWORD:to expr SCOPESTART expr SCOPEEND
 any Parser::forExpr()
 {
-	
+	Position start(current_token.GetStart());
 	if (!current_token.matches(TypeToken::KEYWORD, "for")) {
-		throw InvalidSyntaxError("Expected 'for'",current_token.GetStart().value(),current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected 'for'",current_token.GetStart(),current_token.GetEnd());
 	}
 
 	advance();
 
 	if(!current_token.isToken(TypeToken::IDENTIFIER)){
-		throw InvalidSyntaxError("Expected identifier", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected identifier", current_token.GetStart(), current_token.GetEnd());
 	}
 
 	Token varName = current_token;
 	advance();
 
 	if (!current_token.isToken(TypeToken::EQ)) {
-		throw InvalidSyntaxError("Expected '='",current_token.GetStart().value(),current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '='",current_token.GetStart(),current_token.GetEnd());
 	}
 	advance();
 
 	any start_value = this->expr();
 
 	if (!current_token.matches(TypeToken::KEYWORD, "to")) {
-		throw InvalidSyntaxError("Expected 'to'",current_token.GetStart().value(),current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected 'to'",current_token.GetStart(),current_token.GetEnd());
 	}
 
 	advance();
@@ -461,7 +433,7 @@ any Parser::forExpr()
 	}
 
 	if (!current_token.isToken(TypeToken::SCOPESTART)) {
-		throw InvalidSyntaxError("Expected '{'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '{'", current_token.GetStart(), current_token.GetEnd());
 	}
 
 	advance();
@@ -470,13 +442,13 @@ any Parser::forExpr()
 
 
 	if (!current_token.isToken(TypeToken::SCOPEEND)) {
-		throw InvalidSyntaxError("Expected '}'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '}'", current_token.GetStart(), current_token.GetEnd());
 	}
 
 	advance();
 
 
-	return ForNode(varName,start_value,end_value,body,step_value);
+	return ForNode(varName,start_value,end_value,body,step_value,start,current_token.GetStart());
 }
 
 /*
@@ -487,20 +459,20 @@ KEYWORLD:enum IDENTIFIER SCOPESTART (IDENTIFER (COMMA)?)? SCOPEEND
 */
 any Parser::enumExpr()
 {
-	Position start(current_token.GetStart().value());
+	Position start(current_token.GetStart());
 	if (!current_token.matchesKeyWord("enum")) {
-		throw InvalidSyntaxError("Expected keyworld 'enum'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected keyworld 'enum'", current_token.GetStart(), current_token.GetEnd());
 	}
 	advance();
 
 	if (!current_token.isToken(TypeToken::IDENTIFIER)) {
-		throw InvalidSyntaxError("Expected Identifier", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected Identifier", current_token.GetStart(), current_token.GetEnd());
 	}
 	string name = current_token.GetValue().value();
 	advance();
 
 	if (!current_token.isToken(TypeToken::SCOPESTART)) {
-		throw InvalidSyntaxError("Expected Identifier", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected Identifier", current_token.GetStart(), current_token.GetEnd());
 	}
 	advance();
 	vector<Token> enumsKeys;
@@ -517,24 +489,24 @@ any Parser::enumExpr()
 				advance();
 			}
 		}else {
-			throw InvalidSyntaxError("Expected Identifier or ','", current_token.GetStart().value(), current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected Identifier or ','", current_token.GetStart(), current_token.GetEnd());
 		}
 	}
 
 	if (!current_token.isToken(TypeToken::SCOPEEND)) {
-		throw InvalidSyntaxError("Expected '}'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '}'", current_token.GetStart(), current_token.GetEnd());
 	}
 	advance();
 
-	return EnumNode(name,enumsKeys,start,current_token.GetEnd().value());
+	return EnumNode(name,enumsKeys,start,current_token.GetEnd());
 }
 
 // Grammer: KEYWORD:while expr SCOPESTART expr SCOPEEND
 any Parser::whileExpr()
 {
-	
+	Position start(current_token.GetStart());
 	if(!current_token.matches(TypeToken::KEYWORD,"while")){
-		throw InvalidSyntaxError("Expected 'while'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected 'while'", current_token.GetStart(), current_token.GetEnd());
 	}
 
 	advance();
@@ -542,7 +514,7 @@ any Parser::whileExpr()
 	any condition = this->expr();
 
 	if (!current_token.isToken(TypeToken::SCOPESTART)) {
-		throw InvalidSyntaxError("Expected '{'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '{'", current_token.GetStart(), current_token.GetEnd());
 	}
 
 	advance();
@@ -550,12 +522,12 @@ any Parser::whileExpr()
 	any body = this->statements();
 
 	if (!current_token.isToken(TypeToken::SCOPEEND)) {
-		throw InvalidSyntaxError("Expected '{'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '{'", current_token.GetStart(), current_token.GetEnd());
 	}
 
 	advance();
 
-	return WhileNode(condition,body);
+	return WhileNode(condition,body,start,current_token.GetEnd());
 }
 
 /*
@@ -563,8 +535,9 @@ any Parser::whileExpr()
 */
 any Parser::funcDef()
 {
+	Position start(current_token.GetStart());
 	if (!current_token.matches(TypeToken::KEYWORD, "fn")) {
-		throw InvalidSyntaxError("Expected 'fn'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected 'fn'", current_token.GetStart(), current_token.GetEnd());
 	}
 	advance();
 	optional<Token> var_name = nullopt;
@@ -572,12 +545,12 @@ any Parser::funcDef()
 		var_name = current_token;
 		advance();
 		if (!current_token.isToken(TypeToken::LPAREN)) {
-			throw InvalidSyntaxError("Expected '('", current_token.GetStart().value(), current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected '('", current_token.GetStart(), current_token.GetEnd());
 		}
 	}
 	else {
 		if (!current_token.isToken(TypeToken::LPAREN)) {
-			throw InvalidSyntaxError("Expected identifier or '('", current_token.GetStart().value(), current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected identifier or '('", current_token.GetStart(), current_token.GetEnd());
 		}
 	}
 
@@ -591,25 +564,25 @@ any Parser::funcDef()
 		while (current_token.isToken(TypeToken::COMMA)){
 			advance();
 			if (!current_token.isToken(TypeToken::IDENTIFIER)) {
-				throw InvalidSyntaxError("Expected identifier", current_token.GetStart().value(), current_token.GetEnd().value());
+				throw InvalidSyntaxError("Expected identifier", current_token.GetStart(), current_token.GetEnd());
 			}
 			arg_names.push_back(current_token);
 			advance();
 		}
 		if (!current_token.isToken(TypeToken::RPAREN)) {
-			throw InvalidSyntaxError("Expected ',' or ')'", current_token.GetStart().value(), current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected ',' or ')'", current_token.GetStart(), current_token.GetEnd());
 		}
 	}
 	else {
 		if (!current_token.isToken(TypeToken::RPAREN)) {
-			throw InvalidSyntaxError("Expected identifier or ')'", current_token.GetStart().value(), current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected identifier or ')'", current_token.GetStart(), current_token.GetEnd());
 		}
 	}
 
 	advance();
 
 	if (!current_token.isToken(TypeToken::SCOPESTART)) {
-		throw InvalidSyntaxError("Expected '{'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '{'", current_token.GetStart(), current_token.GetEnd());
 	}
 
 	advance();
@@ -617,21 +590,21 @@ any Parser::funcDef()
 	any return_node = this->statements();
 
 	if (!current_token.isToken(TypeToken::SCOPEEND)) {
-		throw InvalidSyntaxError("Expected '{'", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '{'", current_token.GetStart(), current_token.GetEnd());
 	}
 
 	advance();
 
-	return FuncDefNode(var_name,arg_names,return_node);
+	return FuncDefNode(var_name,arg_names,return_node,start,current_token.GetEnd());
 }
 
 any Parser::listExpr()
 {
 	vector<any> nodes;
-	Position start(current_token.GetStart().value());
+	Position start(current_token.GetStart());
 
 	if (!current_token.isToken(TypeToken::LBRACKET)) {
-		throw InvalidSyntaxError("Expected '['", current_token.GetStart().value(), current_token.GetEnd().value());
+		throw InvalidSyntaxError("Expected '['", current_token.GetStart(), current_token.GetEnd());
 	}
 	advance();
 
@@ -643,20 +616,248 @@ any Parser::listExpr()
 			nodes.push_back(this->expr());
 		}
 		catch (InvalidSyntaxError) {
-			throw InvalidSyntaxError("Expected ']' 'let', 'if', 'for', 'while', 'fn', int, float, identifier", current_token.GetStart().value(), current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected ']' 'let', 'if', 'for', 'while', 'fn', int, float, identifier", current_token.GetStart(), current_token.GetEnd());
 		}
 		while (current_token.isToken(TypeToken::COMMA)) {
 			advance();
 			nodes.push_back(this->expr());
 		}
 		if (!current_token.isToken(TypeToken::RBRACKET)) {
-			throw InvalidSyntaxError("Expected identifier or ']'", current_token.GetStart().value(), current_token.GetEnd().value());
+			throw InvalidSyntaxError("Expected identifier or ']'", current_token.GetStart(), current_token.GetEnd());
 		}
 		advance();
 	}
 
 
-	return ListNode(nodes,start,current_token.GetEnd().value());
+	return ListNode(nodes,start,current_token.GetEnd());
+}
+
+/*
+Gammer: KEYWORD:namespace IDENTIFER SCOPESTART (statements) SCOPEEND ENDSTATMENT
+
+*/
+any Parser::namespaceDef()
+{
+	Position start(current_token.GetStart());
+	if (!current_token.matchesKeyWord("namespace")) {
+		throw InvalidSyntaxError("Expected keyworld 'namespace'", current_token.GetStart(), current_token.GetEnd());
+	}
+	advance();
+
+	if (!current_token.isToken(TypeToken::IDENTIFIER)) {
+		throw InvalidSyntaxError("Expected identifier", current_token.GetStart(), current_token.GetEnd());
+	}
+	Token name = current_token;
+	
+	advance();
+
+	if (!current_token.isToken(TypeToken::SCOPESTART)) {
+		throw InvalidSyntaxError("Expected '{'", current_token.GetStart(), current_token.GetEnd());
+	}
+	advance();
+
+	any body = this->statements();
+
+	if (!current_token.isToken(TypeToken::SCOPEEND)) {
+		throw InvalidSyntaxError("Expected '}'", current_token.GetStart(), current_token.GetEnd());
+	}
+
+	advance();
+
+
+
+	return NamespaceNode(name,body,start,current_token.GetEnd());
+}
+
+any Parser::importDef()
+{
+	Position start(current_token.GetStart());
+	if (!current_token.matchesKeyWord("import")) {
+		throw InvalidSyntaxError("Expected keyworld 'import'", current_token.GetStart(), current_token.GetEnd());
+	}
+	advance();
+
+	if (!current_token.isToken(TypeToken::STRING)) {
+		throw InvalidSyntaxError("Expected string", current_token.GetStart(), current_token.GetEnd());
+	}
+	string path = current_token.GetValue().value();
+
+	advance();
+
+	if (!current_token.isToken(TypeToken::ENDSTATEMENT)) {
+		throw InvalidSyntaxError("Expected ';'", current_token.GetStart(), current_token.GetEnd());
+	}
+
+	advance();
+
+	return ImportNode(path, start, current_token.GetEnd());
+
+}
+
+/*
+
+KEYWORLD:match expr SCOPESTART ((EnumValue|Integer|String|Float|IDENTIFIER:_) FATARROW (expr|SCOPESTART statments SCOPEEND) (COMMA)?)* SCOPEEND;
+
+
+
+*/
+any Parser::matchExpr()
+{
+	Position start(current_token.GetStart());
+	if (!current_token.matchesKeyWord("match")) {
+		throw InvalidSyntaxError("Expected keyworld 'match'", current_token.GetStart(), current_token.GetEnd());
+	}
+	advance();
+
+	any expr = this->expr();
+
+	
+	if (!current_token.isToken(TypeToken::SCOPESTART)) {
+		throw InvalidSyntaxError("Expected '{'", current_token.GetStart(), current_token.GetEnd());
+	}
+	advance();
+
+	vector<MatchExpr> matches;
+
+	while (!current_token.isToken(TypeToken::SCOPEEND))
+	{
+		if (current_token.isToken(TypeToken::NEWLINE)) {
+			advance();
+			continue;
+		}
+		matches.push_back(makeMatchExpr());
+
+		
+		if (current_token.isToken(TypeToken::COMMA)) {
+			advance();
+		}
+			
+
+	}
+
+	while (current_token.isToken(TypeToken::NEWLINE)) {
+		advance();
+	}
+
+	if (!current_token.isToken(TypeToken::SCOPEEND)) {
+		throw InvalidSyntaxError("Expected '}'", current_token.GetStart(), current_token.GetEnd());
+	}
+	advance();
+
+
+	return MatchNode(expr, matches, start, current_token.GetEnd());
+
+}
+/*
+
+ IDENTIFER | (IDENTIFER LBRACKET expr RBRACKET) | (IDENTIFER PATHSEP IDENTIFER (PATHSEP IDENTIFER)* ) 
+
+ IDENTIFER (PLUS_EQ|MINUS_EQ|DIV_EQ|MUL_EQ|EQ) expr
+ 
+ 
+ */
+any Parser::Identifer(bool checkEQ)
+{
+	Token tok = current_token;
+	Position start(tok.GetStart());
+	advance();
+
+	if (checkEQ && current_token.isToken(TypeToken::LBRACKET)) {
+		advance();
+
+		any index = this->expr();
+
+		if (!current_token.isToken(TypeToken::RBRACKET)) {
+			throw InvalidSyntaxError("Expected ']'", current_token.GetStart(), current_token.GetEnd());
+		}
+		advance();
+
+		return ListAccessNode(tok, index, start, current_token.GetEnd());
+
+	}
+	else if (current_token.isToken(TypeToken::PATHSEP)) {
+		vector<Token> path;
+		path.push_back(tok);
+
+		while (current_token.isToken(TypeToken::PATHSEP))
+		{
+			advance();
+			if (!current_token.isToken(TypeToken::IDENTIFIER)) {
+				throw InvalidSyntaxError("Expected IDENTIFIER", current_token.GetStart(), current_token.GetEnd());
+			}
+			path.push_back(current_token);
+			advance();
+		}
+
+		//advance();
+
+		return PathAccessNode(path, start, current_token.GetEnd());
+	}
+	else if (checkEQ && (current_token.isToken(TypeToken::PLUS_EQ) || current_token.isToken(TypeToken::MINUS_EQ) || current_token.isToken(TypeToken::MUL_EQ) || current_token.isToken(TypeToken::DIV_EQ) || current_token.isToken(TypeToken::EQ))) {
+		Token op = current_token;
+		advance();
+
+		any value = this->expr();
+
+		return VarReasignNode(tok, op, value, start, current_token.GetEnd());
+
+	}
+
+	return VarAccessNode(tok, start, tok.GetEnd());
+}
+
+/*
+
+	(EnumValue|Integer|String|Float|IDENTIFIER:_) FATARROW (expr|SCOPESTART statments SCOPEEND) (COMMA)?
+
+*/
+MatchExpr Parser::makeMatchExpr()
+{
+	Position start(current_token.GetStart());
+	any checkValue;
+	if (current_token.isToken(TypeToken::INT) || current_token.isToken(TypeToken::FLOAT)) {
+		checkValue = NumberNode(current_token, start, current_token.GetEnd());
+		advance();
+	}
+	else if (current_token.isToken(TypeToken::STRING)) {
+		checkValue = StringNode(current_token, start, current_token.GetEnd());
+		advance();
+	}
+	else if (current_token.isToken(TypeToken::IDENTIFIER)) {
+		if (current_token.matches(TypeToken::IDENTIFIER, "_")) {
+			checkValue = MatchCatchAll {};
+			advance();
+		}
+		else {
+			checkValue = Identifer(false);
+		}
+	}
+	else {
+		throw InvalidSyntaxError("Expected INT|FLOAT|STRING|ENUM or '_' ", current_token.GetStart(), current_token.GetEnd());
+	}
+
+	//advance();
+
+	if (!current_token.isToken(TypeToken::FATARROW)) {
+		throw InvalidSyntaxError("Expected '=>'", current_token.GetStart(), current_token.GetEnd());
+	}
+	advance();
+
+	any body;
+	bool scoped = false;
+	if (current_token.isToken(TypeToken::SCOPESTART)) {
+		advance();
+		scoped = true;
+		body = this->statements();
+		if (!current_token.isToken(TypeToken::SCOPEEND)) {
+			throw InvalidSyntaxError("Expected '}'", current_token.GetStart(), current_token.GetEnd());
+		}
+		advance();
+	}else{
+		body = this->statement();
+	}
+
+	return MatchExpr{ checkValue, body, scoped };
 }
 
 

@@ -18,3 +18,6 @@
 #include "EnumNode.h"
 #include "PathAccessNode.h"
 #include "VarReasignNode.h"
+#include "NamespaceNode.h"
+#include "ImportNode.h"
+#include "MatchNode.h"

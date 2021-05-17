@@ -5,7 +5,7 @@
 
 class StringNode : public Node {
 	public:
-		StringNode(Token token);
+		StringNode(Token token, Position start, Position end);
 		Token GetToken() const;
 		friend std::ostream& operator<<(std::ostream& lhs, const StringNode& token);
 	private:

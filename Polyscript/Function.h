@@ -6,7 +6,7 @@ using namespace std;
 class Function: public BaseFunction
 {
 	public:
-		Function(any body_node, vector<string> arg_names, string name = "<anonymous>");
+		Function(any body_node, vector<string> arg_names, Position start, Position end, string name = "<anonymous>");
 		virtual any exceute(vector<any> args) override;
 	private:
 		any body_node;
