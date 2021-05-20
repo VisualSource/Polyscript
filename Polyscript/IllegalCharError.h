@@ -2,6 +2,6 @@
 #include "PolyscriptError.h"
 class IllegalCharError : public PolyscriptError {
 	public:
-		IllegalCharError(string details, Position start, Position end);
+		IllegalCharError(std::string details, Position start, Position end);
 };
 

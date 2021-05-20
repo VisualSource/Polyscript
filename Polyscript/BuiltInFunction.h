@@ -1,15 +1,12 @@
 #pragma once
 #include "BaseFunction.h"
 
-using namespace std;
-
-
 class BuiltInFunction : public BaseFunction {
 	public:
-		BuiltInFunction(string name, vector<string> args_names);
-		virtual any exceute(vector<any> args) override;
+		BuiltInFunction(std::string name, std::vector<std::string> args_names);
+		virtual std::any exceute(std::vector<std::any> args) override;
 	private:
-		vector<string> args_names;
+		std::vector<std::string> args_names;
 		
 };
 

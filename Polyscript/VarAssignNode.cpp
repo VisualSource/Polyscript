@@ -1,6 +1,8 @@
 #include "VarAssignNode.h"
 #include "NodeUtils.h"
 
+using namespace std;
+
 VarAssignNode::VarAssignNode(Token var_token, any node, Position start, Position end, optional<Token> varType): Node(start,end), var_token(var_token), node(node)
 {
 	if (varType.has_value()) {

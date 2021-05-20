@@ -1,6 +1,8 @@
 #include "EnumValue.h"
 #include "Integer.h"
 
+using namespace std;
+
 Integer EnumValue::cast(const EnumValue& value)
 {
     return Integer(value.value).SetContext(value.GetContext()).SetPostion(value.GetStart(),value.GetEnd());

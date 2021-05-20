@@ -4,12 +4,10 @@
 #include "Token.h"
 #include "Position.h"
 
-using namespace std;
-
 class Lexer {
 	public:
-		Lexer(string text, string fn);
-		vector<Token> makeTokens();
+		Lexer(std::string text, std::string fn);
+		std::vector<Token> makeTokens();
 	private:
 		void advance();
 		Token makeNumber();
@@ -23,8 +21,8 @@ class Lexer {
 		Token MakeMinusORRArrow();
 		Token makeString();
 		void MakeComment();
-		string text;
-		string fn;
+		std::string text;
+		std::string fn;
 		Position pos;
 		char current_char = '\0';
 };

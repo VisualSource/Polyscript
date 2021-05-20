@@ -1,9 +1,6 @@
 #pragma once
 #include "Variable.h"
 
-
-using namespace std;
-
 class Integer;
 class String;
 

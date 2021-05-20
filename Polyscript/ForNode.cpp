@@ -1,6 +1,8 @@
 #include "ForNode.h"
 #include "NodeUtils.h"
 
+using namespace std;
+
 /*
 	FOR expr TO expr (STEP expr)? { expr }
 */

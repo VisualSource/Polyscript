@@ -9,10 +9,10 @@ String String::cast(const Float& value)
 
 String String::cast(const Integer& value)
 {
-    return String(to_string(value.GetValue())).SetContext(value.GetContext());
+    return String(std::to_string(value.GetValue())).SetContext(value.GetContext());
 }
 
-String::String(string value): value(value)
+String::String(std::string value): value(value)
 {
 }
 
@@ -29,7 +29,7 @@ String& String::SetPostion(Position start, Position end)
     return *this;
 }
 
-string String::GetValue() const
+std::string String::GetValue() const
 {
     return value;
 }
@@ -49,7 +49,7 @@ Integer String::operator!=(const String& rhs) const
     return Integer((int)(this->value != rhs.value)).SetContext(context).PrintBool(true);
 }
 
-ostream& operator<<(ostream& lhs, const String& rhs)
+std::ostream& operator<<(std::ostream& lhs, const String& rhs)
 {
     lhs << "\x1B[92m \"" << rhs.value << "\"\033[0m";
     return lhs;

@@ -4,9 +4,9 @@
 
 class ImportNode : public Node {
 	public:
-		ImportNode(string path,Position start, Position end);
-		string GetPath() const;
+		ImportNode(std::string path,Position start, Position end);
+		std::string GetPath() const;
 	private:
-		string path;
+		std::string path;
 };
 

@@ -1,5 +1,7 @@
 #include "NamespaceNode.h"
 
+using namespace std;
+
 NamespaceNode::NamespaceNode(Token name, any statements, Position start, Position end): Node(start,end),name(name), statements(statements)
 {
 }

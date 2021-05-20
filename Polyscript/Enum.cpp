@@ -2,6 +2,8 @@
 #include "EnumValue.h"
 #include "RuntimeError.h"
 
+using namespace std;
+
 
 Enum::Enum(const vector<Token>& keys, string name): name(name)
 {

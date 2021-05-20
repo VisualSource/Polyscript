@@ -115,6 +115,15 @@
     <Filter Include="Source Files\interperter\types\enum">
       <UniqueIdentifier>{7e0c71de-a19a-48e5-8241-515957f02bd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\lib">
+      <UniqueIdentifier>{557a9cfa-510c-4706-9722-54db617d0e8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\lib">
+      <UniqueIdentifier>{4e94a364-ae2f-48f6-b7eb-78e75f877c48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\shared\symbols">
+      <UniqueIdentifier>{0b1c676c-45dc-4965-b0c4-360df96622c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Polyscript.cpp">
@@ -270,6 +279,18 @@
     <ClCompile Include="MatchNode.cpp">
       <Filter>Source Files\nodes\func</Filter>
     </ClCompile>
+    <ClCompile Include="fetch.cpp">
+      <Filter>Source Files\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Source Files\interperter\types</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectNode.cpp">
+      <Filter>Source Files\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="DotAccessNode.cpp">
+      <Filter>Source Files\nodes\varible</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lexer.h">
@@ -309,9 +330,6 @@
       <Filter>Header Files\errors</Filter>
     </ClInclude>
     <ClInclude Include="Context.h">
-      <Filter>Header Files\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="SymbolTable.h">
       <Filter>Header Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="ExpectedCharError.h">
@@ -428,6 +446,27 @@
     <ClInclude Include="Null.h">
       <Filter>Header Files\interperter\types</Filter>
     </ClInclude>
+    <ClInclude Include="fetch.h">
+      <Filter>Header Files\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectNode.h">
+      <Filter>Header Files\nodes\types</Filter>
+    </ClInclude>
+    <ClInclude Include="SymbolTable.h">
+      <Filter>Header Files\shared\symbols</Filter>
+    </ClInclude>
+    <ClInclude Include="SymbolTableUtils.h">
+      <Filter>Header Files\shared\symbols</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Header Files\interperter\types</Filter>
+    </ClInclude>
+    <ClInclude Include="DotAccessNode.h">
+      <Filter>Header Files\nodes\variable</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.ps">
@@ -436,10 +475,26 @@
     <None Include="std.ps">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="ico1.bin">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt">
       <Filter>Resource Files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Version.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\Users\Collin\Downloads\icons8-script-listener-96.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

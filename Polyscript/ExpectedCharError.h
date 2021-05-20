@@ -2,6 +2,6 @@
 #include "PolyscriptError.h"
 class ExpectedCharError : public PolyscriptError {
 	public:
-		ExpectedCharError(string details, Position start, Position end);
+		ExpectedCharError(std::string details, Position start, Position end);
 };
 

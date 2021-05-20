@@ -1,15 +1,13 @@
 #pragma once
 #include "BaseFunction.h"
 
-using namespace std;
-
 class Function: public BaseFunction
 {
 	public:
-		Function(any body_node, vector<string> arg_names, Position start, Position end, string name = "<anonymous>");
-		virtual any exceute(vector<any> args) override;
+		Function(std::any body_node, std::vector<std::string> arg_names, Position start, Position end, std::string name = "<anonymous>");
+		virtual std::any exceute(std::vector<std::any> args) override;
 	private:
-		any body_node;
-		vector<string> arg_names;
+		std::any body_node;
+		std::vector<std::string> arg_names;
 };
 

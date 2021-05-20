@@ -6,6 +6,16 @@
 #include "String.h"
 #include "EnumValue.h"
 
+Integer Integer::True()
+{
+	return Integer(1).PrintBool(true);
+}
+
+Integer Integer::False()
+{
+	return Integer(0).PrintBool(true);
+}
+
 Integer Integer::cast(const Float& value)
 {
 	return Integer((int)value.GetValue()).SetContext(value.GetContext());
@@ -75,6 +85,11 @@ Integer Integer::operator!() const
 		return Integer(1).SetContext(context).PrintBool(true);
 	}
 	return Integer(0).SetContext(context).PrintBool(true);
+}
+
+Integer::operator bool()
+{
+	return (bool)(this->value);
 }
 
 std::ostream& operator<<(std::ostream& lhs, const Integer& other) {

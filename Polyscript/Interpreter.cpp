@@ -9,6 +9,10 @@
 #include "Nodes.h"
 #include "Lexer.h"
 #include "Parser.h"
+#include "fetch.h"
+
+
+using namespace std;
 
 Interpreter::Interpreter() {
 }
@@ -80,7 +84,12 @@ any Interpreter::visit(const any& node, Context* context) {
 	else if (isNode<MatchNode>(node)) {
 		return visit_MatchNode(any_cast<MatchNode>(node), context);
 	}
-
+	else if (isNode<ObjectNode>(node)) {
+		return visit_ObjectNode(any_cast<ObjectNode>(node), context);
+	}
+	else if (isNode<DotAccessNode>(node)) {
+		return visit_DotAccessNode(any_cast<DotAccessNode>(node),context);
+	}
 	else {
 		throw PolyscriptError("Undefined Operation", "No Visit Method for: " + string(node.type().name()), Position(), Position());
 	}
@@ -205,6 +214,9 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 			else if (isTypeOf<EnumValue>(left) && isTypeOf<EnumValue>(right)) {
 				return any_cast<EnumValue>(left) == any_cast<EnumValue>(right);
 			}
+			else if (isTypeOf<Object>(left) && isTypeOf<Object>(right)) {
+				return Integer::False().SetContext(context);
+			}
 			else {
 				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart(), node.GetOpToken().GetEnd());
 			}
@@ -221,6 +233,9 @@ any Interpreter::visit_BinOpNode(const BinOpNode& node, Context* context) {
 			}
 			else if (isTypeOf<EnumValue>(left) && isTypeOf<EnumValue>(right)) {
 				return any_cast<EnumValue>(left) != any_cast<EnumValue>(right);
+			}
+			else if (isTypeOf<Object>(left) && isTypeOf<Object>(right)) {
+				return Integer::True().SetContext(context);
 			}
 			else {
 				throw RuntimeError("Invaild Operation", context, node.GetOpToken().GetStart(), node.GetOpToken().GetEnd());
@@ -403,6 +418,11 @@ any Interpreter::visit_VarAccessNode(const VarAccessNode& node, Context* context
 		return *isNull;
 	}
 
+	auto* isObject = std::get_if<Object>(&value);
+	if (isObject != nullptr) {
+		return *isObject;
+	}
+
 	throw RuntimeError("Failed to access variable", context,node.GetStart(),node.GetEnd());
 }
 
@@ -471,6 +491,9 @@ any Interpreter::visit_VarAssignNode(const VarAssignNode& node, Context* context
 	else if (isTypeOf<Null>(value)) {
 		context->GetScope()->add(var_name, any_cast<Null>(value), context);
 	}
+	else if (isTypeOf<Object>(value)) {
+		context->GetScope()->add(var_name, any_cast<Object>(value), context);
+	}
 	else {
 		throw RuntimeError("Can't create varable of give type", context, node.GetStart(), node.GetEnd());
 	}
@@ -517,6 +540,10 @@ any Interpreter::visit_VarReasignNode(const VarReasignNode& node, Context* conte
 				}
 				else if (isTypeOf<Null>(expr)) {
 					context->GetScope()->set(var, any_cast<Null>(expr), context);
+					break;
+				}
+				else if (isTypeOf<Object>(expr)) {
+					context->GetScope()->set(var, any_cast<Object>(expr), context);
 					break;
 				}
 
@@ -956,19 +983,27 @@ any Interpreter::visit_NamespaceNode(const NamespaceNode& node, Context* context
 any Interpreter::visit_ImportNode(const ImportNode& node, Context* context)
 {
 	string file = node.GetPath();
-	std::ifstream reader(file);
-	if (!reader.is_open()) throw RuntimeError("Failed to open import: " + file ,context,node.GetStart(),node.GetEnd());
-	std::string text((std::istreambuf_iterator<char>(reader)), (std::istreambuf_iterator<char>()));
-	reader.close();
+	string text;
+	//https://raw.githubusercontent.com/VisualSource/Polyscript/master/Polyscript/std.ps?token=AKIUJD5ON2SBT5KWPY3N6BDAUQW7U
+	// do a std libary import check here
+	if (file.find("https://",0,8) != string::npos) {
+
+		httplib::Result res = fetch::Get(file,context);
+
+		text = res->body;
+	}
+	else {
+		std::ifstream reader(file);
+		if (!reader.is_open()) throw RuntimeError("Failed to open import: " + file, context, node.GetStart(), node.GetEnd());
+		text = string((std::istreambuf_iterator<char>(reader)), (std::istreambuf_iterator<char>()));
+		reader.close();
+	}
 
 	Lexer lexer(text, file);
 	Parser parser(lexer.makeTokens());
 	
 	return visit(parser.parse(),context);
 }
-
-
-
 
 any Interpreter::visit_MatchNode(const MatchNode& node, Context* context)
 {
@@ -1023,14 +1058,14 @@ any Interpreter::visit_MatchNode(const MatchNode& node, Context* context)
 						delete matchScope;
 						delete ctx;
 					}
-					return Null();
+					return Null().SetPostion(node.GetStart(), node.GetEnd());;
 				}
 				catch (ContinueEvent) {
 					if (matches.at(index).scoped) {
 						delete matchScope;
 						delete ctx;
 					}
-					return Null();
+					return Null().SetPostion(node.GetStart(), node.GetEnd());;
 				}
 				index++;
 			}
@@ -1083,14 +1118,14 @@ any Interpreter::visit_MatchNode(const MatchNode& node, Context* context)
 						delete matchScope;
 						delete ctx;
 					}
-					return Null();
+					return Null().SetPostion(node.GetStart(), node.GetEnd());;
 				}
 				catch (ContinueEvent) {
 					if (matches.at(index).scoped) {
 						delete matchScope;
 						delete ctx;
 					}
-					return Null();
+					return Null().SetPostion(node.GetStart(), node.GetEnd());;
 				}
 				index++;
 			}
@@ -1142,14 +1177,14 @@ any Interpreter::visit_MatchNode(const MatchNode& node, Context* context)
 						delete matchScope;
 						delete ctx;
 					}
-					return Null();
+					return Null().SetPostion(node.GetStart(), node.GetEnd());;
 				}
 				catch(ContinueEvent){
 					if (matches.at(index).scoped) {
 						delete matchScope;
 						delete ctx;
 					}
-					return Null();
+					return Null().SetPostion(node.GetStart(), node.GetEnd());;
 				}
 				index++;
 			}
@@ -1226,6 +1261,46 @@ any Interpreter::visit_MatchNode(const MatchNode& node, Context* context)
 
 
 	return Null();
+}
+
+std::any Interpreter::visit_ObjectNode(const ObjectNode& node, Context* context)
+{
+	vector<ObjectProperties> props;
+
+	for (auto prop : node.GetValues()) {
+		props.push_back(ObjectProperties { prop.name.GetValue().value(), visit(prop.expr,context) });
+	}
+
+	return Object(props,context).SetPostion(node.GetStart(), node.GetEnd());
+}
+
+
+static any DotPathResution(Object obj, Context* ctx, const vector<string> path, int index) {
+
+	any value = obj.GetValue(path.at(index));
+
+	if (InterTypes::isTypeOf<Object>(value)) {
+		return DotPathResution(any_cast<Object>(value), ctx, path, index + 1);
+	}
+
+	return value;
+
+}
+
+std::any Interpreter::visit_DotAccessNode(const DotAccessNode& node, Context* context)
+{
+	try {
+		vector<string> path = node.GetAccessPath();
+		Object owner = get<Object>(context->GetScope()->get(path.at(0), context));
+		return DotPathResution(owner, context, path, 1);
+	}
+	catch (const std::bad_variant_access&)
+	{
+		throw RuntimeError("Identfier does not point to a Object", context, node.GetStart(), node.GetEnd());
+	}
+
+
+	return Null().SetContext(context).SetPostion(node.GetStart(),node.GetEnd());
 }
 
 FunctionReturn::FunctionReturn(any value): value(value)

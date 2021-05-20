@@ -2,8 +2,9 @@
 #include "Nodes.h"
 #include "Position.h"
 
+using namespace std;
 
-ostream& NodeUtils::printNode(std::ostream& lhs, const any& node) {
+std::ostream& NodeUtils::printNode(std::ostream& lhs, const std::any& node) {
 	using NodeUtils::isNode;
 	if (isNode<NumberNode>(node)) {
 		lhs << any_cast<NumberNode>(node);

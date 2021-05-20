@@ -1,5 +1,7 @@
 #include "MatchNode.h"
 
+using namespace std;
+
 MatchNode::MatchNode(any expr, const vector<MatchExpr>& matches, const Position& start, const Position& end): Node(start,end), expr(expr), matches(matches)
 {
 }

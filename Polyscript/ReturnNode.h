@@ -2,14 +2,11 @@
 #include "Node.h"
 #include <any>
 
-using namespace std;
-
-
 class ReturnNode : public Node {
 	public:
-		ReturnNode(any return_value, Position start, Position end);
-		any GetReturnValue() const;
+		ReturnNode(std::any return_value, Position start, Position end);
+		std::any GetReturnValue() const;
 	private:
-		any return_value;
+		std::any return_value;
 };
 

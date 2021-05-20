@@ -2,13 +2,11 @@
 #include <any>
 #include <ostream>
 
-using namespace std;
-
 namespace InterTypes {
 
 	template<typename T>
-	bool isTypeOf(const any& node) {
+	bool isTypeOf(const std::any& node) {
 		return node.type() == typeid(T);
 	};
-	void print(ostream& rhs, const any& node);
+	void print(std::ostream& rhs, const std::any& node);
 }

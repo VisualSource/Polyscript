@@ -4,6 +4,9 @@
 #include "IllegalCharError.h"
 #include "ExpectedCharError.h"
 
+
+using namespace std;
+
 static bool isKeyWorld(const string& key) {
 	if (key == "import" || key == "return" || key == "break" || key == "continue" || key == "namespace") {
 		return true;
@@ -155,6 +158,10 @@ vector<Token> Lexer::makeTokens() {
 		}
 		else if (current_char == ']') {
 			tokens.push_back(Token(TypeToken::RBRACKET, pos));
+			advance();
+		}
+		else if (current_char == '.') {
+			tokens.push_back(Token(TypeToken::DOT, pos));
 			advance();
 		}
 		else {

@@ -3,13 +3,11 @@
 #include <vector>
 #include "Node.h"
 
-using namespace std;
-
 class ListNode : public Node {
 	public:
-		ListNode(vector<any> elements, Position start, Position end);
-		vector<any> GetElements() const;
+		ListNode(std::vector<std::any> elements, Position start, Position end);
+		std::vector<std::any> GetElements() const;
 	private:
-		vector<any> elements;
+		std::vector<std::any> elements;
 };
 

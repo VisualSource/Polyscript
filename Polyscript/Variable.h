@@ -2,8 +2,6 @@
 #include <ostream>
 #include "Position.h"
 
-using namespace std;
-
 class Context;
 
 class Variable
@@ -14,7 +12,7 @@ class Variable
 		Context* GetContext() const;
 		virtual Variable& SetContext(Context* context) = 0;
 		virtual Variable& SetPostion(Position start, Position end) = 0;
-		friend ostream& operator<<(ostream& lhs, const Variable& rhs);
+		friend std::ostream& operator<<(std::ostream& lhs, const Variable& rhs);
 	protected:
 		Context* context = nullptr;
 		Position start;

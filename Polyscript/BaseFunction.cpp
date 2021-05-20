@@ -4,6 +4,8 @@
 #include "SymbolTable.h"
 #include "InterpreterUtils.h"
 
+using namespace std;
+
 BaseFunction::BaseFunction(string name): name(name)
 {
 }

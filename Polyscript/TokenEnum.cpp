@@ -1,6 +1,6 @@
 #include "TokenEnum.h"
 
-string TokenUtils::printTokenType(TypeToken token) {
+std::string TokenUtils::printTokenType(TypeToken token) {
 	switch (token) {
 		case TypeToken::DIV:
 			return "DIV";

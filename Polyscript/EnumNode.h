@@ -5,11 +5,11 @@
 
 class EnumNode : public Node {
 	public:
-		EnumNode(string name, const vector<Token>& values, Position start, Position end);
-		vector<Token> GetKeys() const;
-		string GetName() const { return name; };
+		EnumNode(std::string name, const std::vector<Token>& values, Position start, Position end);
+		std::vector<Token> GetKeys() const;
+		std::string GetName() const { return name; };
 	private:
-		string name = "";
-		vector<Token> keys;
+		std::string name = "";
+		std::vector<Token> keys;
 };
 

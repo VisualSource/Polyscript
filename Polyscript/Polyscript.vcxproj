@@ -72,9 +72,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -89,10 +93,13 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\SourceCode\Libraries\httplib\;C:\Program Files (x86)\OpenSSL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\OpenSSL\lib;C:\Program Files (x86)\OpenSSL\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>C:\Program Files (x86)\OpenSSL\lib\libssl.lib;C:\Program Files (x86)\OpenSSL\lib\libcrypto.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -104,12 +111,15 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\SourceCode\Libraries\httplib\;C:\Program Files (x86)\OpenSSL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\OpenSSL\lib;C:\Program Files (x86)\OpenSSL\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>C:\Program Files (x86)\OpenSSL\lib\libssl.lib;C:\Program Files (x86)\OpenSSL\lib\libcrypto.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -147,10 +157,12 @@
     <ClCompile Include="BuiltInFunction.cpp" />
     <ClCompile Include="Context.cpp" />
     <ClCompile Include="ContinueNode.cpp" />
+    <ClCompile Include="DotAccessNode.cpp" />
     <ClCompile Include="Enum.cpp" />
     <ClCompile Include="EnumNode.cpp" />
     <ClCompile Include="EnumValue.cpp" />
     <ClCompile Include="ExpectedCharError.cpp" />
+    <ClCompile Include="fetch.cpp" />
     <ClCompile Include="Float.cpp" />
     <ClCompile Include="ForNode.cpp" />
     <ClCompile Include="FuncCallNode.cpp" />
@@ -174,9 +186,16 @@
     <ClCompile Include="NodeUtils.cpp" />
     <ClCompile Include="Null.cpp" />
     <ClCompile Include="NumberNode.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ObjectNode.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="PathAccessNode.cpp" />
-    <ClCompile Include="Polyscript.cpp" />
+    <ClCompile Include="Polyscript.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\SourceCode\Libraries\httplib\;C:\SourceCode\Libraries\openssl-OpenSSL_1_1_1k\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\SourceCode\Libraries\httplib\;C:\SourceCode\Libraries\openssl-OpenSSL_1_1_1k\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp17</LanguageStandard>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp17</LanguageStandard>
+    </ClCompile>
     <ClCompile Include="PolyscriptError.cpp" />
     <ClCompile Include="Position.cpp" />
     <ClCompile Include="ReturnNode.cpp" />
@@ -200,10 +219,12 @@
     <ClInclude Include="BuiltInFunction.h" />
     <ClInclude Include="Context.h" />
     <ClInclude Include="ContinueNode.h" />
+    <ClInclude Include="DotAccessNode.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="EnumNode.h" />
     <ClInclude Include="EnumValue.h" />
     <ClInclude Include="ExpectedCharError.h" />
+    <ClInclude Include="fetch.h" />
     <ClInclude Include="Float.h" />
     <ClInclude Include="ForNode.h" />
     <ClInclude Include="FuncCallNode.h" />
@@ -228,15 +249,19 @@
     <ClInclude Include="NodeUtils.h" />
     <ClInclude Include="Null.h" />
     <ClInclude Include="NumberNode.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjectNode.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="PathAccessNode.h" />
     <ClInclude Include="PolyscriptError.h" />
     <ClInclude Include="Position.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="ReturnNode.h" />
     <ClInclude Include="RuntimeError.h" />
     <ClInclude Include="String.h" />
     <ClInclude Include="StringNode.h" />
     <ClInclude Include="SymbolTable.h" />
+    <ClInclude Include="SymbolTableUtils.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="TokenEnum.h" />
     <ClInclude Include="Types.h" />
@@ -248,13 +273,23 @@
     <ClInclude Include="WhileNode.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ico1.bin" />
     <None Include="std.ps" />
     <None Include="test.ps" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Version.rc" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc">
+    </ResourceCompile>
+  </ItemGroup>
 </Project>

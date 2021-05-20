@@ -19,6 +19,6 @@ Null& Null::SetPostion(Position start, Position end)
 
 std::ostream& operator<<(std::ostream& lhs, const Null& other)
 {
-	lhs << "\x1B[90mnull\033[0m" << endl;
+	lhs << "\x1B[90mnull\033[0m" << std::endl;
 	return lhs;
 }

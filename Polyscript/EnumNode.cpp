@@ -1,5 +1,7 @@
 #include "EnumNode.h"
 
+using namespace std;
+
 EnumNode::EnumNode(string name, const vector<Token>& values, Position start, Position end): Node(start,end), keys(values), name(name)
 {
 }

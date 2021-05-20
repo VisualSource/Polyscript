@@ -21,3 +21,5 @@
 #include "NamespaceNode.h"
 #include "ImportNode.h"
 #include "MatchNode.h"
+#include "ObjectNode.h"
+#include "DotAccessNode.h"

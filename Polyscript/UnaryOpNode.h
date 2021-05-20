@@ -5,12 +5,12 @@
 
 class UnaryOpNode: public Node {
 	public:
-		UnaryOpNode(Token op_tok, any node, Position start, Position end);
+		UnaryOpNode(Token op_tok, std::any node, Position start, Position end);
 		Token GetToken() const;
-		any GetNode() const;
+		std::any GetNode() const;
 		friend std::ostream& operator<<(std::ostream& lhs, const UnaryOpNode& token);
 	private:
 		Token op_tok;
-		any node;
+		std::any node;
 };
 

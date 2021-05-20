@@ -9,6 +9,8 @@
 #include "Integer.h"
 #include "NodeUtils.h"
 
+using namespace std;
+
 
 Function::Function(any body_node, vector<string> arg_names, Position start, Position end, string name): body_node(body_node), arg_names(arg_names), BaseFunction(name)
 {

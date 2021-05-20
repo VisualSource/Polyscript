@@ -1,5 +1,7 @@
 #include "PolyscriptError.h"
 
+using namespace std;
+
 PolyscriptError::PolyscriptError() {
     details = name = "";
     end = start = Position();

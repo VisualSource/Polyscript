@@ -2,16 +2,14 @@
 #include <any>
 #include "Node.h"
 
-using namespace std;
-
 class WhileNode: public Node
 {
 	public:
-		WhileNode(any conditon, any body, Position start, Position end);
-		any GetConditionNode() const;
-		any GetBodyNode() const;
+		WhileNode(std::any conditon, std::any body, Position start, Position end);
+		std::any GetConditionNode() const;
+		std::any GetBodyNode() const;
 	private:
-		any conditon_node;
-		any body_node;
+		std::any conditon_node;
+		std::any body_node;
 };
 

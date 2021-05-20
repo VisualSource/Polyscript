@@ -4,13 +4,11 @@
 #include "Node.h"
 #include "Token.h"
 
-using namespace std;
-
 class PathAccessNode : public Node {
 	public:
-		PathAccessNode(const vector<Token>& path, Position start, Position end);
-		vector<string> GetPath() const;
+		PathAccessNode(const std::vector<Token>& path, Position start, Position end);
+		std::vector<std::string> GetPath() const;
 	private:
-		vector<string> path;
+		std::vector<std::string> path;
 };
 

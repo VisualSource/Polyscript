@@ -5,18 +5,16 @@
 #include "Token.h"
 #include "Node.h"
 
-using namespace std;
-
 class FuncDefNode: public Node
 {
 	public:
-		FuncDefNode(optional<Token> var_name_token, const vector<Token>& arg_tokens, any body, Position start, Position end);
-		any GetBody() const;
-		optional<Token> GetName() const;
-		vector<Token> GetArgs() const;
+		FuncDefNode(std::optional<Token> var_name_token, const std::vector<Token>& arg_tokens, std::any body, Position start, Position end);
+		std::any GetBody() const;
+		std::optional<Token> GetName() const;
+		std::vector<Token> GetArgs() const;
 	private:
-		any body_node;
-		optional<Token> var_name;
-		vector<Token> arg_names;
+		std::any body_node;
+		std::optional<Token> var_name;
+		std::vector<Token> arg_names;
 };
 

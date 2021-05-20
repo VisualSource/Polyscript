@@ -1,6 +1,152 @@
+
+IN ORDER OF IMPLENATION
+
 - ++ and -- 
-- OBECT 
-- CLASS OBJECT
+- const varibles
 - casting
-- std libary
+- namespace augmention 
+- OBECT 
 - JSON PARSE and stringify
+- std libary
+	- sync fetch (http request)
+	- sync read file 
+	- sync write file
+- CLASS OBJECT
+
+
+
+#### BUILTIN (JSON) ###### 
+
+TYPE: OBJECT
+
+FUNCTION parse;
+	ARGUMENT: STRING
+
+FUNCTION stringify
+	ARGUMENT: ANY
+
+
+#### STD BULTIN (writeFile) ######
+
+FILE: fs.ps
+NAMESPACE: STD::FS
+RETURN: NULL
+
+ARGUMENTS:
+	path TYPE: STRING
+	opt  TYPE: OBJECT
+	cb   TYPE: FUNCTION
+
+#### STD BUILTIN (readFile) #######
+
+FILE: fs.ps
+NAMESPACE: STD::FS 
+
+RETURN: NULL 
+
+readFile(path, cb, opt );
+
+
+ARGUMENTS:
+	path TYPE: STRING
+	opt  TYPE: OBJECT
+	cb   TYPE: FUNCTION
+
+#### STD BUILTIN (fetch) ######
+
+FILE: http.ps
+NAMESPACE: STD::HTTP
+
+BASED on javascript fetch API SEE https://fetch.spec.whatwg.org/
+
+
+
+##### (++|--) OPERATORS ######
+
+GRAMMER: 
+
+	IDENTIFIER	(PLUS_PLUS|MINUS_MINUS)
+
+EXAMPLE: 
+	
+	variable++;
+
+	variable--;
+
+
+
+###### CASTING ######
+
+GRAMMER: 
+
+	LPRAM (KEYWORD:type) PPRAM (atom)
+
+EXAMPLE:
+	
+	(int)true;
+
+	(int)1.12;
+
+	(string)135
+
+
+###### OBJECT #######
+
+GRAMMER: 
+	SCOPESTART IDENTIFIER CONDITIONAL expr  (COMMA)?
+
+EXAMPLE:
+
+	{
+		IDENTIFIER: VALUE
+	}
+
+ACCESS: 
+	IDENTIFIER DOT call
+	
+
+##### CLASS OBJECT ####### 
+
+GRAMMER:
+	(KEYWORD:abstract)? KEYWORD:class IDENTIFIER (KEYWORD:extends IDENTIFIER (COMMA IDENTIFIER)?*))? SCOPESTART 
+	(KEYWORD:constructor call SCOPESTART statments SCOPEEND)?
+	((KEYWORD:(public|privite|protected))? IDENTIFIER call (SCOPESTART statments SCOPEEND)|(EQ INTEGER:0)? )?
+	((KEYWORD:(public|privite|protected))? IDENTIFIER (CONDINAL KEYWORD:(TYPE) ) EQ (atom))?
+	SCOPEEND
+
+EXAMPLE:
+	ABSTRACT CLASS:
+		abstract class Example {
+			privite name: string = "HELLO";
+			privite value = 1;
+			constructor(name: string, value: int){
+				self.name = name;
+				self.value = value;
+			}
+			public printName(){
+				
+			}
+			privite setName(str: string){
+				self.name = name;
+			}
+			protected setValue(v){
+				self.value = v;
+			}
+			protected printValues() = 0;
+		}
+	NORMAL CLASS:
+		class ExampleN {
+			constructor(){}
+		}
+	DIRIVIED CLASS:
+		public expampleValue = ENUM::VALUE;
+		class DExample extends Example, ExampleN {
+			constructor(name: string, value: int): Example(name,value), ExampleN() {
+				
+			}
+			protected printValues() {
+				
+			}
+ACCESS: 
+
+	IDENTIFIER DOT (call|IDENTIFIER)

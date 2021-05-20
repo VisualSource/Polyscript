@@ -1,6 +1,8 @@
 #include "IfNode.h"
 #include "NodeUtils.h"
 
+using namespace std;
+
 
 IfNode::IfNode(const vector<IfCases>& statments, optional<any> else_statment, Position start, Position end): Node(start,end), ifStatements(statments)
 {

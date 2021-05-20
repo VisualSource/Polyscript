@@ -29,7 +29,7 @@ Variable& Variable::SetPostion(Position start, Position end)
     return *this;
 }
 
-ostream& operator<<(ostream& lhs, const Variable& rhs)
+std::ostream& operator<<(std::ostream& lhs, const Variable& rhs)
 {
     lhs << "<object>";
     return lhs;

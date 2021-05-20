@@ -1,6 +1,8 @@
 #include "Namespace.h"
 #include "Context.h"
 
+using namespace std;
+
 Namespace::Namespace(string name,Context* ctx): nsctx(ctx), name(name)
 {
 }

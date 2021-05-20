@@ -1,8 +1,6 @@
 #pragma once
 #include <string>
 
-using namespace std;
-
 enum class TypeToken {
 	DIV, // '/' Division
 	MUL, // '*' Multiplication
@@ -44,9 +42,10 @@ enum class TypeToken {
 	DIV_EQ,
 	MUL_EQ,
 	PLUS_PLUS,
-	MINUS_MINUS
+	MINUS_MINUS,
+	DOT,
 };
 
 namespace TokenUtils {
-	string printTokenType(TypeToken token);
+	std::string printTokenType(TypeToken token);
 }

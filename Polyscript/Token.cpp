@@ -1,5 +1,7 @@
 #include "Token.h"
 
+using namespace std;
+
 Token::Token() {
 	value = nullopt;
 	type = TypeToken::T_UNDEFINED;

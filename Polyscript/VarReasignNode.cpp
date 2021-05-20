@@ -1,6 +1,6 @@
 #include "VarReasignNode.h"
 
-VarReasignNode::VarReasignNode(Token ident, Token op, any expr, Position start, Position end): Node(start,end), identifer(ident), opeartor(op), expr(expr)
+VarReasignNode::VarReasignNode(Token ident, Token op, std::any expr, Position start, Position end): Node(start,end), identifer(ident), opeartor(op), expr(expr)
 {
 }
 
@@ -14,7 +14,7 @@ Token VarReasignNode::GetOperationToken() const
 	return opeartor;
 }
 
-any VarReasignNode::GetExpr() const
+std::any VarReasignNode::GetExpr() const
 {
 	return expr;
 }

@@ -1,6 +1,8 @@
 #include "UnaryOpNode.h"
 #include "NodeUtils.h"
 
+using namespace std;
+
 std::ostream& operator<<(std::ostream& lhs, const UnaryOpNode& token) {
 
     lhs << "(" << token.GetToken() << ", ";

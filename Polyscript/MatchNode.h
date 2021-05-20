@@ -3,11 +3,9 @@
 #include <any>
 #include "Node.h"
 
-using namespace std;
-
 struct MatchExpr {
-	any checkValue;
-	any expr;
+	std::any checkValue;
+	std::any expr;
 	bool scoped;
 };
 
@@ -15,11 +13,11 @@ struct MatchCatchAll {};
 
 class MatchNode : public Node {
 	public:
-		MatchNode(any expr, const vector<MatchExpr>& matches, const Position& start, const Position& end);
-		any GetExpr() const;
-		vector<MatchExpr> GetMatches() const;
+		MatchNode(std::any expr, const std::vector<MatchExpr>& matches, const Position& start, const Position& end);
+		std::any GetExpr() const;
+		std::vector<MatchExpr> GetMatches() const;
 	private:
-		vector<MatchExpr> matches;
-		any expr;
+		std::vector<MatchExpr> matches;
+		std::any expr;
 };
 

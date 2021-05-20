@@ -1,13 +1,13 @@
 #pragma once
 #include "Variable.h"
 
-using namespace std;
-
 class Float;
 class String;
 
 class Integer: public Variable {
 	public:
+		static Integer True();
+		static Integer False();
 		static Integer cast(const Float& value);
 		static Integer cast(const String& value);
 		Integer(int value);
@@ -23,6 +23,7 @@ class Integer: public Variable {
 		Integer operator&&(const Integer& rhs) const;
 		Integer operator||(const Integer& rhs) const;
 		Integer operator!() const;
+		operator bool();
 		friend Integer operator<(const Integer& lhs, const Integer& rhs);
 		friend Integer operator>(const Integer& lhs, const Integer& rhs);
 		friend Integer operator<=(const Integer& lhs, const Integer& rhs);

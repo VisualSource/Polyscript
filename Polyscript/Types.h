@@ -9,3 +9,4 @@
 #include "Function.h"
 #include "Namespace.h"
 #include "Null.h"
+#include "Object.h"

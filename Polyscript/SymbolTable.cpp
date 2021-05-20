@@ -2,18 +2,14 @@
 #include "RuntimeError.h"
 #include "Context.h"
 
+using namespace std;
 using namespace ScopeTypes;
 
-struct ScopeTypes::Node {
-	string key;
-	ScopeTypes::Var value;
-	Node* next;
-};
-
-static ScopeTypes::NodePtr createNode(string key, Var value, NodePtr p){
+static ScopeTypes::NodePtr createNode(string key, Var value, NodePtr p, bool writable = true) {
 	
-	NodePtr n = new Node;
+	NodePtr n = new ScopeTypes::Node;
 
+	n->writable = writable;
 	n->key = key;
 	n->value = value;
 	n->next = p;
@@ -22,18 +18,18 @@ static ScopeTypes::NodePtr createNode(string key, Var value, NodePtr p){
 }
 
 SymbolTable::SymbolTable(){
-	this->head = createNode(HEAD_OF_LIST, monostate {}, nullptr);
+	this->head = createNode(HEAD_OF_LIST, Null(), nullptr);
 }
 
 SymbolTable::SymbolTable(string secKey, Var value) {
-	this->head = createNode(HEAD_OF_LIST, monostate{}, nullptr);
+	this->head = createNode(HEAD_OF_LIST, Null(), nullptr);
 	this->insert(secKey, value);
 }
 
 SymbolTable::SymbolTable(const SymbolTable& lhs)
 {
 	NodePtr npp = lhs.head->next;
-	this->head = createNode(HEAD_OF_LIST, monostate{}, nullptr);
+	this->head = createNode(HEAD_OF_LIST, Null(), nullptr);
 	while (npp != nullptr) {
 		this->insert(npp->key,npp->value);
 		npp = npp->next;
@@ -103,6 +99,7 @@ void SymbolTable::set(string key, Var value, Context* context)
 	NodePtr npc = head->next;
 	while (npc != nullptr) {
 		if (npc->key == key) {
+			if(!npc->writable) throw RuntimeError(key + " is a const", context, context->GetPostion(), context->GetPostion());
 			npc->value = value;
 			return;
 		}
@@ -159,44 +156,3 @@ void SymbolTable::remove(string key)
 	}
 }
 
-bool ScopeTypes::isInteger(const Var& value)
-{
-	auto* v = std::get_if<Integer>(&value);
-	return v != nullptr;
-}
-
-bool ScopeTypes::isFloat(const Var& value)
-{
-	auto* v = std::get_if<Float>(&value);
-	return v != nullptr;
-}
-
-bool ScopeTypes::isString(const Var& value)
-{
-	auto* v = std::get_if<String>(&value);
-	return v != nullptr;
-}
-
-bool ScopeTypes::isList(const Var& value)
-{
-	auto* v = std::get_if<List>(&value);
-	return v != nullptr;
-}
-
-bool ScopeTypes::isBuiltIn(const Var& value)
-{
-	auto* v = std::get_if<BuiltInFunction>(&value);
-	return v != nullptr;
-}
-
-bool ScopeTypes::isEnum(const Var& value)
-{
-	auto* v = std::get_if<Enum>(&value);
-	return v != nullptr;
-}
-
-bool ScopeTypes::isFunction(const Var& value)
-{
-	auto* v = std::get_if<Function>(&value);
-	return v != nullptr;
-}

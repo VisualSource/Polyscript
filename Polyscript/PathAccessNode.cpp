@@ -1,5 +1,7 @@
 #include "PathAccessNode.h"
 
+using namespace std;
+
 PathAccessNode::PathAccessNode(const vector<Token>& path, Position start, Position end) : Node(start,end)
 {
 	for (auto item : path) {

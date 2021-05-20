@@ -6,6 +6,7 @@
 #include "TokenEnum.h"
 #include "Token.h"
 
+using namespace std;
 
 Parser::Parser(vector<Token> tokens): tokens(tokens) {
 	tok_idx = -1;
@@ -110,6 +111,58 @@ any Parser::atom(){
 	else if (tok.isToken(TypeToken::IDENTIFIER)) {
 		return Identifer();
 	}
+	else if (tok.isToken(TypeToken::SCOPESTART)) {
+		advance();
+
+		/*
+		
+		{
+			IDENTIFER : expr ,
+		}
+		
+		*/
+		vector<ObjectNodeValue> objects;
+		while (!current_token.isToken(TypeToken::SCOPEEND))
+		{
+			if (current_token.isToken(TypeToken::NEWLINE)) {
+				advance();
+				continue;
+			}
+			else if (current_token.isToken(TypeToken::IDENTIFIER)) {
+				Token name = current_token;
+				advance();
+				if (!current_token.isToken(TypeToken::CONDITIONAL)) {
+					throw InvalidSyntaxError("Expected ':'", current_token.GetStart(), current_token.GetEnd());
+				}
+				advance();
+
+				any value = this->expr();
+
+				if(current_token.isToken(TypeToken::COMMA)){
+					advance();
+				}
+
+				objects.push_back(ObjectNodeValue {
+						name,
+						value
+				});
+			}
+			else {
+				throw InvalidSyntaxError("Expected a IDENTIFIER or ','", current_token.GetStart(), current_token.GetEnd());
+			}
+			
+			
+		}
+
+		if(!current_token.isToken(TypeToken::SCOPEEND)){
+			throw InvalidSyntaxError("Expected '}'", current_token.GetStart(), current_token.GetEnd());
+		}
+
+		advance();
+
+		return ObjectNode(objects,tok.GetStart(),current_token.GetEnd());
+
+	}
 	else if (tok.isToken(TypeToken::LPAREN)) {
 		advance();
 		any expr = this->expr();
@@ -123,16 +176,16 @@ any Parser::atom(){
 	else if (tok.isToken(TypeToken::LBRACKET)) {
 		return listExpr();
 	}
-	else if (tok.matches(TypeToken::KEYWORD,"if")){
+	else if (tok.matchesKeyWord("if")){
 		return exprIf();
 	}
-	else if (tok.matches(TypeToken::KEYWORD, "for")) {
+	else if (tok.matchesKeyWord("for")) {
 		return forExpr();
 	}
-	else if (tok.matches(TypeToken::KEYWORD, "while")) {
+	else if (tok.matchesKeyWord("while")) {
 		return whileExpr();
 	}
-	else if(tok.matches(TypeToken::KEYWORD,"fn")){
+	else if(tok.matchesKeyWord("fn")){
 		return funcDef();
 	}
 	else if (tok.matchesKeyWord("enum")) {
@@ -801,6 +854,22 @@ any Parser::Identifer(bool checkEQ)
 
 		return VarReasignNode(tok, op, value, start, current_token.GetEnd());
 
+	}
+	else if (current_token.isToken(TypeToken::DOT)) {
+		vector<string> path;
+		path.push_back(tok.GetValue().value());
+
+		while (current_token.isToken(TypeToken::DOT))
+		{
+			advance();
+			if (!current_token.isToken(TypeToken::IDENTIFIER)) {
+				throw InvalidSyntaxError("Expected IDENTIFIER", current_token.GetStart(), current_token.GetEnd());
+			}
+			path.push_back(current_token.GetValue().value());
+			advance();
+		}
+		
+		return DotAccessNode(path,tok.GetStart(),current_token.GetEnd());
 	}
 
 	return VarAccessNode(tok, start, tok.GetEnd());

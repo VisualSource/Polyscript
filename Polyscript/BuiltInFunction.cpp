@@ -8,6 +8,8 @@
 #include "InterpreterUtils.h"
 #include "Integer.h"
 
+using namespace std;
+
 BuiltInFunction::BuiltInFunction(string name, vector<string> args_names): BaseFunction(name), args_names(args_names)
 {
 }

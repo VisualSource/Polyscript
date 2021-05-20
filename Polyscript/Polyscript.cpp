@@ -15,10 +15,8 @@
 #include "NodeUtils.h"
 #include "BuiltInFunction.h"
 
-using namespace std;
-
-
-void run(string fn, string text, SymbolTable* scope, bool showTokens, bool fromFile) {
+void run(std::string fn, std::string text, SymbolTable* scope, bool showTokens, bool fromFile) {
+	using namespace std;
 	try {
 		Lexer lexer(text, fn);
 		vector<Token> tokens = lexer.makeTokens();
@@ -82,7 +80,7 @@ void run(string fn, string text, SymbolTable* scope, bool showTokens, bool fromF
 		cerr << "Unkown Runtime Error" << endl;
 	}
 }
-void read_run(string file, SymbolTable* scope, bool showTokens){
+void read_run(std::string file, SymbolTable* scope, bool showTokens){
 	std::ifstream reader(file);
 	if (!reader.is_open()) return;
 	std::string text((std::istreambuf_iterator<char>(reader)), (std::istreambuf_iterator<char>()));
@@ -93,6 +91,7 @@ void read_run(string file, SymbolTable* scope, bool showTokens){
 
 
 int main(int argc, char* argv[]) {
+	using namespace std;
 	bool showTokens = false;
 	bool fromFile = false;
 	string file_name;
@@ -111,8 +110,8 @@ int main(int argc, char* argv[]) {
 	SymbolTable* globalscope = new SymbolTable();
 	globalscope->add("__name__", String("main"), nullptr);
 	globalscope->add("null", Null(), nullptr);
-	globalscope->add("false", Integer(0).PrintBool(true), nullptr);
-	globalscope->add("true", Integer(1).PrintBool(true), nullptr);
+	globalscope->add("false", Integer::False(), nullptr);
+	globalscope->add("true", Integer::True(), nullptr);
 	globalscope->add("print", BuiltInFunction("print", bulitin),nullptr);
 	globalscope->add("clear", BuiltInFunction("clear", vector<string>()), nullptr);
 	globalscope->add("isInteger", BuiltInFunction("isInteger", bulitin), nullptr);
@@ -125,7 +124,7 @@ int main(int argc, char* argv[]) {
 	globalscope->add("length", BuiltInFunction("length", bulitin), nullptr);
 
 	if (!fromFile) {
-		cout << "Polyscript \x1B[94mV0.3.0\033[0m | use exit() to exit." << endl;
+		cout << "Polyscript \x1B[94mV0.4.0\033[0m | use exit() to exit." << endl;
 
 		while (true) {
 			cout << "> ";

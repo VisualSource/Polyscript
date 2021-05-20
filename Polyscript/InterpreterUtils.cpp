@@ -2,7 +2,10 @@
 #include "Types.h"
 
 
-void InterTypes::print(ostream& rhs, const any& node) {
+using namespace std;
+
+
+void InterTypes::print(std::ostream& rhs, const std::any& node) {
 	using namespace InterTypes;
 	if (isTypeOf<Float>(node)) {
 		rhs << any_cast<Float>(node);
@@ -31,5 +34,9 @@ void InterTypes::print(ostream& rhs, const any& node) {
 	else if (isTypeOf<Null>(node)) {
 		rhs << any_cast<Null>(node);
 	}
+	else if (isTypeOf<Object>(node)) {
+		rhs << any_cast<Object>(node);
+	}
+
 }
 
