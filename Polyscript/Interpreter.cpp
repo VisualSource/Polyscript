@@ -3,6 +3,7 @@
 #include <fstream>
 #include <variant>
 #include "InterpreterUtils.h"
+#include "SymbolTableUtils.h"
 #include "SymbolTable.h"
 #include "PolyscriptError.h"
 #include "RuntimeError.h"
@@ -373,57 +374,8 @@ any Interpreter::visit_VarAccessNode(const VarAccessNode& node, Context* context
 	string var_name = node.GetToken().GetValue().value();
 	ScopeTypes::Var value = context->GetScope()->get(var_name,context);
 
-	auto* typeA = std::get_if<Integer>(&value);
-	if (typeA != nullptr) {
-		return (*typeA).SetContext(context);
-	}
-
-	auto* typeString = get_if<String>(&value);
-	if (typeString != nullptr) {
-		return (*typeString).SetContext(context);
-	}
-
-	auto* typeB = std::get_if<Float>(&value);
-	if (typeB != nullptr) {
-		return (*typeB).SetContext(context);
-	}
-
-	auto* func = std::get_if<Function>(&value);
-	if (func != nullptr) {
-		return *func;
-	}
-
-	auto* list = get_if<List>(&value);
-	if (list != nullptr) {
-		return (*list).SetContext(context);
-	}
-
-	auto* builtin = get_if<BuiltInFunction>(&value);
-	if (builtin != nullptr) {
-		return *builtin;
-	}
-
-	auto* isEnum = std::get_if<Enum>(&value);
-	if (isEnum != nullptr) {
-		return *isEnum;
-	}
-
-	auto* isEnumValue = std::get_if<EnumValue>(&value);
-	if (isEnumValue != nullptr) {
-		return *isEnumValue;
-	}
-
-	auto* isNull = std::get_if<Null>(&value);
-	if (isNull != nullptr) {
-		return *isNull;
-	}
-
-	auto* isObject = std::get_if<Object>(&value);
-	if (isObject != nullptr) {
-		return *isObject;
-	}
-
-	throw RuntimeError("Failed to access variable", context,node.GetStart(),node.GetEnd());
+	return ScopeTypes::VarToAny(value,context);
+	//throw RuntimeError("Failed to access variable", context,node.GetStart(),node.GetEnd());
 }
 
 any Interpreter::visit_VarAssignNode(const VarAssignNode& node, Context* context)
@@ -433,66 +385,65 @@ any Interpreter::visit_VarAssignNode(const VarAssignNode& node, Context* context
 
 	any value = visit(node.GetNode(),context);
 
-	
 	if (isTypeOf<Integer>(value)) {
 		if (node.GetVarType().matchesKeyWord("float")) {
 			Float realF = Float::cast(any_cast<Integer>(value));
-			context->GetScope()->add(var_name, realF,context);
+			context->GetScope()->add(var_name, realF,context, node.isConst());
 			return realF;
 		} else if(node.GetVarType().matchesKeyWord("string")){
 			String real = String::cast(any_cast<Integer>(value));
-			context->GetScope()->add(var_name, real,context);
+			context->GetScope()->add(var_name, real,context, node.isConst());
 			return real;
 		}else {
-			context->GetScope()->add(var_name, any_cast<Integer>(value),context);
+			context->GetScope()->add(var_name, any_cast<Integer>(value),context, node.isConst());
 		}
 	}
 	else if (isTypeOf<Float>(value)) {
 			if (node.GetVarType().matchesKeyWord("int")) {
 				Integer realF = Integer::cast(any_cast<Float>(value));
-				context->GetScope()->add(var_name, realF,context);
+				context->GetScope()->add(var_name, realF,context, node.isConst());
 				return realF;
 			}
 			else if (node.GetVarType().matchesKeyWord("string")) {
 				String real = String::cast(any_cast<Float>(value));
-				context->GetScope()->add(var_name, real,context);
+				context->GetScope()->add(var_name, real,context, node.isConst());
 				return real;
 			}
 			else {
-				context->GetScope()->add(var_name, any_cast<Float>(value),context);
+				context->GetScope()->add(var_name, any_cast<Float>(value),context, node.isConst());
 			}
 	}
 	else if (isTypeOf<String>(value)) {
 		if (node.GetVarType().matchesKeyWord("int")) {
 			Integer real = Integer::cast(any_cast<String>(value));
-			context->GetScope()->add(var_name, real,context);
+			context->GetScope()->add(var_name, real,context, node.isConst());
 			return real;
 		}
 		else if (node.GetVarType().matchesKeyWord("float")) {
 			Float real = Float::cast(any_cast<String>(value));
-			context->GetScope()->add(var_name, real,context);
+			context->GetScope()->add(var_name, real,context, node.isConst());
 			return real;
 		}
 		else {
-			context->GetScope()->add(var_name, any_cast<String>(value),context);
+			context->GetScope()->add(var_name, any_cast<String>(value),context, node.isConst());
 		}
 	}
 	else if (isTypeOf<List>(value)) {
-		context->GetScope()->add(var_name, any_cast<List>(value),context);
+		context->GetScope()->add(var_name, any_cast<List>(value),context, node.isConst());
 	}
 	else if (isTypeOf<EnumValue>(value)) {
 		if (node.GetVarType().matchesKeyWord("int")) {
 			Integer real = EnumValue::cast(any_cast<EnumValue>(value));
-			context->GetScope()->add(var_name, real, context);
+			context->GetScope()->add(var_name, real, context, node.isConst());
 			return real;
 		}
-		context->GetScope()->add(var_name, any_cast<EnumValue>(value), context);
+		context->GetScope()->add(var_name, any_cast<EnumValue>(value), context, node.isConst());
 	}
 	else if (isTypeOf<Null>(value)) {
-		context->GetScope()->add(var_name, any_cast<Null>(value), context);
+		context->GetScope()->add(var_name, any_cast<Null>(value), context, node.isConst());
 	}
 	else if (isTypeOf<Object>(value)) {
-		context->GetScope()->add(var_name, any_cast<Object>(value), context);
+		context->GetScope()->add(var_name, any_cast<Object>(value), context, node.isConst());
 	}
 	else {
 		throw RuntimeError("Can't create varable of give type", context, node.GetStart(), node.GetEnd());
@@ -515,36 +466,28 @@ any Interpreter::visit_VarReasignNode(const VarReasignNode& node, Context* conte
 			case TypeToken::EQ: {
 				using namespace InterTypes;
 				if (isTypeOf<String>(expr)) {
-					context->GetScope()->set(var, any_cast<String>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, any_cast<String>(expr), context),context);
 				}
 				else if (isTypeOf<Integer>(expr)) {
-					context->GetScope()->set(var, any_cast<Integer>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, any_cast<Integer>(expr), context),context);
 				}
 				else if (isTypeOf<Float>(expr)) {
-					context->GetScope()->set(var, any_cast<Function>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, any_cast<Function>(expr), context),context);
 				}
 				else if (isTypeOf<BuiltInFunction>(expr)) {
-					context->GetScope()->set(var, any_cast<BuiltInFunction>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, any_cast<BuiltInFunction>(expr), context), context);
 				}
 				else if (isTypeOf<List>(expr)) {
-					context->GetScope()->set(var, any_cast<List>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, any_cast<List>(expr), context), context);
 				}
 				else if (isTypeOf<EnumValue>(expr)) {
-					context->GetScope()->set(var, any_cast<EnumValue>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, any_cast<EnumValue>(expr), context), context);
 				}
 				else if (isTypeOf<Null>(expr)) {
-					context->GetScope()->set(var, any_cast<Null>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, any_cast<Null>(expr), context), context);
 				}
 				else if (isTypeOf<Object>(expr)) {
-					context->GetScope()->set(var, any_cast<Object>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, any_cast<Object>(expr), context), context);
 				}
 
 				throw RuntimeError("Invaild Opeation", context, node.GetIdentifer().GetStart(), node.GetOperationToken().GetEnd());
@@ -552,18 +495,15 @@ any Interpreter::visit_VarReasignNode(const VarReasignNode& node, Context* conte
 			case TypeToken::PLUS_EQ: {
 				auto* integer = get_if<Integer>(&value);
 				if (integer != nullptr) {
-					context->GetScope()->set(var, (*integer) + any_cast<Integer>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, (*integer) + any_cast<Integer>(expr), context), context);
 				}
 				auto* flo = get_if<Float>(&value);
 				if (flo != nullptr) {
-					context->GetScope()->set(var, (*flo) + any_cast<Float>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, (*flo) + any_cast<Float>(expr), context), context);
 				}
 				auto* str = get_if<String>(&value);
 				if (str != nullptr) {
-					context->GetScope()->set(var, (*str) + any_cast<String>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, (*str) + any_cast<String>(expr), context), context);
 				}
 
 				throw RuntimeError("Invaild Opeation", context, node.GetIdentifer().GetStart(), node.GetOperationToken().GetEnd());
@@ -571,13 +511,11 @@ any Interpreter::visit_VarReasignNode(const VarReasignNode& node, Context* conte
 			case TypeToken::MINUS_EQ: {
 				auto* integer = get_if<Integer>(&value);
 				if (integer != nullptr) {
-					context->GetScope()->set(var, (*integer) - any_cast<Integer>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, (*integer) - any_cast<Integer>(expr), context), context);
 				}
 				auto* flo = get_if<Float>(&value);
 				if (flo != nullptr) {
-					context->GetScope()->set(var, (*flo) - any_cast<Float>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, (*flo) - any_cast<Float>(expr), context), context);
 				}
 
 				throw RuntimeError("Invaild Opeation", context, node.GetIdentifer().GetStart(), node.GetOperationToken().GetEnd());
@@ -585,13 +523,11 @@ any Interpreter::visit_VarReasignNode(const VarReasignNode& node, Context* conte
 			case TypeToken::DIV_EQ: {
 				auto* integer = get_if<Integer>(&value);
 				if (integer != nullptr) {
-					context->GetScope()->set(var, (*integer) / any_cast<Integer>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, (*integer) / any_cast<Integer>(expr), context), context);
 				}
 				auto* flo = get_if<Float>(&value);
 				if (flo != nullptr) {
-					context->GetScope()->set(var, (*flo) / any_cast<Float>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, (*flo) / any_cast<Float>(expr), context), context);
 				}
 
 				throw RuntimeError("Invaild Opeation", context, node.GetIdentifer().GetStart(), node.GetOperationToken().GetEnd());
@@ -599,13 +535,11 @@ any Interpreter::visit_VarReasignNode(const VarReasignNode& node, Context* conte
 			case TypeToken::MUL_EQ: {
 				auto* integer = get_if<Integer>(&value);
 				if (integer != nullptr) {
-					context->GetScope()->set(var, (*integer) * any_cast<Integer>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, (*integer) * any_cast<Integer>(expr), context), context);
 				}
 				auto* flo = get_if<Float>(&value);
 				if (flo != nullptr) {
-					context->GetScope()->set(var, (*flo) * any_cast<Float>(expr), context);
-					break;
+					return ScopeTypes::VarToAny(context->GetScope()->set(var, (*flo) * any_cast<Float>(expr), context), context);
 				}
 			}	
 			default:
@@ -614,7 +548,7 @@ any Interpreter::visit_VarReasignNode(const VarReasignNode& node, Context* conte
 	}
 	catch (const bad_any_cast&)
 	{
-		throw RuntimeError("Ivaild operation", context, node.GetIdentifer().GetStart(), node.GetOperationToken().GetEnd());
+		throw RuntimeError("Invaild operation", context, node.GetIdentifer().GetStart(), node.GetOperationToken().GetEnd());
 	}
 
 	return Null();
@@ -637,59 +571,21 @@ static any PathResution(Context* ctx, const vector<string> path, int index){
 
 	// a value 
 
-	auto* typeA = std::get_if<Integer>(&value);
-	if (typeA != nullptr) {
-		return (*typeA).SetContext(ctx);
-	}
-
-	auto* typeString = get_if<String>(&value);
-	if (typeString != nullptr) {
-		return (*typeString).SetContext(ctx);
-	}
-
-	auto* typeB = std::get_if<Float>(&value);
-	if (typeB != nullptr) {
-		return (*typeB).SetContext(ctx);
-	}
-
-	auto* func = std::get_if<Function>(&value);
-	if (func != nullptr) {
-		return *func;
-	}
-
-	auto* list = get_if<List>(&value);
-	if (list != nullptr) {
-		return (*list).SetContext(ctx);
-	}
-
-	auto* builtin = get_if<BuiltInFunction>(&value);
-	if (builtin != nullptr) {
-		return *builtin;
-	}
-
-	auto* isEnumValue = std::get_if<EnumValue>(&value);
-	if (isEnumValue != nullptr) {
-		return *isEnumValue;
-	}
-
-	auto* isNull = std::get_if<Null>(&value);
-	if (isNull != nullptr) {
-		return *isNull;
-	}
-
-	return Null();
-
+	return ScopeTypes::VarToAny(value, ctx);
 }
 
 any Interpreter::visit_PathAccessNode(const PathAccessNode& node, Context* context)
 {	
 	vector<string> path = node.GetPath();
 
-	if (path.size() > 0) {
-		return PathResution(context,path,0);
+	try{
+		if (path.size() > 0) {
+			return PathResution(context, path, 0);
+		}
+		return Null();
+	}catch(std::out_of_range){
+		throw RuntimeError("Invaild path",context,node.GetStart(),node.GetEnd());
 	}
-	
-	return Null();
 }
 
 any Interpreter::visit_IfNode(const IfNode& node, Context* context)
@@ -965,19 +861,30 @@ any Interpreter::visit_EnumDefNode(const EnumNode& node, Context* context)
 any Interpreter::visit_NamespaceNode(const NamespaceNode& node, Context* context)
 {
 	string nameNS = node.GetName().GetValue().value();
-	SymbolTable* scopeNS = new SymbolTable();
-	scopeNS->setParent(context->GetScope());
-	Context* ctxNS = new Context(nameNS,scopeNS,context,node.GetStart());
+	if (context->GetScope()->hasVar(nameNS)) {
+		Namespace name = get<Namespace>(context->GetScope()->get(nameNS,context));
+		if (node.GetStatements().has_value()) {
+			visit(node.GetStatements(), name.GetNamespaceCtx());
+		}
+		return name;
+	}
+	else {
+		SymbolTable* scopeNS = new SymbolTable();
+		scopeNS->setParent(context->GetScope());
+		Context* ctxNS = new Context(nameNS, scopeNS, context, node.GetStart());
 
-	if (node.GetStatements().has_value()) {
-		visit(node.GetStatements(), ctxNS);
+		if (node.GetStatements().has_value()) {
+			visit(node.GetStatements(), ctxNS);
+		}
+
+		Namespace def(nameNS, ctxNS);
+		def.SetContext(context).SetPostion(node.GetStart(), node.GetEnd());
+		context->GetScope()->add(nameNS, def, context);
+
+		return def;
 	}
 
-	Namespace def(nameNS, ctxNS);
-	def.SetContext(context).SetPostion(node.GetStart(), node.GetEnd());
-	context->GetScope()->add(nameNS,def,context);
-
-	return def;
+	
 }
 
 any Interpreter::visit_ImportNode(const ImportNode& node, Context* context)

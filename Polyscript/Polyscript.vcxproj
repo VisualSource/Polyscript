@@ -203,6 +203,7 @@
     <ClCompile Include="String.cpp" />
     <ClCompile Include="StringNode.cpp" />
     <ClCompile Include="SymbolTable.cpp" />
+    <ClCompile Include="SymbolTableUtils.cpp" />
     <ClCompile Include="Token.cpp" />
     <ClCompile Include="TokenEnum.cpp" />
     <ClCompile Include="UnaryOpNode.cpp" />
@@ -274,6 +275,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ico1.bin" />
+    <None Include="ReadMe.md" />
     <None Include="std.ps" />
     <None Include="test.ps" />
   </ItemGroup>

@@ -68,16 +68,16 @@ void run(std::string fn, std::string text, SymbolTable* scope, bool showTokens, 
 		cerr << e << endl;
 	}
 	catch (runtime_error e) {
-		cerr << e.what() << endl;
+		cerr << "Runtime Error: " + std::string(e.what()) << endl;
 	}
 	catch (out_of_range e) {
-		cerr << e.what() << endl;
+		cerr << "Runtime out of range error: " + std::string(e.what()) << endl;
 	}
 	catch (logic_error e) {
-		cerr << e.what() << endl;
+		cerr << "Runtime logic error: " + std::string(e.what()) << endl;
 	}
 	catch (...) {
-		cerr << "Unkown Runtime Error" << endl;
+		cerr << "Unname Runtime Error" << endl;
 	}
 }
 void read_run(std::string file, SymbolTable* scope, bool showTokens){
@@ -107,21 +107,23 @@ int main(int argc, char* argv[]) {
 	}
 
 	vector<string> bulitin = { "__input" };
+	vector<string> fetchParams = { "__url" };
 	SymbolTable* globalscope = new SymbolTable();
-	globalscope->add("__name__", String("main"), nullptr);
-	globalscope->add("null", Null(), nullptr);
-	globalscope->add("false", Integer::False(), nullptr);
-	globalscope->add("true", Integer::True(), nullptr);
-	globalscope->add("print", BuiltInFunction("print", bulitin),nullptr);
-	globalscope->add("clear", BuiltInFunction("clear", vector<string>()), nullptr);
-	globalscope->add("isInteger", BuiltInFunction("isInteger", bulitin), nullptr);
-	globalscope->add("isFloat", BuiltInFunction("isFloat", bulitin), nullptr);
-	globalscope->add("isFunction", BuiltInFunction("print", bulitin), nullptr);
-	globalscope->add("isList", BuiltInFunction("isList", bulitin), nullptr);
-	globalscope->add("isString", BuiltInFunction("isString", bulitin), nullptr);
-	globalscope->add("isEnum", BuiltInFunction("isEnum", bulitin), nullptr);
-	globalscope->add("isNull", BuiltInFunction("isNull", bulitin), nullptr);
-	globalscope->add("length", BuiltInFunction("length", bulitin), nullptr);
+	globalscope->add("__name__", String("main"), nullptr, false);
+	globalscope->add("null", Null(), nullptr, false);
+	globalscope->add("false", Integer::False(), nullptr, false);
+	globalscope->add("true", Integer::True(), nullptr, false);
+	globalscope->add("print", BuiltInFunction("print", bulitin),nullptr, false);
+	globalscope->add("clear", BuiltInFunction("clear", vector<string>()), nullptr, false);
+	globalscope->add("isInteger", BuiltInFunction("isInteger", bulitin), nullptr, false);
+	globalscope->add("isFloat", BuiltInFunction("isFloat", bulitin), nullptr, false);
+	globalscope->add("isFunction", BuiltInFunction("print", bulitin), nullptr, false);
+	globalscope->add("isList", BuiltInFunction("isList", bulitin), nullptr, false);
+	globalscope->add("isString", BuiltInFunction("isString", bulitin), nullptr, false);
+	globalscope->add("isEnum", BuiltInFunction("isEnum", bulitin), nullptr, false);
+	globalscope->add("isNull", BuiltInFunction("isNull", bulitin), nullptr, false);
+	globalscope->add("length", BuiltInFunction("length", bulitin), nullptr, false);
+	globalscope->add("syncFetch", BuiltInFunction("syncFetch", fetchParams), nullptr,false);
 
 	if (!fromFile) {
 		cout << "Polyscript \x1B[94mV0.4.0\033[0m | use exit() to exit." << endl;

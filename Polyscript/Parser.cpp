@@ -289,7 +289,8 @@ any Parser::term(){
 */
 any Parser::expr() {
 	Position start(current_token.GetStart());
-	if (current_token.matches(TypeToken::KEYWORD, "let")) {
+	if (current_token.matchesKeyWord("let") || current_token.matchesKeyWord("const")) {
+		bool isConstant = !current_token.matchesKeyWord("const");
 		advance();
 
 		if (!current_token.isToken(TypeToken::IDENTIFIER)) {
@@ -316,7 +317,7 @@ any Parser::expr() {
 
 		any expr = this->expr();
 		
-		return VarAssignNode(varName,expr,start,current_token.GetEnd(),varType);
+		return VarAssignNode(varName,isConstant,expr,start,current_token.GetEnd(),varType);
 	}
 
 

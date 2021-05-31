@@ -3,7 +3,7 @@
 
 using namespace std;
 
-VarAssignNode::VarAssignNode(Token var_token, any node, Position start, Position end, optional<Token> varType): Node(start,end), var_token(var_token), node(node)
+VarAssignNode::VarAssignNode(Token var_token, bool constant, any node, Position start, Position end, optional<Token> varType): Node(start,end), var_token(var_token), node(node), constant(constant)
 {
 	if (varType.has_value()) {
 		type = varType.value();
@@ -23,6 +23,11 @@ Token VarAssignNode::GetVarType() const
 any VarAssignNode::GetNode() const
 {
 	return node;
+}
+
+bool VarAssignNode::isConst() const
+{
+	return constant;
 }
 
 Token VarAssignNode::GetToken() const

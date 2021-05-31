@@ -1,7 +1,10 @@
 #pragma once
 #include <string>
+#include <any>
 #include <variant>
 #include "Types.h"
+
+class Context;
 
 namespace ScopeTypes {
 	typedef std::variant<Null, Integer, Float, Function, String, List, BuiltInFunction, Enum, EnumValue, Namespace, Object> Var;
@@ -16,4 +19,5 @@ namespace ScopeTypes {
 	bool isType(const Var& type){
 		return std::get_if<T>(&type) != nullptr;
 	}
+	std::any VarToAny(const Var& value, Context* context);
 }

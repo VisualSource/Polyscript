@@ -92,7 +92,7 @@ Var SymbolTable::get(string key, Context* context) const
 	
 }
 
-void SymbolTable::set(string key, Var value, Context* context)
+Var SymbolTable::set(string key, Var value, Context* context)
 {
 	if (!hasVar(key)) throw RuntimeError(key + " is undefined",context,context->GetPostion(),context->GetPostion());
 	NodePtr npp = head;
@@ -101,7 +101,7 @@ void SymbolTable::set(string key, Var value, Context* context)
 		if (npc->key == key) {
 			if(!npc->writable) throw RuntimeError(key + " is a const", context, context->GetPostion(), context->GetPostion());
 			npc->value = value;
-			return;
+			return npc->value;
 		}
 		npp = npc;
 		npc = npc->next;
@@ -111,12 +111,12 @@ void SymbolTable::set(string key, Var value, Context* context)
 	}
 }
 
-void SymbolTable::add(string key, Var value, Context* context)
+void SymbolTable::add(string key, Var value, Context* context, bool writable)
 {
 	if (hasVar(key)) {
 		throw RuntimeError(key + " is already defined",context,context->GetPostion(),context->GetPostion());
 	}
-	this->insert(key, value);
+	this->insert(key, value, writable);
 }
 
 void SymbolTable::setParent(SymbolTable* parent)
@@ -124,7 +124,7 @@ void SymbolTable::setParent(SymbolTable* parent)
 	this->parent = parent;
 }
 
-void SymbolTable::insert(string key, Var value)
+void SymbolTable::insert(string key, Var value, bool writable)
 {
 	NodePtr npp = head;
 	NodePtr npc = head->next;
@@ -136,7 +136,7 @@ void SymbolTable::insert(string key, Var value)
 		npp = npc;
 		npc = npc->next;
 	}
-	npp->next = createNode(key, value, npc);
+	npp->next = createNode(key, value, npc, writable);
 
 }
 

@@ -8,14 +8,14 @@
 using namespace std;
 
 static bool isKeyWorld(const string& key) {
-	if (key == "import" || key == "return" || key == "break" || key == "continue" || key == "namespace") {
+	if (key == "import" || key == "throw" || key == "return" || key == "break" || key == "continue" || key == "namespace" || key == "class") {
 		return true;
 	}
 	// functions 
 	if (key == "match" || key == "for" || key == "to" || key == "step" || key == "while" || key == "fn" || key == "if" || key == "else") return true;
 	
 	// Var/Types
-	if (key == "let" || key == "int" || key == "float" || key == "bool" || key == "string" || key == "enum") return true;
+	if (key == "const" || key == "let" || key == "int" || key == "float" || key == "bool" || key == "string" || key == "enum") return true;
 	
 	return false;
 }

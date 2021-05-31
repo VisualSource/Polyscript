@@ -7,6 +7,9 @@
 #include "RuntimeError.h"
 #include "InterpreterUtils.h"
 #include "Integer.h"
+#include "fetch.h"
+#include "Object.h"
+#include "String.h"
 
 using namespace std;
 
@@ -152,12 +155,41 @@ any BuiltInFunction::exceute(vector<any> args)
     }
     else if (func == "length") {  
         try {
-            List len = get<List>(ctx->GetScope()->get("__input", ctx));
-            return Integer(len.GetElements().size());
+            ScopeTypes::Var value = ctx->GetScope()->get("__input", ctx);
+            auto* islist = get_if<List>(&value);
+            if (islist != nullptr) {
+                return Integer((*islist).GetElements().size());
+            }
+            auto* isString = get_if<String>(&value);
+            if (isString != nullptr) {
+                return Integer((*isString).GetValue().length());
+            }
+            return Null();
         }
         catch (bad_variant_access const&) {
             throw RuntimeError("Expected a list", ctx, start, end);
         }
+    }
+    else if (func == "syncFetch") {
+        String url = get<String>(ctx->GetScope()->get("__url", ctx));
+
+        httplib::Result res = fetch::Get(url.GetValue(),ctx);
+
+        vector<ObjectProperties> props;
+        props.push_back(ObjectProperties {
+            "body",
+            String(res->body)
+        });
+        props.push_back(ObjectProperties{
+          "version",
+          String(res->version)
+        });
+        props.push_back(ObjectProperties{
+          "status",
+          Integer(res->status)
+        });
+    
+        return Object(props, ctx);
     }
     return Null();
 }

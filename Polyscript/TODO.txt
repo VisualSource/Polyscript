@@ -2,10 +2,9 @@
 IN ORDER OF IMPLENATION
 
 - ++ and -- 
-- const varibles
+- throw keyword
+- try catch block
 - casting
-- namespace augmention 
-- OBECT 
 - JSON PARSE and stringify
 - std libary
 	- sync fetch (http request)

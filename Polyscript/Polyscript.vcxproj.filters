@@ -291,6 +291,9 @@
     <ClCompile Include="DotAccessNode.cpp">
       <Filter>Source Files\nodes\varible</Filter>
     </ClCompile>
+    <ClCompile Include="SymbolTableUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lexer.h">
@@ -478,6 +481,9 @@
     <None Include="ico1.bin">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="ReadMe.md">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt">
@@ -488,13 +494,8 @@
     <ResourceCompile Include="Version.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="icon1.ico">
+    <ResourceCompile Include="icon.rc">
       <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\..\Users\Collin\Downloads\icons8-script-listener-96.png">
-      <Filter>Resource Files</Filter>
-    </Image>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

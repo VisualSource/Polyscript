@@ -15,13 +15,13 @@ class SymbolTable {
 		bool isEmpty() const;
 		bool hasVar(std::string key) const;
 		ScopeTypes::Var get(std::string key, Context* context) const;
-		void set(std::string key, ScopeTypes::Var value, Context* context);
-		void add(std::string key, ScopeTypes::Var value, Context* context);
+		ScopeTypes::Var set(std::string key, ScopeTypes::Var value, Context* context);
+		void add(std::string key, ScopeTypes::Var value, Context* context, bool writable = true);
 		void setParent(SymbolTable* parent);
 	private:
 		SymbolTable* parent = nullptr;
 		ScopeTypes::NodePtr head = nullptr;
-		void insert(std::string key, ScopeTypes::Var value);
+		void insert(std::string key, ScopeTypes::Var value, bool writable = true);
 		void remove(std::string key);
 };
 
