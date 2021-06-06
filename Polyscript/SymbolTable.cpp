@@ -107,8 +107,10 @@ Var SymbolTable::set(string key, Var value, Context* context)
 		npc = npc->next;
 	}
 	if (parent != nullptr) {
-		parent->set(key,value,context);
+		return parent->set(key,value,context);
 	}
+
+	throw RuntimeError("Failed to set variable", context, context->GetPostion(), context->GetPostion());
 }
 
 void SymbolTable::add(string key, Var value, Context* context, bool writable)

@@ -113,7 +113,8 @@ int main(int argc, char* argv[]) {
 	globalscope->add("null", Null(), nullptr, false);
 	globalscope->add("false", Integer::False(), nullptr, false);
 	globalscope->add("true", Integer::True(), nullptr, false);
-	globalscope->add("print", BuiltInFunction("print", bulitin),nullptr, false);
+	globalscope->add("println", BuiltInFunction("println", bulitin),nullptr, false);
+	globalscope->add("print", BuiltInFunction("print", bulitin), nullptr, false);
 	globalscope->add("clear", BuiltInFunction("clear", vector<string>()), nullptr, false);
 	globalscope->add("isInteger", BuiltInFunction("isInteger", bulitin), nullptr, false);
 	globalscope->add("isFloat", BuiltInFunction("isFloat", bulitin), nullptr, false);
@@ -123,10 +124,11 @@ int main(int argc, char* argv[]) {
 	globalscope->add("isEnum", BuiltInFunction("isEnum", bulitin), nullptr, false);
 	globalscope->add("isNull", BuiltInFunction("isNull", bulitin), nullptr, false);
 	globalscope->add("length", BuiltInFunction("length", bulitin), nullptr, false);
-	globalscope->add("syncFetch", BuiltInFunction("syncFetch", fetchParams), nullptr,false);
+	globalscope->add("fetch", BuiltInFunction("fetch", fetchParams), nullptr,false);
+	globalscope->add("readFile", BuiltInFunction("readFile", bulitin), nullptr, false);
 
 	if (!fromFile) {
-		cout << "Polyscript \x1B[94mV0.4.0\033[0m | use exit() to exit." << endl;
+		cout << "Polyscript \x1B[94mV0.4.1\033[0m | use exit() to exit." << endl;
 
 		while (true) {
 			cout << "> ";

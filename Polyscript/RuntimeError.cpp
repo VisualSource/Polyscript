@@ -10,7 +10,7 @@ std::ostream& operator<<(std::ostream& lhs, const RuntimeError& error) {
 	Context* ctx = error.context;
 	Position pos = error.GetStart();
 	while (ctx != nullptr) {
-		lhs << "  File " << pos.GetFn() << ", line " << (pos.GetLn() + 1) <<  ", in " + ctx->GetDisplayName() << std::endl;
+		lhs << "  File " << "?" << ", line " << (pos.GetLn() + 1) <<  ", in " + ctx->GetDisplayName() << std::endl;
 
 		pos = ctx->GetPostion();
 		ctx = ctx->GetContextParent();

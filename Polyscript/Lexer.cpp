@@ -22,7 +22,7 @@ static bool isKeyWorld(const string& key) {
 
 Lexer::Lexer(string text, string fn): text(text) {
 	current_char = '\0';
-	pos = Position(fn, text);
+	pos = Position();
 	advance();
 }
 
@@ -77,12 +77,6 @@ vector<Token> Lexer::makeTokens() {
 			}
 
 			tokens.push_back(Token(type,pos));
-		}else if (current_char == '^') {
-			tokens.push_back(Token(TypeToken::POWER,pos));
-			advance();
-		}else if (current_char == '+') {
-			tokens.push_back(Token(TypeToken::PLUS, pos));
-			advance();
 		} else if (current_char == '-') {
 			tokens.push_back(MakeMinusORRArrow());
 		} else if (current_char == '*') {

@@ -5,7 +5,7 @@ class BuiltInFunction : public BaseFunction {
 	public:
 		BuiltInFunction(std::string name, std::vector<std::string> args_names);
 		virtual std::any exceute(std::vector<std::any> args) override;
-	private:
+	protected:
 		std::vector<std::string> args_names;
 		
 };

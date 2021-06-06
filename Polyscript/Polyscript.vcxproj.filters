@@ -124,6 +124,9 @@
     <Filter Include="Header Files\shared\symbols">
       <UniqueIdentifier>{0b1c676c-45dc-4965-b0c4-360df96622c9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\interperter\types\bultin">
+      <UniqueIdentifier>{8c0541ba-223c-4f30-87cf-695b3648f9a3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Polyscript.cpp">

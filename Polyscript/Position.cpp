@@ -1,6 +1,6 @@
 #include "Position.h"
 
-Position::Position(std::string fn, std::string ftxt,int idx, int ln, int col): idx(idx), ln(ln), col(col), fn(fn), ftxt(ftxt) {
+Position::Position(int idx, int ln, int col): idx(idx), ln(ln), col(col) {
 }
 
 Position& Position::advance(char current_char) {
@@ -24,8 +24,4 @@ int Position::GetLn() const {
 
 int Position::GetCol() const {
 	return col;
-}
-
-std::string Position::GetFn() const {
-	return fn;
 }

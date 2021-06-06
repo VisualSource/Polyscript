@@ -598,15 +598,12 @@ any Parser::funcDef()
 	if (current_token.isToken(TypeToken::IDENTIFIER)) {
 		var_name = current_token;
 		advance();
-		if (!current_token.isToken(TypeToken::LPAREN)) {
-			throw InvalidSyntaxError("Expected '('", current_token.GetStart(), current_token.GetEnd());
-		}
 	}
-	else {
-		if (!current_token.isToken(TypeToken::LPAREN)) {
-			throw InvalidSyntaxError("Expected identifier or '('", current_token.GetStart(), current_token.GetEnd());
-		}
+	
+	if (!current_token.isToken(TypeToken::LPAREN)) {
+		throw InvalidSyntaxError("Expected identifier or '('", current_token.GetStart(), current_token.GetEnd());
 	}
+	
 
 	advance();
 
@@ -623,15 +620,12 @@ any Parser::funcDef()
 			arg_names.push_back(current_token);
 			advance();
 		}
-		if (!current_token.isToken(TypeToken::RPAREN)) {
-			throw InvalidSyntaxError("Expected ',' or ')'", current_token.GetStart(), current_token.GetEnd());
-		}
 	}
-	else {
-		if (!current_token.isToken(TypeToken::RPAREN)) {
-			throw InvalidSyntaxError("Expected identifier or ')'", current_token.GetStart(), current_token.GetEnd());
-		}
+	
+	if (!current_token.isToken(TypeToken::RPAREN)) {
+		throw InvalidSyntaxError("Expected identifier or ')'", current_token.GetStart(), current_token.GetEnd());
 	}
+	
 
 	advance();
 
