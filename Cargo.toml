@@ -3,7 +3,10 @@ name = "polyscript_rust"
 version = "0.5.1"
 authors = ["VisualSource <boomishere_network@outlook.com>"]
 edition = "2018"
-
+repository = "https://github.com/VisualSource/Polyscript/tree/rust"
+license = "MIT"
+description="A script runtime"
+build = "build.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -11,3 +14,7 @@ dyn-clone = "1.0.4"
 clap = "2.33.3"
 colored = "2.0.0"
 reqwest = { version = "0.11.3", features = ["blocking", "json"] }
+
+
+[build-dependencies]
+embed-resource = "1.6.2"

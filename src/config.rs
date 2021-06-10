@@ -14,8 +14,6 @@ impl Config {
         .version(version)
         .author(author)
         .arg(Arg::with_name("run").value_name("FILE").takes_value(true)).get_matches();
-
-    
         Self {
             file: matches.value_of("run").unwrap_or("<stdin>").to_string(),
             version: version.to_string(),

@@ -40,7 +40,7 @@ fn run(text: String, file_name: String, globalscope: Rc<RefCell<Scope>>, config:
 
                     match interpreter.visit(value, global_context) {
                         IResult::Err(error) => {
-                            println!("{}",error.to_string());
+                            eprintln!("{}",error.to_string());
                         }
                         IResult::Inter(_) => {}
                         IResult::Ok(par) => {
