@@ -1,0 +1,22 @@
+{
+    "configurations": [
+    {
+        "name": "Debug Rust",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/target/debug/polyscript_rust.exe",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${fileDirname}",
+        "environment": [],
+        "console": "externalTerminal",
+        "preLaunchTask": {
+            "type": "cargo",
+            "subcommand": "build",
+            "problemMatcher": [
+                "$rustc"
+            ]
+        }
+    }
+    ]
+}

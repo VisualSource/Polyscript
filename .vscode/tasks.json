@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "command": "cargo",
+    "args": ["build"],
+    "isBackground": false,
+    "type": "shell",
+    "tasks": [
+        {
+            "type": "cargo",
+            "subcommand": "build",
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "group": "build",
+            "label": "Rust: cargo build - polyscript_rust"
+        }
+    ]
+}
+    
