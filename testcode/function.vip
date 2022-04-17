@@ -1,0 +1,10 @@
+fn get_obj_pram(param, obj) {
+    return obj[param];
+}
+
+let global_obj = {
+    online: true,
+    uuid: "d6cf5f72-eecb-47d5-a778-2d6e2a668004"
+};
+
+printLn(get_obj_pram("uuid",global_obj));
