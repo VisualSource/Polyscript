@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/VisualSource/Polyscript/README">
-    <img src="https://github.com/VisualSource/Polyscript/blob/master/Polyscript/polyscript.ico" alt="Logo" width="80" height="80">
+    <img src="./vip.ico" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Vip</h3>
@@ -39,13 +39,13 @@
   
 ## About The Project
 
-Vip is my 3rd revision at creating an interpreted programing language.
+Vip (previously Polyscript) is my 3rd revision at creating an interpreted programing language.
 The language draws aspects from rust, c++, javascript/typescript, java, C#, and python.
 
 
 ### Built With
   
-  The current implmetation of vip is build useing rust 2021
+  The current implmetation of vip is build using rust 2021 and tokio
   
 ## Getting Started
 
