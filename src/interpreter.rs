@@ -26,11 +26,15 @@ use std::{
 use dyn_clone::DynClone;
 use colored::*;
 use async_recursion::async_recursion;
-use crate::standard_lib::io::insert_io;
+use async_trait::async_trait;
+use crate::standard_lib::{
+    io::insert_io,
+    http::insert_http
+};
 
-
-pub trait Functional: Debug + DynClone + Send {
-    fn execute(&self, args: Vec<DataType>) -> VisitResult<DataType>;
+#[async_trait]
+pub trait Functional: Debug + DynClone + Send + Sync {
+    async fn execute(&self, args: Vec<DataType>) -> VisitResult<DataType>;
 }
 dyn_clone::clone_trait_object!(Functional);
 
@@ -175,6 +179,86 @@ impl DataType {
             _ => true
         }
     }
+    fn gt(&self, right: &DataType) -> VisitResult<DataType> {
+        let self_value = match self { 
+            DataType::INTEGER { value } => value,
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "gt"
+            })
+        };
+        let right_value = match right { 
+            DataType::INTEGER { value } => value,
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "gt"
+            })
+        };
+
+        VisitResult::Ok(DataType::boolean(self_value > right_value ))
+    }
+    fn lt(&self, right: &DataType) -> VisitResult<DataType> {
+        let self_value = match self { 
+            DataType::INTEGER { value } => value,
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "lt"
+            })
+        };
+        let right_value = match right { 
+            DataType::INTEGER { value } => value,
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "lt"
+            })
+        };
+
+        VisitResult::Ok(DataType::boolean(self_value < right_value ))
+    }
+    fn gte(&self, right: &DataType) -> VisitResult<DataType> {
+        let self_value = match self { 
+            DataType::INTEGER { value } => value,
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "gte"
+            })
+        };
+        let right_value = match right { 
+            DataType::INTEGER { value } => value,
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "gte"
+            })
+        };
+
+        VisitResult::Ok(DataType::boolean(self_value >= right_value ))
+    }
+    fn lte(&self, right: &DataType) -> VisitResult<DataType> {
+        let self_value = match self { 
+            DataType::INTEGER { value } => value,
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "lte"
+            })
+        };
+        let right_value = match right { 
+            DataType::INTEGER { value } => value,
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "lte"
+            })
+        };
+
+        VisitResult::Ok(DataType::boolean(self_value <= right_value ))
+    }
+    fn eq(&self, right: &DataType) -> VisitResult<DataType> {
+        let self_value = match self { 
+            DataType::INTEGER { value } => value,
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "eq"
+            })
+        };
+        let right_value = match right { 
+            DataType::INTEGER { value } => value,
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "eq"
+            })
+        };
+
+        VisitResult::Ok(DataType::boolean(self_value == right_value))
+    }
 }
 
 impl Display for DataType {
@@ -249,6 +333,7 @@ impl Context {
         scope.insert("null".to_string(), Property { value: DataType::NULL, writable: false });
 
         insert_io(&mut scope);
+        insert_http(&mut scope);
 
         Self {
             parent: None,
@@ -347,6 +432,8 @@ impl Interperter {
     async fn visit(&self, node: Node, ctx: Ctx) -> VisitResult<DataType> {
         match node {
            Node::Empty => VisitResult::Ok(DataType::NULL),
+           Node::While { start, end, scope, expr } => self.visit_while(ctx,start,end,scope,expr).await,
+           Node::For { start, end, iterator, element_key, scope } => self.visit_for(ctx,start,end,iterator,element_key,scope).await,
            Node::If { start, end, expr, body } => self.visit_if(ctx,start,end,expr,body).await,
            Node::Return { start, end, node } => self.visit_return(ctx,start,end,node).await,
            Node::Function { start, end, args, body, name } => self.visit_function(ctx,start,end,args,body,name).await,
@@ -362,6 +449,126 @@ impl Interperter {
            Node::VarableAccess { start, end, identifer } => self.visit_varable_access(ctx,identifer, start, end).await,
            Node::VarableAsignment { identifer, operation, value, start, end } => self.visit_varable_asignment(ctx,identifer, operation, value, start, end).await,
            Node::VarableDeclarement { identifer, is_const, value, start, end } => self.visit_varable_declarement(ctx, identifer, is_const, value, start, end).await,
+        }
+    }
+    async fn visit_while(&self, ctx: Ctx, _start: Position, _end: Position, scope: Box<Node>, expr: Box<Node>) -> VisitResult<DataType> {
+        let wctx = Arc::new(Mutex::new(
+            Context::new(Some(ctx.clone()),"<while>".into(),PathBuf::default())
+        ));
+
+        loop {
+            let node = expr.clone();
+            match self.visit(*node,ctx.clone()).await {
+                VisitResult::Ok(value) => {
+                    if !value.is_true() {
+                        break;
+                    }
+                }
+                VisitResult::Error(err) => return VisitResult::Error(err),
+                VisitResult::Break(_) => return VisitResult::Error(RuntimeError::SyntaxError { reason: "Invaild statment".into() })
+            }
+
+
+            let snode = scope.clone();
+
+            match self.visit(*snode, wctx.clone()).await {
+                VisitResult::Ok(_) => {}
+                VisitResult::Error(err) => return VisitResult::Error(err),
+                VisitResult::Break(value) => return VisitResult::Break(value)
+            }
+        }
+
+        VisitResult::Ok(DataType::NULL)
+    }
+    async fn visit_for(&self,ctx: Ctx,_start: Position, _end: Position, iterator: Box<Node>, element_key: String, scope: Box<Node>) -> VisitResult<DataType> {
+        let array = match self.visit(*iterator, ctx.clone()).await {
+            VisitResult::Ok(value) => value,
+            VisitResult::Error(err) => return VisitResult::Error(err),
+            VisitResult::Break(_) => return VisitResult::Error(RuntimeError::SyntaxError { 
+                reason: "Invaild statement" .into()
+            })
+        };
+
+        let for_ctx = Arc::new(Mutex::new(
+            Context::with(Some(ctx.clone()), "<for>".into(), PathBuf::default(), HashMap::from(
+                [
+                    (
+                        element_key.clone(), 
+                        Property { writable: true, value: DataType::NULL } 
+                    )
+                ]
+            ))
+        ));
+
+        match array {
+            DataType::LIST { value } => {
+
+                for el in value {
+                    let node = scope.clone();
+                    let fctx = for_ctx.clone();
+                    
+                    match fctx.lock() {
+                        Ok(mut lock) => {
+                            if let Err(err) = lock.set_var(element_key.clone(), el) {
+                                error!("{}",err);
+                                return VisitResult::Error(RuntimeError::InternalError { 
+                                    reason: "Failed to set loop varaible" 
+                                });
+                            }
+                        }
+                        Err(err) => {
+                            error!("{}",err);
+                            return VisitResult::Error(RuntimeError::ReferenceError { 
+                                reason: "Failed to get loop context".into() 
+                            });
+                        }
+                    } 
+
+                   match self.visit(*node, for_ctx.clone()).await {
+                       VisitResult::Error(err) => return VisitResult::Error(err),
+                       VisitResult::Ok(_) => {}
+                       VisitResult::Break(value) => return VisitResult::Break(value)
+                   }
+                }
+
+                VisitResult::Ok(DataType::NULL)
+            }
+            DataType::STRING { value } => {
+                for el in value.chars() {
+                    let node = scope.clone();
+                    let fctx = for_ctx.clone();
+                    
+                    match fctx.lock() {
+                        Ok(mut lock) => {
+                            if let Err(err) = lock.set_var(element_key.clone(), DataType::STRING { value: el.to_string() }) {
+                                error!("{}",err);
+                                return VisitResult::Error(RuntimeError::InternalError { 
+                                    reason: "Failed to set loop varaible" 
+                                });
+                            }
+                        }
+                        Err(err) => {
+                            error!("{}",err);
+                            return VisitResult::Error(RuntimeError::ReferenceError { 
+                                reason: "Failed to get loop context".into() 
+                            });
+                        }
+                    } 
+
+                   match self.visit(*node, for_ctx.clone()).await {
+                       VisitResult::Error(err) => return VisitResult::Error(err),
+                       VisitResult::Ok(_) => {}
+                       VisitResult::Break(value) => return VisitResult::Break(value)
+                   }
+                }
+
+                VisitResult::Ok(DataType::NULL)
+            }
+            _ => {
+                VisitResult::Error(RuntimeError::SyntaxError { 
+                    reason: "Can not iterate over give type" .into()
+                })
+            }
         }
     }
     async fn visit_if(&self,ctx: Ctx, _start: Position, _end: Position, expr: Box<Node>, body: Box<Node>) -> VisitResult<DataType> {
@@ -488,14 +695,20 @@ impl Interperter {
                    DataType::INTEGER { value: integer } => {
                         match operator.token {
                             TokenType::MINUS => VisitResult::Ok(DataType::int(integer * -1)),
+                            TokenType::NOT => VisitResult::Ok(DataType::boolean(!(integer != 0))),
                             _ => VisitResult::Error(RuntimeError::SyntaxError { 
                                 reason: "Invaild operation".into() 
                             })
                         }
                     }
-                    _ => VisitResult::Error(RuntimeError::TypeError { 
-                        reason: "Expected a vaild data type".into()
-                    })
+                    _ => {
+                        match operator.token {
+                            TokenType::NOT => VisitResult::Ok(DataType::boolean(!el.is_true())),
+                            _ => VisitResult::Error(RuntimeError::TypeError { 
+                                reason: "Expected a vaild data type".into()
+                            })
+                        }
+                    }
                 }
             }
             VisitResult::Break(_) => VisitResult::Error(RuntimeError::SyntaxError { 
@@ -717,14 +930,8 @@ impl Interperter {
                     VisitResult::Error(err) => VisitResult::Error(err)
                 }
             }
-            DataType::NativeFunction { name: _name, args: args_list, method } => {
-                if args_list.len() != args.len() {
-                    return VisitResult::Error(RuntimeError::SyntaxError { 
-                        reason: format!("Expected {} arguments found {}",args_list.len(),args.len())
-                    })
-                }
-
-                method.execute(args)
+            DataType::NativeFunction { name: _name, args: _args_list, method } => {
+                method.execute(args).await
             }
             _ => VisitResult::Error(RuntimeError::TypeError { 
                 reason: "Not a callable data type".into() 
@@ -760,6 +967,11 @@ impl Interperter {
             TokenType::PLUS => left_node.add(&right_node),
             TokenType::DIV => left_node.div(&right_node),
             TokenType::MUL => left_node.mul(&right_node),
+            TokenType::ARROWL => left_node.lt(&right_node),
+            TokenType::ARROWR => left_node.gt(&right_node),
+            TokenType::GEATERTHENEQ => left_node.gte(&right_node),
+            TokenType::LESSTHENEQ => left_node.lte(&right_node),
+            TokenType::EE => left_node.eq(&right_node),
             _ => VisitResult::Error(RuntimeError::InterptError { 
                 start, 
                 end, 

@@ -58,6 +58,12 @@ pub enum TokenType {
     EQUAL,
     COLON,
     COMMA,
+    NOT,
+    ARROWL,
+    ARROWR,
+    GEATERTHENEQ,
+    LESSTHENEQ,
+    EE,
     EOF
 }
 
@@ -179,6 +185,19 @@ pub enum Node {
         start: Position,
         end: Position,
         node: Box<Node>
+    },
+    For {
+        start: Position,
+        end: Position,
+        iterator: Box<Node>,
+        element_key: String,
+        scope: Box<Node>
+    },
+    While {
+        start: Position,
+        end: Position,
+        scope: Box<Node>,
+        expr: Box<Node>
     }
 }
 

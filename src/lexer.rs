@@ -29,13 +29,53 @@ impl Lexer {
     async fn lex(&mut self) -> anyhow::Result<Vec<Token>> {
         let mut tokens = vec![];
 
-        let mut iter = self.input.chars().into_iter();
+        let mut iter = self.input.chars().into_iter().peekable();
         let mut current = if let Some(value) = iter.next() { value } else { '\0' };
 
         while current != '\0' {
             match current {
                 a if a.is_control() => {}
                 a if a.is_whitespace() => {}
+                '>' => {
+                    let start = self.pos.clone();
+                    match iter.peek() {
+                        Some(value) => {
+                            if value == &'=' {
+                                if let Some(value) = iter.next() {
+                                    current = value;
+                                    self.pos.inc_col();
+                                } else {
+                                    current = '\0';
+                                }
+                                tokens.push(Token::new(TokenType::GEATERTHENEQ, start, self.pos.clone()));
+                               
+                            } else {
+                                tokens.push(Token::new(TokenType::ARROWR, self.pos.clone(), self.pos.clone()))
+                            }
+                        }
+                        None => tokens.push(Token::new(TokenType::ARROWR, self.pos.clone(), self.pos.clone()))
+                    }
+                },
+                '<' => {
+                    let start = self.pos.clone();
+                    match iter.peek() {
+                        Some(value) => {
+                            if value == &'=' {
+                                if let Some(value) = iter.next() {
+                                    current = value;
+                                    self.pos.inc_col();
+                                } else {
+                                    current = '\0';
+                                }
+                                tokens.push(Token::new(TokenType::LESSTHENEQ, start, self.pos.clone()));
+                            } else {
+                                tokens.push(Token::new(TokenType::ARROWL, self.pos.clone(), self.pos.clone()))
+                            }
+                        }
+                        None => tokens.push(Token::new(TokenType::ARROWL, self.pos.clone(), self.pos.clone()))
+                    }
+                },
+                '!' => tokens.push(Token::new(TokenType::NOT, self.pos.clone(), self.pos.clone())),
                 ')' => tokens.push(Token::new(TokenType::RPAREN,self.pos.clone(),self.pos.clone())),
                 '(' => tokens.push(Token::new(TokenType::LPAREN,self.pos.clone(),self.pos.clone())),
                 ']' => tokens.push(Token::new(TokenType::RBRACKET,self.pos.clone(),self.pos.clone())),
@@ -49,7 +89,25 @@ impl Lexer {
                 ',' => tokens.push(Token::new(TokenType::COMMA,self.pos.clone(),self.pos.clone())),
                 ':' => tokens.push(Token::new(TokenType::COLON,self.pos.clone(),self.pos.clone())),
                 ';' => tokens.push(Token::new(TokenType::SEMICOLON,self.pos.clone(),self.pos.clone())),
-                '=' => tokens.push(Token::new(TokenType::EQUAL,self.pos.clone(),self.pos.clone())),
+                '=' => {
+                    let start = self.pos.clone();
+                    match iter.peek() {
+                        Some(value) => {
+                            if value == &'=' {
+                                if let Some(value) = iter.next() {
+                                    current = value;
+                                    self.pos.inc_col();
+                                } else {
+                                    current = '\0';
+                                }
+                                tokens.push(Token::new(TokenType::EE, start, self.pos.clone()));
+                            } else {
+                                tokens.push(Token::new(TokenType::EQUAL,self.pos.clone(),self.pos.clone()))
+                            }
+                        }
+                        None => tokens.push(Token::new(TokenType::EQUAL,self.pos.clone(),self.pos.clone()))
+                    }
+                }
                 '\n' => {
                     tokens.push(Token::new(TokenType::NEWLINE,self.pos.clone(),self.pos.clone()));
                     self.pos.inc_col();
@@ -175,7 +233,7 @@ mod tests {
     async fn test_lexer() {
         init();
 
-        let lexer = Lexer::parse(r#" fn hello() { reutrn 1 + 1; }"#.to_string(),PathBuf::from("<INTERNAL_TEST>")).await;
+        let lexer = Lexer::parse(r#"a == b"#.to_string(),PathBuf::from("<INTERNAL_TEST>")).await;
 
         match lexer {
             anyhow::Result::Ok(value) => {

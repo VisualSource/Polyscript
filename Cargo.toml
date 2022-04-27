@@ -14,8 +14,13 @@ serde = { version = "1.0.136", features = ["derive"] }
 serde_json = "1.0.79"
 simple_logger = "2.1.0"
 async-recursion = "1.0.0"
+async-trait = "0.1.53"
 colored = "2.0.0"
 dyn-clone = "1.0.5"
+reqwest = { version = "0.11.10", features = ["json"] }
 
 [build-dependencies]
 embed-resource = "1.7.2"
+
+[profile.release]
+debug = true

@@ -327,6 +327,74 @@ impl Parser<'_> {
                 })
 
             }
+            a if a.is_keyword("while") => {
+                self.next();
+
+                let expr = self.expr();
+
+                if expr.is_err() {
+                    return expr;
+                }
+
+                let scope = self.scope();
+
+                if scope.is_err() {
+                    return scope;
+                }
+
+                Ok(Node::While { 
+                    start, 
+                    end: self.current_token.end.clone(), 
+                    scope: Box::new(scope.expect("Failed to get node")), 
+                    expr: Box::new(expr.expect("Failed to get node")) 
+                })
+
+            }
+            a if a.is_keyword("for") => {
+                self.next();
+                // KEYWORD IDENTIFIER KEYWORD expr SCOPE
+
+                let element_name = match &self.current_token.token {
+                    TokenType::IDENTIFIER(value) => value.clone(),
+                    _ => {
+                        bail!(ParserError::SyntaxError { 
+                            pos: self.current_token.start.clone(), 
+                            reason: "Expected a identifer after 'for'" 
+                        });
+                    }  
+                };
+
+                self.next();
+
+                if !self.current_token.is_keyword("in") {
+                    bail!(ParserError::SyntaxError { 
+                        pos: self.current_token.start.clone(), 
+                        reason: "Expected keyword 'in' after identifer" 
+                    });
+                }
+
+                self.next();
+
+                let iterator = self.expr();
+
+                if iterator.is_err() {
+                    return iterator;
+                }
+
+                let scope = self.scope();
+
+                if scope.is_err() {
+                    return scope;
+                }
+
+                Ok(Node::For { 
+                    start, 
+                    end: self.current_token.end.clone(), 
+                    iterator: Box::new(iterator.expect("Failed to get node")), 
+                    element_key: element_name, 
+                    scope: Box::new(scope.expect("Failed to get node")) 
+                })
+            }
             a if a.is_keyword("if") => {
                 self.next();
 
@@ -498,9 +566,52 @@ impl Parser<'_> {
     }
 
     fn comp_expr(&mut self) -> ParseResult {
-        //let start = self.current_token.start.clone();
+        let start = self.current_token.start.clone();
 
-        let left = self.arith_expr();
+        if self.current_token.is(TokenType::NOT) {
+            let op = self.current_token.clone();
+            self.next();
+            let com = self.comp_expr();
+            if com.is_err() {
+                return com;
+            }
+
+            return Ok(Node::UnaryOperation { 
+                operator: op, 
+                value: Box::new(com.expect("Failed to get node")), 
+                start, 
+                end: self.current_token.end.clone() 
+            });
+        }
+
+        let mut left = self.arith_expr();
+
+        while self.current_token.is(TokenType::EE) || 
+              self.current_token.is(TokenType::GEATERTHENEQ) || 
+              self.current_token.is(TokenType::LESSTHENEQ) || 
+              self.current_token.is(TokenType::ARROWL) || 
+              self.current_token.is(TokenType::ARROWR) {
+            let op = self.current_token.clone();
+            self.next();
+
+            let right = self.arith_expr();
+
+            if right.is_err() {
+                return right;
+            }
+
+            if left.is_err() {
+                return left;
+            }
+
+            left = Ok(Node::BinOperation { 
+                left: Box::new(left.expect("Failed to get Node")), 
+                operator: op.token, 
+                right: Box::new(right.expect("Failed to get Node")), 
+                start: start.clone(), 
+                end: self.current_token.end.clone() 
+            });
+        }
 
         left
     }

@@ -36,7 +36,7 @@ pub enum RuntimeError {
         reason: &'static str,
         ctx: &'static str
     },
-    #[error("Attempted to {op} a non number type")]
+    #[error("Attempted operation '{op}' on a non number type")]
     OperationError {
         op: &'static str,
     },
