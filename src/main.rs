@@ -11,38 +11,16 @@ mod lexer;
 mod parser;
 mod interpreter;
 mod standard_lib;
+mod runner;
 use std::env;
 use std::sync::{Arc,Mutex};
-use interpreter::{Context, Interperter, DataType };
+use interpreter::Context;
 use std::path::PathBuf;
 use std::io::{ stdin, stdout, Write };
 use tokio::fs::read_to_string;
-
 use simple_logger::SimpleLogger;
 
-async fn run(input: String, file: PathBuf, ctx: Arc<Mutex<Context>>) -> anyhow::Result<DataType> {
-    let lexer = match lexer::Lexer::parse(input, file).await {
-        Ok(value) => value,
-        Err(err) => {
-            error!("{}",err);
-            bail!(err);
-        }
-    };
-
-    //debug!("{:?}",lexer);
-
-    let parser = match parser::Parser::parse(&lexer) {
-        Ok(value) => value,
-        Err(err) => {
-            error!("{}",err);
-            bail!(err);
-        }
-    };
-
-    //debug!("{:?}",parser);
-
-    Interperter::run(parser, ctx).await
-}
+use crate::runner::parse;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -51,7 +29,10 @@ async fn main() -> anyhow::Result<()> {
     let file = if let Some(value) = args.get(1) {
         PathBuf::from(value)
     } else {
-        PathBuf::from("<INTERNAL>")
+        match env::current_dir() {
+            Ok(value) => value,
+            Err(_err) => PathBuf::from("/")
+        }
     };
 
     let ctx = Arc::new(
@@ -62,7 +43,7 @@ async fn main() -> anyhow::Result<()> {
     if file.is_file() {
         match read_to_string(file.clone()).await {
             Ok(value) => {
-                match run(value,file,ctx).await {
+                match runner::parse(value,file,ctx).await {
                     Ok(_) => return Ok(()),
                     Err(err) => return Err(err)
                 }
@@ -73,14 +54,14 @@ async fn main() -> anyhow::Result<()> {
 
     let mut buffer = String::default();
 
-    println!("Polyscript V2 0.0.1: type '.exit' to close");
+    println!("Vip 0.0.1: type '.exit' to close");
     loop {
         print!("> ");
         stdout().flush().expect("Faild to flush");
         match stdin().read_line(&mut buffer) {
             Ok(_) => {
                 if buffer.trim() == ".exit" { break; }
-                match run(buffer.clone(),file.clone(),ctx.clone()).await {
+                match parse(buffer.clone(),file.clone(),ctx.clone()).await {
                     Ok(value) => println!("{}",value),
                     Err(err) => eprintln!("{}",err)
                 }

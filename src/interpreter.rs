@@ -21,7 +21,7 @@ use std::{
     borrow::{
         BorrowMut, 
         Borrow
-    }
+    }, ops::Add, fs
 };
 use dyn_clone::DynClone;
 use colored::*;
@@ -29,8 +29,10 @@ use async_recursion::async_recursion;
 use async_trait::async_trait;
 use crate::standard_lib::{
     io::insert_io,
-    http::insert_http
+    http::insert_http,
+    fs::insert_fs
 };
+use crate::runner;
 
 #[async_trait]
 pub trait Functional: Debug + DynClone + Send + Sync {
@@ -73,6 +75,7 @@ pub enum DataType {
         args: Vec<String>,
         method: Box<dyn Functional>
     },
+    NAMESPACE(Ctx),
     NULL
 }
 
@@ -99,22 +102,35 @@ impl DataType {
     }
 
     fn add(&self,right: &DataType) -> VisitResult<DataType> {
-        let self_value = match self { 
-            DataType::INTEGER { value } => value,
-            _ => return VisitResult::Error(RuntimeError::OperationError { 
-                op: "add"
-            })
-        };
-        let right_value = match right { 
-            DataType::INTEGER { value } => value,
-            _ => return VisitResult::Error(RuntimeError::OperationError { 
-                op: "add"
-            })
-        };
+        match self { 
+            DataType::INTEGER { value: self_value } => {
+                let right_value = match right { 
+                    DataType::INTEGER { value } => value,
+                    _ => return VisitResult::Error(RuntimeError::OperationError { 
+                        op: "add"
+                    })
+                };
 
-        VisitResult::Ok(DataType::INTEGER { 
-            value: self_value + right_value  
-        })
+                VisitResult::Ok(DataType::INTEGER { 
+                    value: self_value + right_value  
+                })
+            },
+            DataType::STRING { value: self_value } => {
+                let right_value = match right { 
+                    DataType::STRING { value } => value,
+                    _ => return VisitResult::Error(RuntimeError::OperationError { 
+                        op: "add"
+                    })
+                };
+
+                VisitResult::Ok(DataType::STRING { 
+                    value: self_value.clone().add(right_value.as_str())
+                })
+            },
+            _ => return VisitResult::Error(RuntimeError::OperationError { 
+                op: "add"
+            })
+        }
     }
     fn div(&self, right: &DataType) -> VisitResult<DataType> {
         let self_value = match self { 
@@ -278,11 +294,17 @@ impl Display for DataType {
                 write!(f,"{{ {} }}",props)
             },
             Self::FUNCTION {name,args: _b, body: _a} => write!(f,"{} {}{}","<function".bright_black(), name.bright_cyan(),">".bright_black()),
+            Self::NAMESPACE( ctx ) => {
+                match ctx.lock() {
+                    Err(err) => write!(f,"{}","Failed to access namespace context".red()),
+                    Ok(lock)=>write!(f,"{} {}{}","<namespace".bright_black(),lock.name.white(),">".bright_black())
+                }
+            }
            // _ => write!(f, "<MISSING>")
         }
     }
 }
-
+#[derive(Debug)]
 pub struct Property {
     pub writable: bool,
     pub value: DataType
@@ -296,6 +318,7 @@ impl Property {
     }
 }
 
+#[derive(Debug)]
 pub struct Context {
     parent: Option<Arc<Mutex<Self>>>,
     name: String,
@@ -307,6 +330,17 @@ pub struct Context {
 pub type Ctx = Arc<Mutex<Context>>;
 
 impl Context {
+    pub fn add_import(&mut self, file: String) -> anyhow::Result<bool> {
+        match &self.parent {
+            Some(parent) => {
+                match parent.lock(){
+                    Ok(mut lock) => lock.add_import(file),
+                    Err(_err) => bail!("Failed to get context")
+                }
+            }
+            None => Ok(self.imports.insert(file))
+        }
+    }
     pub fn new(parent: Option<Arc<Mutex<Context>>>, name: String, file: PathBuf) -> Self {
         Self {
             parent,
@@ -334,6 +368,7 @@ impl Context {
 
         insert_io(&mut scope);
         insert_http(&mut scope);
+        insert_fs(&mut scope);
 
         Self {
             parent: None,
@@ -432,6 +467,9 @@ impl Interperter {
     async fn visit(&self, node: Node, ctx: Ctx) -> VisitResult<DataType> {
         match node {
            Node::Empty => VisitResult::Ok(DataType::NULL),
+           Node::PropAccess { start, end, path } => self.visit_prop(ctx,start,end,path).await,
+           Node::Import { start, end, from, namespace } => self.visit_import(ctx, start, end, from, namespace).await,
+           Node::Namespace { start, end, identifer, scope } => self.visit_namespace(ctx, start, end, identifer, scope).await,
            Node::While { start, end, scope, expr } => self.visit_while(ctx,start,end,scope,expr).await,
            Node::For { start, end, iterator, element_key, scope } => self.visit_for(ctx,start,end,iterator,element_key,scope).await,
            Node::If { start, end, expr, body } => self.visit_if(ctx,start,end,expr,body).await,
@@ -451,12 +489,57 @@ impl Interperter {
            Node::VarableDeclarement { identifer, is_const, value, start, end } => self.visit_varable_declarement(ctx, identifer, is_const, value, start, end).await,
         }
     }
+    async fn visit_prop(&self, ctx: Ctx, _start: Position, _end: Position, path: Vec<String>) -> VisitResult<DataType> {
+        let root = match path.get(0) {
+            Some(value) => value,
+            None => return VisitResult::Error(RuntimeError::TypeError { reason: "Expexted a namespace,object, or class ref".to_string() })
+        };
+        let access = match path.get(1) {
+            Some(value) => value,
+            None => return VisitResult::Error(RuntimeError::TypeError { reason: "Expexted a identifer".to_string() })
+        };
+
+        let lock = match ctx.lock() {
+            Ok(value) => value,
+            Err(_) => return VisitResult::Error(RuntimeError::ReferenceError { 
+                reason: "Failed to access context".to_string() 
+            }) 
+        };
+
+        match lock.get(root) {
+            Ok(value) => {
+                match value {
+                    DataType::NAMESPACE(ns) => {
+                        let ns_lock = match ns.lock() {
+                            Ok(value) => value,
+                            Err(_) => return VisitResult::Error(RuntimeError::ReferenceError { 
+                                reason: "Failed to access context".to_string() 
+                            }) 
+                        };
+
+                        match ns_lock.get(access){
+                            Ok(data) => VisitResult::Ok(data),
+                            Err(err) => VisitResult::Error(RuntimeError::Error(err))
+                        }
+                    }
+                    DataType::OBJECT { value: obj } => {
+                        match obj.get(access) {
+                            Some(data) => VisitResult::Ok(data.to_owned()),
+                            None => VisitResult::Error(RuntimeError::ReferenceError { reason: format!("'{}' does not exist on object",access) })
+                        }
+                    }
+                    _ => VisitResult::Error(RuntimeError::SyntaxError { reason: "Can't use '.' on given type".to_string() })
+                }
+            }
+            Err(err) => VisitResult::Error(RuntimeError::Error(err))
+        }
+    }
     async fn visit_while(&self, ctx: Ctx, _start: Position, _end: Position, scope: Box<Node>, expr: Box<Node>) -> VisitResult<DataType> {
         let wctx = Arc::new(Mutex::new(
             Context::new(Some(ctx.clone()),"<while>".into(),PathBuf::default())
         ));
 
-        loop {
+       loop {
             let node = expr.clone();
             match self.visit(*node,ctx.clone()).await {
                 VisitResult::Ok(value) => {
@@ -467,7 +550,6 @@ impl Interperter {
                 VisitResult::Error(err) => return VisitResult::Error(err),
                 VisitResult::Break(_) => return VisitResult::Error(RuntimeError::SyntaxError { reason: "Invaild statment".into() })
             }
-
 
             let snode = scope.clone();
 
@@ -989,6 +1071,103 @@ impl Interperter {
                 reason: "Failed to generate string (invaild type)", 
                 ctx: "<main>" 
             })
+        }
+    }
+    async fn visit_import(&self, ctx: Ctx, _start: Position, _end: Position, from: PathBuf, namespace: String) -> VisitResult<DataType> {
+        
+        let path = match ctx.lock() {
+            Ok(lock) => {
+                let mut file = lock.file.clone();
+                if !file.is_dir() {
+                    file.pop();
+                }
+                match file.join(from.clone()).canonicalize() {
+                    Ok(value) => value,
+                    Err(err) => return VisitResult::Error(RuntimeError::StdError{ error: err, module: "import" })
+                }
+            }
+            Err(_) => return VisitResult::Error(RuntimeError::ReferenceError { 
+                reason: "Failed to access context".to_string() 
+            }) 
+        };
+
+        // if the import does not point to a file we cant do anything
+        if !path.is_file() {
+            return VisitResult::Error(RuntimeError::SyntaxError { reason: "Could not file".to_string() });
+        }
+
+        // get the absulute path; this is to help not importing file multiple times
+       
+        let abs_str = path.to_str().expect("Failed to convert to string").to_string();
+
+        let ns = Arc::new(
+            Mutex::new(
+                Context::new(Some(ctx.clone()),namespace.clone(),PathBuf::default())
+            )
+        );
+
+        let file = match fs::read_to_string(path.clone()) {
+            Ok(value) => value,
+            Err(err) => return VisitResult::Error(RuntimeError::StdError { module: "import", error: err })
+        };
+
+        if let Err(err) = runner::parse(file, path, ns.clone()).await {
+            return VisitResult::Error(RuntimeError::Error(err));
+        }
+
+        /*
+            Should be checking if the import exists before parseing but calling lock before a await block gets a error of 
+            future cannot be sent between threads safely within `impl Future<Output = [async output]>`, the trait `Send` is not implemented for `std::sync::MutexGuard<'_, interpreter::Context>`
+            required for the cast to the object type `dyn Future<Output = VisitResult<DataType>> + Send
+
+            so await stuff needs to be done before hand
+        */
+
+        let mut lock = match ctx.lock() {
+            Ok(value) => value,
+            Err(_) => return VisitResult::Error(RuntimeError::ReferenceError { 
+                reason: "Failed to access context".to_string() 
+            }) 
+        };
+
+        match lock.add_import(abs_str) {
+            Ok(imported) => {
+                if !imported {
+                    return VisitResult::Error(RuntimeError::InternalError { reason: "Already imported module" })
+                }
+            }
+            Err(err) => return VisitResult::Error(RuntimeError::Error(err))
+        };
+
+        if let Err(err) = lock.insert(namespace, DataType::NAMESPACE(ns), false) {
+            return VisitResult::Error(RuntimeError::Error(err));
+        }
+        
+        VisitResult::Ok(DataType::NULL)
+    }
+    async fn visit_namespace(&self, ctx: Ctx, _start: Position, _end: Position, identifer: String, scope: Box<Node>) -> VisitResult<DataType> {
+
+        let namespace_ctx = Arc::new(
+            Mutex::new(
+                Context::new(Some(ctx.clone()),identifer.clone(),PathBuf::default())
+            )
+        );
+
+        match self.visit(*scope, namespace_ctx.clone()).await {
+            VisitResult::Error(err) => return VisitResult::Error(err),
+            _ => {}
+        };
+
+        let mut lock = match ctx.lock() {
+            Ok(value) => value,
+            Err(_) => return VisitResult::Error(RuntimeError::ReferenceError { 
+                reason: "Failed to access context".to_string() 
+            }) 
+        };
+
+        match lock.insert(identifer, DataType::NAMESPACE(namespace_ctx.clone()), true) {
+            Ok(value) => VisitResult::Ok(value),
+            Err(err) => VisitResult::Error(RuntimeError::Error(err))
         }
     }
 }

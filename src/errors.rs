@@ -29,6 +29,11 @@ pub enum ParserError {
 
 #[derive(Error,Debug)]
 pub enum RuntimeError {
+    #[error("{module} - {error}")]
+    StdError {
+        module: &'static str,
+        error: std::io::Error
+    },
     #[error("{reason} at {start}-{end} in {ctx:?}")]
     InterptError {
         start: Position,

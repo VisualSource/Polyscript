@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::slice::Iter;
 use crate::shared::{ Token, TokenType, Node };
 use crate::errors::ParserError;
@@ -417,6 +418,72 @@ impl Parser<'_> {
                 })
 
             }
+            a if a.is_keyword("import") => {
+                self.next();
+                
+                let namespace = match &self.current_token.token {
+                    TokenType::IDENTIFIER(value) => {
+                        let idnt = value.to_owned();
+                        self.next();
+                        idnt
+                    },
+                    _ => bail!(ParserError::SyntaxError { 
+                        pos: self.current_token.start.clone(), 
+                        reason: "Expected a import" 
+                    })              
+                };
+
+                if !&self.current_token.is_keyword("from") {
+                    bail!(ParserError::SyntaxError { 
+                        pos: self.current_token.start.clone(), 
+                        reason: "Expected a from keyworld" 
+                    });     
+                }
+
+                self.next();
+
+                let import_statment = match &self.current_token.token {
+                    TokenType::STRING(value) => {
+                        let idnt = value.to_owned();
+                        self.next();
+                        idnt
+                    },
+                    _ => bail!(ParserError::SyntaxError { 
+                        pos: self.current_token.start.clone(), 
+                        reason: "Expected a import string" 
+                    })              
+                };
+
+                Ok(Node::Import { start, end: self.current_token.end.clone(), from: PathBuf::from(import_statment), namespace })
+            }
+            a if a.is_keyword("namespace") => {
+                self.next();
+
+                let namespace = match &self.current_token.token {
+                    TokenType::IDENTIFIER(value) => {
+                        let idnt = value.to_owned();
+                        self.next();
+                        idnt
+                    },
+                    _ => bail!(ParserError::SyntaxError { 
+                        pos: self.current_token.start.clone(), 
+                        reason: "Expected a identifier" 
+                    })              
+                };
+
+                let scope = self.scope();
+
+                if scope.is_err() {
+                    return scope;
+                }
+
+                Ok(Node::Namespace { 
+                    start, 
+                    end: self.current_token.end.clone(), 
+                    identifer: namespace, 
+                    scope: Box::new(scope.expect("Failed to get node")) 
+                })
+            }
             _ => Ok(Node::Empty)
         }
     }
@@ -697,9 +764,8 @@ impl Parser<'_> {
                 start: start, 
                 end: self.current_token.end.clone()
             });
-        }
-
-        if self.current_token.is(TokenType::EQUAL) {
+        } else if self.current_token.is(TokenType::EQUAL) {
+            // var = something
             let operator = self.current_token.clone();
             self.next();
 
@@ -717,6 +783,42 @@ impl Parser<'_> {
                     Err(err)
                 }
             };
+        }  
+
+        if self.current_token.is(TokenType::DOT) {
+            // prop access | var.name
+            self.next();
+
+            let mut path: Vec<String> = vec![];
+
+            match &identifer.token {
+                TokenType::IDENTIFIER(value) => {
+                    let idnt = value.to_owned();
+                    path.push(idnt);
+                },
+                _ => bail!(ParserError::SyntaxError { 
+                    pos: self.current_token.start.clone(), 
+                    reason: "Expected a identifier" 
+                })              
+            };
+
+            match &self.current_token.token {
+                TokenType::IDENTIFIER(value) => {
+                    let idnt = value.to_owned();
+                    path.push(idnt);
+                    self.next();
+                },
+                _ => bail!(ParserError::SyntaxError { 
+                    pos: self.current_token.start.clone(), 
+                    reason: "Expected a identifier" 
+                })              
+            };
+           
+            return Ok(Node::PropAccess { 
+                start, 
+                end: self.current_token.end.clone(), 
+                path
+            });
         }
 
         Ok(Node::VarableAccess { 

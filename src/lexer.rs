@@ -22,7 +22,7 @@ impl Lexer {
     }
     fn is_keyword(&self, idit: &String) -> bool {
         match idit.as_str() {
-            "use" | "let" | "const" | "fn" | "class" | "match" | "if" | "else" | "in" | "for" | "while" | "return" | "break" | "continue" => true,
+            "namespace" | "export" | "import" | "from" | "let" | "const" | "fn" | "class" | "match" | "if" | "else" | "in" | "for" | "while" | "return" | "break" | "continue" => true,
             _ => false
         }
     }
@@ -75,6 +75,24 @@ impl Lexer {
                         None => tokens.push(Token::new(TokenType::ARROWL, self.pos.clone(), self.pos.clone()))
                     }
                 },
+                '`' => {
+                    let start = self.pos.clone();
+                    let mut str_buf = String::default();
+
+                    current = if let Some(value) = iter.next() { self.pos.inc_col(); value } else { '\0' };
+
+                    while current != '\0' && current != '`' {
+                        str_buf.push(current);
+
+                        current = if let Some(value) = iter.next() { self.pos.inc_col(); value } else { '\0' };
+                    }
+
+                    current = if let Some(value) = iter.next() { self.pos.inc_col(); value } else { '\0' };
+
+                    tokens.push(Token::new(TokenType::STRING(str_buf),start,self.pos.clone()));
+
+                    continue;
+                }
                 '!' => tokens.push(Token::new(TokenType::NOT, self.pos.clone(), self.pos.clone())),
                 ')' => tokens.push(Token::new(TokenType::RPAREN,self.pos.clone(),self.pos.clone())),
                 '(' => tokens.push(Token::new(TokenType::LPAREN,self.pos.clone(),self.pos.clone())),
@@ -87,6 +105,7 @@ impl Lexer {
                 '/' => tokens.push(Token::new(TokenType::DIV,self.pos.clone(),self.pos.clone())),
                 '*' => tokens.push(Token::new(TokenType::MUL,self.pos.clone(),self.pos.clone())),
                 ',' => tokens.push(Token::new(TokenType::COMMA,self.pos.clone(),self.pos.clone())),
+                '.' => tokens.push(Token::new(TokenType::DOT,self.pos.clone(),self.pos.clone())),
                 ':' => tokens.push(Token::new(TokenType::COLON,self.pos.clone(),self.pos.clone())),
                 ';' => tokens.push(Token::new(TokenType::SEMICOLON,self.pos.clone(),self.pos.clone())),
                 '=' => {
@@ -125,7 +144,7 @@ impl Lexer {
                         current = '\0';
                     }
                   
-                    while current != '\0' && current != '"' {
+                    while current != '\0' && current != '"' && current != '\n' {
                         str_value.push(current);
 
                         if let Some(value) = iter.next() {

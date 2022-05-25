@@ -1,6 +1,5 @@
 
-use std::fmt::{ Display };
-
+use std::{fmt::{ Display }, path::PathBuf};
 #[derive(Default,Debug,Clone)]
 pub struct Position {
     pub row: usize,
@@ -64,6 +63,9 @@ pub enum TokenType {
     GEATERTHENEQ,
     LESSTHENEQ,
     EE,
+    DOT,
+    AND,
+    OR,
     EOF
 }
 
@@ -98,7 +100,7 @@ impl Token {
 }
 
 
-#[derive(Debug,Clone)]
+#[derive(Clone, Debug)]
 pub enum Node {
     Empty,
     Integer {
@@ -198,6 +200,23 @@ pub enum Node {
         end: Position,
         scope: Box<Node>,
         expr: Box<Node>
+    },
+    Namespace {
+        start: Position,
+        end: Position,
+        identifer: String,
+        scope: Box<Node>
+    },
+    Import {
+        start: Position,
+        end: Position,
+        from: PathBuf,
+        namespace: String
+    },
+    PropAccess {
+        start: Position,
+        end: Position,
+        path: Vec<String>
     }
 }
 
