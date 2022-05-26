@@ -296,7 +296,7 @@ impl Display for DataType {
             Self::FUNCTION {name,args: _b, body: _a} => write!(f,"{} {}{}","<function".bright_black(), name.bright_cyan(),">".bright_black()),
             Self::NAMESPACE( ctx ) => {
                 match ctx.lock() {
-                    Err(err) => write!(f,"{}","Failed to access namespace context".red()),
+                    Err(_err) => write!(f,"{}","Failed to access namespace context".red()),
                     Ok(lock)=>write!(f,"{} {}{}","<namespace".bright_black(),lock.name.white(),">".bright_black())
                 }
             }

@@ -41,12 +41,8 @@ impl Lexer {
                     match iter.peek() {
                         Some(value) => {
                             if value == &'=' {
-                                if let Some(value) = iter.next() {
-                                    current = value;
-                                    self.pos.inc_col();
-                                } else {
-                                    current = '\0';
-                                }
+                                iter.next(); 
+                                self.pos.inc_col();
                                 tokens.push(Token::new(TokenType::GEATERTHENEQ, start, self.pos.clone()));
                                
                             } else {
@@ -61,12 +57,8 @@ impl Lexer {
                     match iter.peek() {
                         Some(value) => {
                             if value == &'=' {
-                                if let Some(value) = iter.next() {
-                                    current = value;
-                                    self.pos.inc_col();
-                                } else {
-                                    current = '\0';
-                                }
+                                iter.next();
+                                self.pos.inc_col();
                                 tokens.push(Token::new(TokenType::LESSTHENEQ, start, self.pos.clone()));
                             } else {
                                 tokens.push(Token::new(TokenType::ARROWL, self.pos.clone(), self.pos.clone()))
@@ -135,12 +127,8 @@ impl Lexer {
                     match iter.peek() {
                         Some(value) => {
                             if value == &'=' {
-                                if let Some(value) = iter.next() {
-                                    current = value;
-                                    self.pos.inc_col();
-                                } else {
-                                    current = '\0';
-                                }
+                                iter.next();
+                                self.pos.inc_col();
                                 tokens.push(Token::new(TokenType::EE, start, self.pos.clone()));
                             } else {
                                 tokens.push(Token::new(TokenType::EQUAL,self.pos.clone(),self.pos.clone()))
