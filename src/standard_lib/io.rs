@@ -31,8 +31,6 @@ impl Functional for ReadLine {
     }
 }
 
-
-
 #[derive(Debug,Clone)]
 struct PrintLn {}
 
@@ -89,7 +87,7 @@ impl Functional for Print {
 
 
 pub fn insert_io(data: &mut HashMap<String,Property>) {
-    data.insert("printLn".into(), Property { 
+    data.insert("println".into(), Property { 
         value: PrintLn::new(),
         writable: false
     });

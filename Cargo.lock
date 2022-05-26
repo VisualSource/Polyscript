@@ -578,25 +578,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1df8c4ec4b0627e53bdf214615ad287367e482558cf84b109250b37464dc03ae"
 
 [[package]]
-name = "polyscriptv2"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-recursion",
- "async-trait",
- "colored",
- "dyn-clone",
- "embed-resource",
- "log",
- "reqwest",
- "serde",
- "serde_json",
- "simple_logger",
- "thiserror",
- "tokio",
-]
-
-[[package]]
 name = "proc-macro2"
 version = "1.0.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1039,6 +1020,25 @@ name = "vcpkg"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
+
+[[package]]
+name = "vip"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-recursion",
+ "async-trait",
+ "colored",
+ "dyn-clone",
+ "embed-resource",
+ "log",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "simple_logger",
+ "thiserror",
+ "tokio",
+]
 
 [[package]]
 name = "vswhom"

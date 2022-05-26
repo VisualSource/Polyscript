@@ -102,7 +102,29 @@ impl Lexer {
                 '}' => tokens.push(Token::new(TokenType::RCURLY,self.pos.clone(),self.pos.clone())),
                 '+' => tokens.push(Token::new(TokenType::PLUS,self.pos.clone(),self.pos.clone())),
                 '-' => tokens.push(Token::new(TokenType::MINUS,self.pos.clone(),self.pos.clone())),
-                '/' => tokens.push(Token::new(TokenType::DIV,self.pos.clone(),self.pos.clone())),
+                '/' => {
+                    let start = self.pos.clone();
+                    match iter.peek() {
+                        Some(value) => {
+                            match value {
+                                '/' => {
+                                    while current != '\n' && current != '\0' {
+                                        println!("{}",current.escape_debug());
+                                        if let Some(value) = iter.next() {
+                                            current = value;
+                                            self.pos.inc_col();
+                                        } else {
+                                            current = '\0';
+                                        }
+                                    }
+                                    continue;
+                                }
+                                _ => tokens.push(Token::new(TokenType::DIV,start,self.pos.clone()))
+                            }
+                        }
+                        None => tokens.push(Token::new(TokenType::DIV,start,self.pos.clone()))
+                    }
+                },
                 '*' => tokens.push(Token::new(TokenType::MUL,self.pos.clone(),self.pos.clone())),
                 ',' => tokens.push(Token::new(TokenType::COMMA,self.pos.clone(),self.pos.clone())),
                 '.' => tokens.push(Token::new(TokenType::DOT,self.pos.clone(),self.pos.clone())),

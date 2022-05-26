@@ -30,7 +30,7 @@ use async_trait::async_trait;
 use crate::standard_lib::{
     io::insert_io,
     http::insert_http,
-    fs::insert_fs
+    fs::import_fs
 };
 use crate::runner;
 
@@ -368,8 +368,7 @@ impl Context {
 
         insert_io(&mut scope);
         insert_http(&mut scope);
-        insert_fs(&mut scope);
-
+      
         Self {
             parent: None,
             name: "<main>".to_string(),
@@ -1074,6 +1073,29 @@ impl Interperter {
         }
     }
     async fn visit_import(&self, ctx: Ctx, _start: Position, _end: Position, from: PathBuf, namespace: String) -> VisitResult<DataType> {
+    
+        if from == PathBuf::from("fs") {
+            let mut lock = match ctx.lock() {
+                Ok(value) => value,
+                Err(_) => return VisitResult::Error(RuntimeError::ReferenceError { 
+                    reason: "Failed to access context".to_string() 
+                }) 
+            };
+            match lock.add_import("fs".into()) {
+                Ok(imported) => {
+                    if !imported {
+                        return VisitResult::Error(RuntimeError::InternalError { reason: "Already imported module" })
+                    }
+                }
+                Err(err) => return VisitResult::Error(RuntimeError::Error(err))
+            };
+    
+            if let Err(err) = lock.insert(namespace, import_fs(&ctx), false) {
+                return VisitResult::Error(RuntimeError::Error(err));
+            }
+
+            return VisitResult::Ok(DataType::NULL)
+        }
         
         let path = match ctx.lock() {
             Ok(lock) => {
@@ -1095,9 +1117,7 @@ impl Interperter {
         if !path.is_file() {
             return VisitResult::Error(RuntimeError::SyntaxError { reason: "Could not file".to_string() });
         }
-
         // get the absulute path; this is to help not importing file multiple times
-       
         let abs_str = path.to_str().expect("Failed to convert to string").to_string();
 
         let ns = Arc::new(

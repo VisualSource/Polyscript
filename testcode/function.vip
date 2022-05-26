@@ -1,3 +1,9 @@
 import Test from "./test.vip";
 
-Test.test();
+Test.test(); 
+
+fn test(input,test){
+
+}
+
+namespace World {}
