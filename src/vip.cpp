@@ -1,17 +1,12 @@
-#include <iostream>
+#include <vip/vip.hpp>
 #include <string.h>
-#include <string>
+#include <iostream>
 #include <ctype.h>
-#include <list>
-#include "./helpers/Token.hpp"
-#include "./helpers/Node.hpp"
+#include <deque>
+#include "./tokenizer/Token.hpp"
+#include "./ast/Parser.hpp"
 
-const char ALLOWED_SYMBOLS[] = "{}()!;+=,-*&|#";
-
-bool isKeyword(std::string &value)
-{
-    return value == "let" || value == "while" || value == "fn" || value == "if" || value == "else";
-}
+static char ALLOWED_SYMBOLS[] = "{}()!;+=,-*&|#";
 
 bool next(std::string &input, unsigned int &index, char &current)
 {
@@ -24,45 +19,14 @@ bool next(std::string &input, unsigned int &index, char &current)
     return true;
 }
 
-Token &consume(std::list<Token> &list)
+void vip::vipJit(std::string input)
 {
-    auto front = list.front();
-    list.pop_front();
-    return front;
-}
-
-bool consume_if(std::list<Token> &list, unsigned int type, std::string value)
-{
-
-    Token item = list.front();
-    bool result = item.getType() == type && item.getValue() == value;
-
-    if (result)
-    {
-        list.pop_front();
-    }
-
-    return result;
-}
-
-void parse_scope(std::list<Token> &list)
-{
-    // consume {
-
-    // consume }
-}
-
-int main(int, char **)
-{
-    std::string input = "fn main(){ print(\"Hello, World\"); print(100.00) }";
-    std::list<Token> tokens = std::list<Token>();
-
+    std::deque<Token> *tokens = new std::deque<Token>();
     unsigned int index = 0;
     char current = input[0];
 
     while (current != '\0')
     {
-
         if (isalpha(current))
         {
             std::string value = "";
@@ -72,7 +36,7 @@ int main(int, char **)
                 next(input, index, current);
             }
 
-            tokens.push_back(Token(value, TYPE_IDENTIFER));
+            tokens->push_back(Token(value, TYPE_IDENTIFER));
             continue;
         }
 
@@ -89,7 +53,7 @@ int main(int, char **)
 
             next(input, index, current);
 
-            tokens.push_back(Token(value, TYPE_STRING));
+            tokens->push_back(Token(value, TYPE_STRING));
 
             continue;
         }
@@ -110,19 +74,26 @@ int main(int, char **)
                 next(input, index, current);
             }
 
-            tokens.push_back(Token(value, TYPE_NUMBER));
+            tokens->push_back(Token(value, TYPE_NUMBER));
             continue;
         }
 
         if (strchr(ALLOWED_SYMBOLS, current) != nullptr)
         {
-            tokens.push_back(Token(current, TYPE_SYMBOLE));
+            tokens->push_back(Token(current, TYPE_SYMBOLE));
         }
 
         next(input, index, current);
     }
 
-    // key words "let","while","fn"
+    ast::Parser parser = ast::Parser(tokens);
 
-    std::list<Node> ast = std::list<Node>();
+    ast::Program program = parser.parse();
+
+    for (auto &&i : program.getStatements())
+    {
+        std::cout << i->toString() << std::endl;
+    }
+
+    delete tokens;
 }
