@@ -16,6 +16,8 @@ namespace ast
             if (expression != nullptr)
                 delete expression;
         }
+
+        std::string toString(int padding = 0) override;
     };
 
 }

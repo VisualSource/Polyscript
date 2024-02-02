@@ -19,9 +19,6 @@ namespace ast
             if (rhs != nullptr)
                 delete rhs;
         }
-        std::string toString(int padding = 0) override
-        {
-            return "<BinaryExpression\n" + lhs->toString(padding + 4) + "\n" + rhs->toString(padding + 4) + ">";
-        }
+        std::string toString(int padding = 0) override;
     };
 } // namespace ast

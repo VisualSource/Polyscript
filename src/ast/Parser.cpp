@@ -3,6 +3,9 @@
 #include "./Identifier.hpp"
 #include "./ExpressionStatement.hpp"
 #include "./BinaryExpression.hpp"
+#include "./Block.hpp"
+#include "./FunctionDeclaration.hpp"
+#include "./IfStatement.hpp"
 #include <string>
 #include <string.h>
 
@@ -108,22 +111,7 @@ namespace ast
         if (is(TYPE_IDENTIFER))
         {
             std::string value = current.getValue();
-            if (is_next(TYPE_SYMBOLE, '('))
-            {
-                consume(); // eat '('
-
-                // parse args,
-                // ParseStatement
-
-                if (!is(TYPE_SYMBOLE, ')'))
-                {
-                    return nullptr;
-                }
-                consume(); // eat ')'
-
-                // return function call;
-            }
-
+            consume();
             return new Identifier(value);
         }
 
@@ -184,12 +172,73 @@ namespace ast
 
     bool Parser::ParseBlock(std::vector<Node *> &statements, bool requireBrackets)
     {
-        if (requireBrackets && !is(TYPE_SYMBOLE, '{'))
-            return false;
+        if (requireBrackets)
+        {
+            if (!is(TYPE_SYMBOLE, '{'))
+                return false;
+            consume();
+        }
 
         // keyword parse
         if (is_keyword())
         {
+            auto key = current.getValue();
+            if (key == "fn")
+            {
+                consume();
+
+                auto name = ParseStatement();
+                if (Identifier *d = static_cast<Identifier *>(name); d != nullptr)
+                {
+
+                    if (!is(TYPE_SYMBOLE, '('))
+                        return false;
+                    consume();
+                    if (!is(TYPE_SYMBOLE, ')'))
+                        return false;
+                    consume();
+
+                    std::vector<Node *> body = std::vector<Node *>();
+                    if (!ParseBlock(body, true))
+                        return false;
+
+                    auto block = new Block(body);
+
+                    statements.push_back(new FunctionDeclartion(d, block));
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (key == "if")
+            {
+                consume();
+                if (!is(TYPE_SYMBOLE, '('))
+                    return false;
+                consume();
+
+                auto condition = ParseStatement();
+
+                if (!is(TYPE_SYMBOLE, ')'))
+                    return false;
+                consume();
+
+                std::vector<Node *> block = std::vector<Node *>();
+                if (ParseBlock(block, true))
+                    return false;
+
+                Block *b = new Block(block);
+
+                statements.push_back(new IfStatement(condition, b, nullptr));
+
+                return false;
+            }
+            else
+            {
+                return false;
+            }
         }
         else
         {
@@ -201,8 +250,13 @@ namespace ast
             }
         }
 
-        if (requireBrackets && !is(TYPE_SYMBOLE, '}'))
-            return false;
+        if (requireBrackets)
+        {
+            if (!is(TYPE_SYMBOLE, '}'))
+                return false;
+            consume();
+        }
+
         return true;
     }
 

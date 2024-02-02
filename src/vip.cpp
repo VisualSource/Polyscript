@@ -3,6 +3,8 @@
 #include <iostream>
 #include <ctype.h>
 #include <deque>
+#include "./ast/BinaryExpression.hpp"
+#include "./ast/NumericLiteral.hpp"
 #include "./tokenizer/Token.hpp"
 #include "./ast/Parser.hpp"
 

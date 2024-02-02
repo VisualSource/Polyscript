@@ -3,7 +3,7 @@
 
 int main()
 {
-    std::string input = "1 + 1;";
+    std::string input = "1+1;";
 
     vip::vipJit(input);
 
