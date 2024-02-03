@@ -1,22 +1,26 @@
-#include "./Parser.hpp"
-#include "./NumericLiteral.hpp"
-#include "./Identifier.hpp"
-#include "./ExpressionStatement.hpp"
-#include "./BinaryExpression.hpp"
-#include "./Block.hpp"
-#include "./FunctionDeclaration.hpp"
-#include "./IfStatement.hpp"
-#include <string>
 #include <string.h>
+#include <string>
+#include <exception>
+#include "./Parser.hpp"
+
+#include "./ExpressionStatement.hpp"
+#include "./VariableDeclaration.hpp"
+#include "./BinaryExpression.hpp"
+#include "./ReturnStatement.hpp"
+#include "./NumericLiteral.hpp"
+#include "./StringLiteral.hpp"
+#include "./Identifier.hpp"
+#include "./Parameter.hpp"
+#include "./Block.hpp"
 
 namespace ast
 {
 
     Parser::Parser(std::deque<Token> *tokens) : tokens(tokens), current(Token())
     {
+        // setup first token
         consume();
     }
-
     void Parser::consume()
     {
         if (tokens->empty())
@@ -26,7 +30,6 @@ namespace ast
         current = Token(tokens->front());
         tokens->pop_front();
     }
-
     bool Parser::is(unsigned int type)
     {
         return current.getType() == type;
@@ -34,6 +37,10 @@ namespace ast
     bool Parser::is(unsigned int type, char value)
     {
         return is(type) && current.getValue().at(0) == value;
+    }
+    bool Parser::is(unsigned int type, std::string value)
+    {
+        return is(type) && current.getValue() == value;
     }
     bool Parser::is_next(unsigned int type)
     {
@@ -63,10 +70,22 @@ namespace ast
 
         return strchr(check, ref.getValue().at(0)) != nullptr;
     }
-    bool Parser::is_keyword()
+    int Parser::is_keyword()
     {
         auto value = current.getValue();
-        return is(TYPE_IDENTIFER) && (value == "fn" || value == "let" || value == "if");
+        if (!(is(TYPE_IDENTIFER) && (value == "fn" || value == "let" || value == "if" || value == "return")))
+            return -1;
+
+        if (value == "fn")
+            return 0;
+        if (value == "let")
+            return 1;
+        if (value == "if")
+            return 2;
+        if (value == "return")
+            return 3;
+
+        return -1;
     }
     bool Parser::is_any(const char *check)
     {
@@ -74,7 +93,6 @@ namespace ast
             return false;
         return strchr(check, current.getValue().at(0)) != nullptr;
     }
-
     int Parser::getBinopPrecedence()
     {
         if (!is(TYPE_SYMBOLE))
@@ -101,7 +119,6 @@ namespace ast
 
     Node *Parser::ParseStatement()
     {
-
         if (is(TYPE_NUMBER))
         {
             double value = stod(current.getValue());
@@ -113,6 +130,13 @@ namespace ast
             std::string value = current.getValue();
             consume();
             return new Identifier(value);
+        }
+
+        if (is(TYPE_STRING))
+        {
+            std::string value = current.getValue();
+            consume();
+            return new StringLiteral(value);
         }
 
         return nullptr;
@@ -141,7 +165,7 @@ namespace ast
             {
                 rhs = BinOpRHS(prec + 1, std::move(rhs));
                 if (!rhs)
-                    return nullptr;
+                    throw std::logic_error("RHS of expression is invalid.");
             }
 
             lhs = new BinaryExpression(op, lhs, rhs);
@@ -150,7 +174,7 @@ namespace ast
         return nullptr;
     }
 
-    Node *Parser::ParseExpressionStatement()
+    Node *Parser::ParseExpression()
     {
         auto lhs = ParseStatement();
 
@@ -162,12 +186,150 @@ namespace ast
             lhs = BinOpRHS(0, lhs);
         }
 
-        if (!is(TYPE_SYMBOLE, ';'))
+        return lhs;
+    }
+
+    IfStatement *Parser::ParseIfStatement()
+    {
+        consume(); // eat 'if'
+        if (!is(TYPE_SYMBOLE, '('))
+            throw std::logic_error("Expected to find '('");
+        consume(); // eat '('
+
+        Node *condition = ParseExpression();
+
+        if (!is(TYPE_SYMBOLE, ')'))
+            throw std::logic_error("Expected to find ')'");
+        consume(); // eat ')'
+
+        std::vector<Node *> block = std::vector<Node *>();
+        ParseBlock(block, true);
+
+        Block *thenBlock = new Block(block);
+
+        // else block
+        if (is(TYPE_IDENTIFER, "else"))
         {
-            return nullptr;
+            consume(); // eat 'else'
+
+            // handle if else.
+            if (is(TYPE_IDENTIFER, "if"))
+            {
+                IfStatement *ifelse = ParseIfStatement();
+                return new IfStatement(condition, thenBlock, ifelse);
+            }
+
+            std::vector<Node *> elseBlockList = std::vector<Node *>();
+            ParseBlock(block, true);
+            Block *elseBlock = new Block(block);
+            return new IfStatement(condition, thenBlock, elseBlock);
         }
 
-        return new ExpressionStatement(std::move(lhs));
+        return new IfStatement(condition, thenBlock, nullptr);
+    }
+
+    FunctionDeclartion *Parser::ParseFunctionDeclartion()
+    {
+        // IDENTIFER(fn) IDENTIFER(????) SYMBOL('(') arguments SYMBOL(')') block
+        consume(); // eat 'fn'
+        Identifier *name = dynamic_cast<Identifier *>(ParseStatement());
+        if (name == nullptr)
+            throw std::logic_error("Expected to find identifier;");
+
+        std::vector<Parameter *> parameters;
+        if (!is(TYPE_SYMBOLE, '('))
+            throw std::logic_error("Expected to find '(';");
+
+        consume(); // eat '('
+        bool first = true;
+        while (!is(TYPE_SYMBOLE, ')'))
+        {
+            if (!first)
+            {
+                if (!is(TYPE_SYMBOLE, ','))
+                    throw std::logic_error("Expected to find ','");
+                consume();
+            }
+            first = false;
+
+            Identifier *param = dynamic_cast<Identifier *>(ParseStatement());
+            if (param == nullptr)
+                throw std::logic_error("Expected to find identifier");
+
+            if (!is(TYPE_SYMBOLE, ':'))
+                throw std::logic_error("Expected to find ':'");
+            consume(); // eat ':'
+
+            // parse typedata
+            Identifier *typedata = dynamic_cast<Identifier *>(ParseStatement());
+            if (typedata == nullptr)
+                throw std::logic_error("Expected to find identifier");
+
+            parameters.push_back(new Parameter(param, typedata));
+            // parse function arguments
+        }
+        consume(); // eat ')'
+
+        std::vector<Node *> body = std::vector<Node *>();
+        ParseBlock(body, true);
+
+        auto block = new Block(body);
+
+        return new FunctionDeclartion(name, parameters, block);
+    }
+
+    VariableStatement *Parser::ParseVaraibleStatement()
+    {
+        // (IDENTIFER(let) SYMBOL(:) IDENTIFER(string|number) SYMBOL(=) expression)(,+) SYMBOL(;)
+        // I.E let a: string = "", b: number = 1;
+
+        consume(); // eat 'let'
+        std::vector<VariableDeclaration *> declarations;
+
+        bool first = true;
+
+        while (!is(TYPE_SYMBOLE, ';'))
+        {
+            if (!first)
+            {
+                if (!is(TYPE_SYMBOLE, ","))
+                    throw std::logic_error("Expected to find ','");
+                consume(); // eat ','
+            }
+
+            Identifier *d = dynamic_cast<Identifier *>(ParseStatement());
+            if (d == nullptr)
+            {
+                throw std::logic_error("Expected to find identifier");
+            }
+
+            if (!is(TYPE_SYMBOLE, ':'))
+                throw std::logic_error("Expected to find ':'");
+            consume(); // eat ':'
+            Identifier *td = dynamic_cast<Identifier *>(ParseStatement());
+
+            if (!is(TYPE_SYMBOLE, '='))
+            {
+                // variable with no initializer
+                declarations.push_back(new VariableDeclaration(d, td, nullptr));
+                first = false;
+
+                continue;
+            }
+
+            consume(); // eat '='
+
+            Node *expr = ParseExpression();
+
+            declarations.push_back(new VariableDeclaration(d, td, expr));
+            first = false;
+        }
+
+        if (!is(TYPE_SYMBOLE, ';'))
+            throw std::logic_error("Expected to find ';'");
+        consume(); // eat ';'
+
+        return new VariableStatement(declarations);
     }
 
     bool Parser::ParseBlock(std::vector<Node *> &statements, bool requireBrackets)
@@ -175,86 +337,73 @@ namespace ast
         if (requireBrackets)
         {
             if (!is(TYPE_SYMBOLE, '{'))
-                return false;
-            consume();
+                throw std::logic_error("Expected to find '{'");
+            consume(); // eat '{'
         }
 
-        // keyword parse
-        if (is_keyword())
+        while ((!requireBrackets && !tokens->empty()) || (requireBrackets && !is(TYPE_SYMBOLE, '}')))
         {
-            auto key = current.getValue();
-            if (key == "fn")
+            // keyword parse
+            if (int id = is_keyword(); id != -1)
             {
-                consume();
-
-                auto name = ParseStatement();
-                if (Identifier *d = static_cast<Identifier *>(name); d != nullptr)
+                switch (id)
                 {
-
-                    if (!is(TYPE_SYMBOLE, '('))
-                        return false;
-                    consume();
-                    if (!is(TYPE_SYMBOLE, ')'))
-                        return false;
-                    consume();
-
-                    std::vector<Node *> body = std::vector<Node *>();
-                    if (!ParseBlock(body, true))
-                        return false;
-
-                    auto block = new Block(body);
-
-                    statements.push_back(new FunctionDeclartion(d, block));
-                    return true;
-                }
-                else
+                case 0:
                 {
-                    return false;
+                    auto func = ParseFunctionDeclartion();
+                    if (func != nullptr)
+                        statements.push_back(func);
+                    break;
                 }
+                case 1:
+                {
+                    auto vars = ParseVaraibleStatement();
+                    statements.push_back(vars);
+                    break;
+                }
+                case 2:
+                {
+                    auto ifs = ParseIfStatement();
+                    if (ifs != nullptr)
+                        statements.push_back(ifs);
+                    break;
+                }
+                case 3:
+                {
+                    consume(); // eat 'return'
+                    auto expr = ParseExpression();
+                    if (!is(TYPE_SYMBOLE, ';'))
+                        throw std::logic_error("Expected to find ';'");
+                    consume();
+
+                    statements.push_back(new ReturnStatement(expr));
+                    break;
+                }
+                default:
+                    throw std::logic_error("Unknown keyword");
+                }
+
+                continue;
             }
-            else if (key == "if")
+
+            if (auto statement = ParseExpression(); statement != nullptr)
             {
-                consume();
-                if (!is(TYPE_SYMBOLE, '('))
-                    return false;
-                consume();
+                if (!is(TYPE_SYMBOLE, ';'))
+                    throw std::logic_error("Expected to find ';'");
 
-                auto condition = ParseStatement();
-
-                if (!is(TYPE_SYMBOLE, ')'))
-                    return false;
                 consume();
 
-                std::vector<Node *> block = std::vector<Node *>();
-                if (ParseBlock(block, true))
-                    return false;
+                auto stmt = new ExpressionStatement(std::move(statement));
 
-                Block *b = new Block(block);
-
-                statements.push_back(new IfStatement(condition, b, nullptr));
-
-                return false;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            auto statement = ParseExpressionStatement();
-            if (statement != nullptr)
-            {
-
-                statements.push_back(std::move(statement));
+                statements.push_back(std::move(stmt));
             }
         }
 
         if (requireBrackets)
         {
             if (!is(TYPE_SYMBOLE, '}'))
-                return false;
-            consume();
+                throw std::logic_error("Expected to find '}'");
+            consume(); // eat '}'
         }
 
         return true;

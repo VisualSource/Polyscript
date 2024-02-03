@@ -8,7 +8,7 @@
 #include "./tokenizer/Token.hpp"
 #include "./ast/Parser.hpp"
 
-static char ALLOWED_SYMBOLS[] = "{}()!;+=,-*&|#";
+static char ALLOWED_SYMBOLS[] = "{}()!;:+=,-*&|#";
 
 bool next(std::string &input, unsigned int &index, char &current)
 {

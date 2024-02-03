@@ -4,17 +4,23 @@ namespace ast
 {
     std::string IfStatement::toString(int padding)
     {
-        auto header = std::string("<IfStatement\n").insert(0, padding, ' ');
-        auto exp = expression->toString(padding + 3);
-        auto t = thenStatement->toString(padding + 3);
-        auto footer = std::string(">\n").insert(0, padding, ' ');
-        if (elseStatement == nullptr)
+        auto tag = std::string("<IfStatement>\n").insert(0, padding, ' ');
+        tag += std::string("<Expression>\n").insert(0, padding + 3, ' ');
+        tag += expression->toString(padding + 6);
+        tag += std::string("</Expression>\n").insert(0, padding + 3, ' ');
+        tag += std::string("<ThenBlock>\n").insert(0, padding + 3, ' ');
+        tag += thenStatement->toString(padding + 6);
+        tag += std::string("</ThenBlock>\n").insert(0, padding + 3, ' ');
+
+        if (elseStatement != nullptr)
         {
-            return header + exp + t + footer;
+            tag += std::string("<ElseStatement>\n").insert(0, padding + 3, ' ');
+            tag += elseStatement->toString(padding + 6);
+            tag += std::string("</ElseStatement>\n").insert(0, padding + 3, ' ');
         }
 
-        auto e = elseStatement->toString(padding + 3);
+        tag += std::string("</IfStatement>\n").insert(0, padding, ' ');
 
-        return header + exp + t + e + footer;
+        return tag;
     }
 } // namespace ast
