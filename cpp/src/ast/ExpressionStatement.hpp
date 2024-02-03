@@ -11,12 +11,8 @@ namespace ast
 
     public:
         ExpressionStatement(Node *expression) : expression(std::move(expression)) {}
-        ~ExpressionStatement()
-        {
-            if (expression != nullptr)
-                delete expression;
-        }
-
+        ~ExpressionStatement();
+        Node *getExpression() { return expression; }
         std::string toString(int padding = 0) override;
     };
 

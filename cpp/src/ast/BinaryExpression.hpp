@@ -12,13 +12,7 @@ namespace ast
 
     public:
         BinaryExpression(char op, Node *lhs, Node *rhs) : op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
-        ~BinaryExpression()
-        {
-            if (lhs != nullptr)
-                delete lhs;
-            if (rhs != nullptr)
-                delete rhs;
-        }
+        ~BinaryExpression();
         std::string toString(int padding = 0) override;
     };
 } // namespace ast

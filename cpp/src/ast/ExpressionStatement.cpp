@@ -2,6 +2,11 @@
 
 namespace ast
 {
+    ExpressionStatement::~ExpressionStatement()
+    {
+        if (expression != nullptr)
+            delete expression;
+    }
     std::string ExpressionStatement::toString(int padding)
     {
         std::string header = std::string("<ExpressionStatement>\n").insert(0, padding, ' ');

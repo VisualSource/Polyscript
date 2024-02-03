@@ -2,6 +2,14 @@
 
 namespace ast
 {
+    BinaryExpression::~BinaryExpression()
+    {
+        if (lhs != nullptr)
+            delete lhs;
+        if (rhs != nullptr)
+            delete rhs;
+    }
+
     // <BinaryExpression
     //        lhs: expression
     //        op: char

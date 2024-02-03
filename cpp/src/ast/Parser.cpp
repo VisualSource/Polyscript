@@ -1,12 +1,13 @@
 #include <string.h>
 #include <string>
-#include <exception>
+#include <stdexcept>
 #include "./Parser.hpp"
 
 #include "./ExpressionStatement.hpp"
 #include "./VariableDeclaration.hpp"
 #include "./BinaryExpression.hpp"
 #include "./ReturnStatement.hpp"
+#include "./CallExpression.hpp"
 #include "./NumericLiteral.hpp"
 #include "./StringLiteral.hpp"
 #include "./Identifier.hpp"
@@ -129,6 +130,7 @@ namespace ast
         {
             std::string value = current.getValue();
             consume();
+
             return new Identifier(value);
         }
 
@@ -177,6 +179,32 @@ namespace ast
     Node *Parser::ParseExpression()
     {
         auto lhs = ParseStatement();
+
+        if (auto *name = dynamic_cast<Identifier *>(lhs); name != nullptr && is(TYPE_SYMBOLE, '('))
+        {
+            consume(); // eat '('
+
+            bool first = true;
+            std::vector<Node *> arguments;
+            while (!is(TYPE_SYMBOLE, ')'))
+            {
+                if (!first)
+                {
+                    if (!is(TYPE_SYMBOLE, ','))
+                        throw std::logic_error("Expexted to find ','");
+                    consume();
+                }
+
+                auto *expr = ParseExpression();
+
+                arguments.push_back(expr);
+
+                first = false;
+            }
+            consume(); // eat ')'
+
+            lhs = new CallExpression(name, arguments);
+        }
 
         if (lhs == nullptr)
             return nullptr;

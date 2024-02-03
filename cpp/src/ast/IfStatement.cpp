@@ -2,6 +2,16 @@
 
 namespace ast
 {
+    IfStatement::~IfStatement()
+    {
+        if (expression != nullptr)
+            delete expression;
+        if (thenStatement != nullptr)
+            delete thenStatement;
+        if (elseStatement != nullptr)
+            delete elseStatement;
+    }
+
     std::string IfStatement::toString(int padding)
     {
         auto tag = std::string("<IfStatement>\n").insert(0, padding, ' ');

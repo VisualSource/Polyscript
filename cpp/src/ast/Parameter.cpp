@@ -2,7 +2,14 @@
 
 namespace ast
 {
-
+    Parameter::~Parameter()
+    {
+        delete name;
+        if (initializer != nullptr)
+            delete initializer;
+        if (type != nullptr)
+            delete type;
+    }
     //  <Parameter>
     //    <Name>
     //      <Identifier value=""/>

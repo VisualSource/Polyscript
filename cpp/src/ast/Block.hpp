@@ -11,12 +11,8 @@ namespace ast
 
     public:
         Block(std::vector<Node *> statements) : statements(std::move(statements)) {}
-        ~Block()
-        {
-            for (auto &&i : statements)
-                delete i;
-        }
-
+        ~Block();
         std::string toString(int padding = 0) override;
+        std::vector<Node *> &getStatements() { return statements; }
     };
 } // namespace ast

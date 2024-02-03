@@ -2,6 +2,13 @@
 
 namespace ast
 {
+    Block::~Block()
+    {
+        for (auto &&i : statements)
+            if (i != nullptr)
+                delete i;
+    }
+
     std::string Block::toString(int padding)
     {
 

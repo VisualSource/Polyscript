@@ -14,5 +14,6 @@ namespace ast
         {
             return std::string("<StringLiteral value=\"" + value + "\"/>\n").insert(0, padding, ' ');
         }
+        std::string &getValue() { return value; }
     };
 } // namespace ast

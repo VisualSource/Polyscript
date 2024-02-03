@@ -21,6 +21,10 @@ build
 *.gch
 *.pch
 
+vip_build/**/*
+Program.o 
+Program.exe
+
 # Libraries
 *.lib
 *.a

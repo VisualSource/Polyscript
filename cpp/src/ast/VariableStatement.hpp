@@ -16,7 +16,8 @@ namespace ast
         ~VariableStatement()
         {
             for (auto &&i : declarations)
-                delete i;
+                if (i != nullptr)
+                    delete i;
         }
         std::string toString(int padding = 0) override;
     };

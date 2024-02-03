@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <iostream>
+#include <string>
 
 #include "./Node.hpp"
 
@@ -9,13 +9,16 @@ namespace ast
     class Program
     {
     private:
+        std::string name;
         std::vector<Node *> statements;
 
     public:
         Program();
-        Program(std::vector<Node *> statements) : statements(statements) {}
+        Program(std::string name, std::vector<Node *> statements) : name(name), statements(statements) {}
         ~Program();
         void setStatements(std::vector<Node *> statements);
         std::vector<Node *> &getStatements() const;
+        std::string toString();
+        std::string getName() { return name; };
     };
 }

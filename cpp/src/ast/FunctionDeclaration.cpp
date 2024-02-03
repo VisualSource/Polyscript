@@ -4,12 +4,15 @@ namespace ast
 {
     FunctionDeclartion::~FunctionDeclartion()
     {
-        delete name;
-        delete body;
+        if (name != nullptr)
+            delete name;
+        if (body != nullptr)
+            delete body;
 
         for (auto &&arg : parameters)
         {
-            delete arg;
+            if (arg != nullptr)
+                delete arg;
         }
     }
     // <FunctionDeclartion>
