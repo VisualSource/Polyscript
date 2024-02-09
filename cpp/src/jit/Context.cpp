@@ -21,10 +21,26 @@ namespace jit
         return variables.find(key) != variables.end();
     }
 
-    bool Context::set(std::string key, std::shared_ptr<Object> value)
+    std::shared_ptr<Object> Context::set(std::string key, std::shared_ptr<Object> value)
     {
         variables.insert({key, std::move(value)});
-        return true;
+        return variables.at(key);
+    }
+
+    std::shared_ptr<Object> Context::update(std::string key, std::shared_ptr<Object> value)
+    {
+        if (has(key))
+        {
+            variables[key] = value;
+            return variables.at(key);
+        }
+
+        if (parent != nullptr)
+        {
+            return parent->update(key, value);
+        }
+
+        return nullptr;
     }
 
     std::shared_ptr<Object> Context::get(std::string key)

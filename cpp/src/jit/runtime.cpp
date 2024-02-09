@@ -8,6 +8,7 @@
 #include <vip/ast/BinaryExpression.hpp>
 #include <vip/jit/components/Null.hpp>
 #include <vip/ast/ReturnStatement.hpp>
+#include <vip/ast/WhileExpression.hpp>
 #include <vip/ast/CallExpression.hpp>
 #include <vip/ast/NumericLiteral.hpp>
 #include <vip/ast/StringLiteral.hpp>
@@ -89,11 +90,32 @@ namespace jit
             }
             throw std::runtime_error("Uncaught SyntaxError: Illegal statement");
         }
+        case ast::consts::WHILE_EXRESSION:
+        {
+            if (auto *w = dynamic_cast<ast::WhileExpression *>(statement); w != nullptr)
+            {
+                while (true)
+                {
+                    auto while_ctx = new Context("<while>", context, context->canReturn());
+                    auto expr = visitExpression(w->getExpression(), context);
+                    if (auto r = std::dynamic_pointer_cast<Number>(expr); r == nullptr || (r != nullptr && !r->asBool()))
+                    {
+                        break;
+                    }
+                    auto result = visitStatements(w->getBody()->getStatements(), while_ctx);
+                    if (result.second)
+                        return result;
+                }
+
+                return std::make_pair(std::shared_ptr<Null>(new Null()), false);
+            }
+            throw std::runtime_error("Uncaught SyntaxError: Illegal statement");
+        }
         default:
             throw std::runtime_error("Uncaught SyntaxError: Illegal statement");
         }
 
-        return std::make_pair(nullptr, false);
+        return std::make_pair(std::shared_ptr<Null>(new Null()), false);
     }
     std::pair<std::shared_ptr<Object>, bool> Runtime::visitStatements(std::vector<ast::Node *> &statements, Context *context, bool returnLast)
     {
@@ -120,6 +142,19 @@ namespace jit
     {
         if (auto bin = dynamic_cast<ast::BinaryExpression *>(value); bin != nullptr)
         {
+            if (bin->getOp() == ast::consts::EQUAL)
+            {
+                auto ident = dynamic_cast<ast::Identifier *>(bin->getLhs());
+                if (ident == nullptr)
+                    throw std::runtime_error("Can not assign to value.");
+
+                std::shared_ptr<Object> rhs = visitExpression(bin->getRhs(), context);
+                if (rhs == nullptr)
+                    throw std::runtime_error("No value on rhs.");
+
+                return context->update(ident->getValue(), rhs);
+            }
+
             std::shared_ptr<Object> lhs = visitExpression(bin->getLhs(), context);
             std::shared_ptr<Object> rhs = visitExpression(bin->getRhs(), context);
 
@@ -342,12 +377,12 @@ namespace jit
         }
         else if (auto idnt = dynamic_cast<ast::Identifier *>(value); idnt != nullptr)
         {
-            if (context->has(idnt->getValue()))
-            {
-                return context->get(idnt->getValue());
-            }
+            auto r = context->get(idnt->getValue());
 
-            throw std::runtime_error("No variable exsists");
+            if (r == nullptr)
+                throw std::runtime_error("No variable exsists");
+
+            return r;
         }
         else
         {

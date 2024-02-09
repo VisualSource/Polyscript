@@ -34,6 +34,7 @@ namespace ast
         const unsigned int VARIABLE_STATEMENT = 11;
         const unsigned int STRING_LITERAL = 12;
         const unsigned int PARAMETER_EXRESSION = 13;
+        const unsigned int WHILE_EXRESSION = 14;
 
     } // namespace consts
 

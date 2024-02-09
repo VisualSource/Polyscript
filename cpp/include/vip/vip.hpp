@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
+#include <memory>
 #include "./jit/runtime.hpp"
 #include "./jit/components/InternalFunction.hpp"
+#include "./jit/Object.hpp"
 
 namespace vip
 {
@@ -22,6 +24,6 @@ namespace vip
         void registerFn(std::string name, jit::CallbackFunction callback);
         /// @brief execute code
         /// @param input the content to execute.
-        void execute(std::string input);
+        std::shared_ptr<jit::Object> execute(std::string input);
     };
 }

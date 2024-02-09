@@ -1,0 +1,8 @@
+let idx: number = 0;
+
+while(idx < 10){
+    
+    println("Index",idx);
+
+    idx = idx + 1;
+}

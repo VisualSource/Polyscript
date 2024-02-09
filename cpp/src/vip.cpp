@@ -175,19 +175,14 @@ namespace vip
         return program;
     }
 
-    void JustInTime::execute(std::string input)
+    std::shared_ptr<jit::Object> JustInTime::execute(std::string input)
     {
         ast::Program program = tokenize(input);
-        auto result = rt.execute(program, cliMode);
-        if (result != nullptr)
-        {
-            std::cout << *result << std::endl;
-        }
+        return rt.execute(program, cliMode);
     }
 
     void JustInTime::registerFn(std::string name, jit::CallbackFunction callback)
     {
-
         auto fn = std::shared_ptr<jit::InternalFunction>(new jit::InternalFunction(name, callback));
 
         rt.declare(name, fn);

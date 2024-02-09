@@ -23,7 +23,8 @@ namespace jit
         Context *getParentContext();
         bool remove(std::string key);
         bool has(std::string key);
+        std::shared_ptr<Object> update(std::string key,  std::shared_ptr<Object> value);
         std::shared_ptr<Object> get(std::string key);
-        bool set(std::string key, std::shared_ptr<Object> value);
+        std::shared_ptr<Object> set(std::string key, std::shared_ptr<Object> value);
     };
 } // namespace jit

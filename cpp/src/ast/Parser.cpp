@@ -7,6 +7,7 @@
 #include <vip/ast/VariableDeclaration.hpp>
 #include <vip/ast/BinaryExpression.hpp>
 #include <vip/ast/ReturnStatement.hpp>
+#include <vip/ast/WhileExpression.hpp>
 #include <vip/ast/CallExpression.hpp>
 #include <vip/ast/NumericLiteral.hpp>
 #include <vip/ast/StringLiteral.hpp>
@@ -85,7 +86,7 @@ namespace ast
     int Parser::is_keyword()
     {
         auto value = current.getValue();
-        if (!(is(tokenizer::TYPE_IDENTIFER) && (value == "fn" || value == "let" || value == "if" || value == "return")))
+        if (!is(tokenizer::TYPE_IDENTIFER))
             return -1;
 
         if (value == "fn")
@@ -96,6 +97,8 @@ namespace ast
             return 2;
         if (value == "return")
             return 3;
+        if (value == "while")
+            return 4;
 
         return -1;
     }
@@ -122,6 +125,7 @@ namespace ast
         case consts::LESS_THEN_OR_EQUAL:
         case consts::GREATER_THEN:
         case consts::EQUAL_EQUAL:
+        case consts::EQUAL:
         case consts::LESS_THEN:
             return 10;
         case consts::PLUS:
@@ -228,7 +232,7 @@ namespace ast
         if (lhs == nullptr)
             return nullptr;
 
-        if (is_any("+-*<>/") || is(tokenizer::TYPE_SYMBOL, "==") || is(tokenizer::TYPE_SYMBOL, ">=") || is(tokenizer::TYPE_SYMBOL, "<=") || is(tokenizer::TYPE_SYMBOL, "!=") || is(tokenizer::TYPE_SYMBOL, "&&") || is(tokenizer::TYPE_SYMBOL, "||"))
+        if (is_any("+-*<>/=") || is(tokenizer::TYPE_SYMBOL, "==") || is(tokenizer::TYPE_SYMBOL, ">=") || is(tokenizer::TYPE_SYMBOL, "<=") || is(tokenizer::TYPE_SYMBOL, "!=") || is(tokenizer::TYPE_SYMBOL, "&&") || is(tokenizer::TYPE_SYMBOL, "||"))
         {
             lhs = BinOpRHS(0, lhs);
         }
@@ -424,6 +428,26 @@ namespace ast
                     consume();
 
                     statements.push_back(new ReturnStatement(expr));
+                    break;
+                }
+                case 4:
+                {
+                    consume(); // eat 'while'
+                    if (!is(tokenizer::TYPE_SYMBOL, '('))
+                        throw std::logic_error("Expected to find '('");
+                    consume(); // eat '('
+
+                    auto statement = ParseExpression();
+
+                    if (!is(tokenizer::TYPE_SYMBOL, ')'))
+                        throw std::logic_error("Expected to find ')'");
+                    consume(); // eat ')'
+
+                    std::vector<Node *> whileBlock;
+                    ParseBlock(whileBlock, true);
+                    auto block = new Block(whileBlock);
+
+                    statements.push_back(new WhileExpression(statement, block));
                     break;
                 }
                 default:
