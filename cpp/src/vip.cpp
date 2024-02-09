@@ -1,16 +1,75 @@
 #include <vip/vip.hpp>
+
 #include <string.h>
 #include <iostream>
 #include <ctype.h>
+#include <memory>
 #include <deque>
-#include "./compile/compiler.hpp"
-#include "./compile/astToCil.hpp"
-#include "./tokenizer/Token.hpp"
-#include "./ast/Parser.hpp"
+
+#include <vip/tokenizer/Token.hpp>
+#include <vip/jit/runtime.hpp>
+#include <vip/ast/Parser.hpp>
 
 namespace vip
 {
-    static char ALLOWED_SYMBOLS[] = "{}()!;:+=,-*&|#";
+    static char ALLOWED_SYMBOLS[] = "{}()!;:+=,<>-*&|#";
+
+    bool isDoubleOperator(char input, char next)
+    {
+        switch (input)
+        {
+        case '!':
+        {
+            if (next == '=')
+                return true;
+            return false;
+        }
+        case '&':
+        {
+            if (next == '&')
+                return true;
+            return false;
+        }
+        case '|':
+        {
+            if (next == '|')
+                return true;
+            return false;
+        }
+        case '+':
+        {
+            if (next == '=')
+                return true;
+            return false;
+        }
+        case '-':
+        {
+            if (next == '=')
+                return true;
+            return false;
+        }
+        case '=':
+        {
+            if (next == '=')
+                return true;
+            return false;
+        }
+        case '>':
+        {
+            if (next == '=')
+                return true;
+            return false;
+        }
+        case '<':
+        {
+            if (next == '>')
+                return true;
+            return false;
+        }
+        default:
+            return false;
+        }
+    }
 
     bool next(std::string &input, unsigned int &index, char &current)
     {
@@ -25,12 +84,18 @@ namespace vip
 
     ast::Program tokenize(std::string input)
     {
-        std::deque<Token> *tokens = new std::deque<Token>();
+        std::deque<tokenizer::Token> *tokens = new std::deque<tokenizer::Token>();
         unsigned int index = 0;
         char current = input[0];
 
         while (current != '\0')
         {
+            if (iscntrl(current))
+            {
+                next(input, index, current);
+                continue;
+            }
+
             if (isalpha(current))
             {
                 std::string value = "";
@@ -40,7 +105,7 @@ namespace vip
                     next(input, index, current);
                 }
 
-                tokens->push_back(Token(value, TYPE_IDENTIFER));
+                tokens->push_back(tokenizer::Token(value, tokenizer::TYPE_IDENTIFER));
                 continue;
             }
 
@@ -57,7 +122,7 @@ namespace vip
 
                 next(input, index, current);
 
-                tokens->push_back(Token(value, TYPE_STRING));
+                tokens->push_back(tokenizer::Token(value, tokenizer::TYPE_STRING));
 
                 continue;
             }
@@ -78,13 +143,24 @@ namespace vip
                     next(input, index, current);
                 }
 
-                tokens->push_back(Token(value, TYPE_NUMBER));
+                tokens->push_back(tokenizer::Token(value, tokenizer::TYPE_NUMBER));
                 continue;
             }
 
             if (strchr(ALLOWED_SYMBOLS, current) != nullptr)
             {
-                tokens->push_back(Token(current, TYPE_SYMBOLE));
+                if (isDoubleOperator(current, input[index + 1]))
+                {
+                    std::string item;
+                    item.push_back(current);
+                    next(input, index, current);
+                    item.push_back(current);
+                    tokens->push_back(tokenizer::Token(item, tokenizer::TYPE_SYMBOL));
+                }
+                else
+                {
+                    tokens->push_back(tokenizer::Token(current, tokenizer::TYPE_SYMBOL));
+                }
             }
 
             next(input, index, current);
@@ -99,14 +175,25 @@ namespace vip
         return program;
     }
 
-    void vipJit(std::string input)
+    void JustInTime::execute(std::string input)
     {
         ast::Program program = tokenize(input);
-
-        std::cout << program.toString() << std::endl;
+        auto result = rt.execute(program, cliMode);
+        if (result != nullptr)
+        {
+            std::cout << *result << std::endl;
+        }
     }
 
-    void vipCompile(std::string input)
+    void JustInTime::registerFn(std::string name, jit::CallbackFunction callback)
+    {
+
+        auto fn = std::shared_ptr<jit::InternalFunction>(new jit::InternalFunction(name, callback));
+
+        rt.declare(name, fn);
+    }
+
+    /*void vipCompile(std::string input)
     {
         ast::Program program = tokenize(input);
 
@@ -114,6 +201,6 @@ namespace vip
         compile::compileCil(files, std::vector<std::string>(), "../../Program.o");
 
         // std::cout << program.toString() << std::endl;
-    }
+    }*/
 
 } // namespace vip

@@ -1,4 +1,4 @@
-#include "./VariableDeclaration.hpp"
+#include <vip/ast/VariableDeclaration.hpp>
 
 namespace ast
 {

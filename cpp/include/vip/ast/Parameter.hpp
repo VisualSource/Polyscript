@@ -1,6 +1,8 @@
 #pragma once
-#include "./Node.hpp"
+
 #include "./Identifier.hpp"
+#include "./Consts.hpp"
+#include "./Node.hpp"
 
 namespace ast
 {
@@ -12,7 +14,7 @@ namespace ast
         Node *initializer;
 
     public:
-        Parameter(Identifier *name, Node *type) : name(std::move(name)), type(std::move(type)), initializer(nullptr) {}
+        Parameter(Identifier *name, Node *type) : Node(0, 0, consts::PARAMETER_EXRESSION), name(std::move(name)), type(std::move(type)), initializer(nullptr) {}
         ~Parameter();
         std::string toString(int padding = 0) override;
     };

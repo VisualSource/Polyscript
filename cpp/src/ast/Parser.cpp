@@ -1,23 +1,34 @@
+#include <vip/ast/Parser.hpp>
+#include <stdexcept>
 #include <string.h>
 #include <string>
-#include <stdexcept>
-#include "./Parser.hpp"
 
-#include "./ExpressionStatement.hpp"
-#include "./VariableDeclaration.hpp"
-#include "./BinaryExpression.hpp"
-#include "./ReturnStatement.hpp"
-#include "./CallExpression.hpp"
-#include "./NumericLiteral.hpp"
-#include "./StringLiteral.hpp"
-#include "./Identifier.hpp"
-#include "./Parameter.hpp"
-#include "./Block.hpp"
+#include <vip/ast/ExpressionStatement.hpp>
+#include <vip/ast/VariableDeclaration.hpp>
+#include <vip/ast/BinaryExpression.hpp>
+#include <vip/ast/ReturnStatement.hpp>
+#include <vip/ast/CallExpression.hpp>
+#include <vip/ast/NumericLiteral.hpp>
+#include <vip/ast/StringLiteral.hpp>
+#include <vip/ast/Identifier.hpp>
+#include <vip/ast/Parameter.hpp>
+#include <vip/ast/Consts.hpp>
+#include <vip/ast/Block.hpp>
 
 namespace ast
 {
+    unsigned int getOperatorValue(std::string &value)
+    {
+        if (value.size() == 1)
+        {
+            return value.at(0);
+        }
+        if (value.size() > 2)
+            throw std::logic_error("operator should be at most 2 chars in length");
+        return value.at(0) + value.at(1);
+    }
 
-    Parser::Parser(std::deque<Token> *tokens) : tokens(tokens), current(Token())
+    Parser::Parser(std::deque<tokenizer::Token> *tokens) : tokens(tokens), current(tokenizer::Token())
     {
         // setup first token
         consume();
@@ -28,7 +39,7 @@ namespace ast
         {
             return;
         }
-        current = Token(tokens->front());
+        current = tokenizer::Token(tokens->front());
         tokens->pop_front();
     }
     bool Parser::is(unsigned int type)
@@ -66,7 +77,7 @@ namespace ast
         if (tokens->empty())
             return false;
         auto ref = tokens->front();
-        if (ref.getType() != TYPE_SYMBOLE)
+        if (ref.getType() != tokenizer::TYPE_SYMBOL)
             return false;
 
         return strchr(check, ref.getValue().at(0)) != nullptr;
@@ -74,7 +85,7 @@ namespace ast
     int Parser::is_keyword()
     {
         auto value = current.getValue();
-        if (!(is(TYPE_IDENTIFER) && (value == "fn" || value == "let" || value == "if" || value == "return")))
+        if (!(is(tokenizer::TYPE_IDENTIFER) && (value == "fn" || value == "let" || value == "if" || value == "return")))
             return -1;
 
         if (value == "fn")
@@ -90,29 +101,37 @@ namespace ast
     }
     bool Parser::is_any(const char *check)
     {
-        if (current.getType() != TYPE_SYMBOLE)
+        if (current.getType() != tokenizer::TYPE_SYMBOL)
             return false;
         return strchr(check, current.getValue().at(0)) != nullptr;
     }
     int Parser::getBinopPrecedence()
     {
-        if (!is(TYPE_SYMBOLE))
+        if (!is(tokenizer::TYPE_SYMBOL))
         {
             return -1;
         }
 
-        char el = current.getValue().at(0);
+        unsigned int el = getOperatorValue(current.getValue());
 
         switch (el)
         {
-        case '<':
+        case consts::AND:
+        case consts::OR:
+        case consts::GREATER_THEN_OR_EQUAL:
+        case consts::LESS_THEN_OR_EQUAL:
+        case consts::GREATER_THEN:
+        case consts::EQUAL_EQUAL:
+        case consts::LESS_THEN:
             return 10;
-        case '+':
+        case consts::PLUS:
             return 20;
-        case '-':
+        case consts::MINUS:
             return 30;
-        case '*':
+        case consts::MULT:
             return 40;
+        case consts::DIV:
+            return 50;
         default:
             return -1;
         }
@@ -120,13 +139,13 @@ namespace ast
 
     Node *Parser::ParseStatement()
     {
-        if (is(TYPE_NUMBER))
+        if (is(tokenizer::TYPE_NUMBER))
         {
             double value = stod(current.getValue());
             consume();
             return new NumericLiteral(value);
         }
-        if (is(TYPE_IDENTIFER))
+        if (is(tokenizer::TYPE_IDENTIFER))
         {
             std::string value = current.getValue();
             consume();
@@ -134,7 +153,7 @@ namespace ast
             return new Identifier(value);
         }
 
-        if (is(TYPE_STRING))
+        if (is(tokenizer::TYPE_STRING))
         {
             std::string value = current.getValue();
             consume();
@@ -154,7 +173,7 @@ namespace ast
             if (prec < experPrec)
                 return lhs;
 
-            char op = current.getValue().at(0);
+            unsigned int op = getOperatorValue(current.getValue());
             consume();
 
             auto rhs = ParseStatement();
@@ -180,17 +199,17 @@ namespace ast
     {
         auto lhs = ParseStatement();
 
-        if (auto *name = dynamic_cast<Identifier *>(lhs); name != nullptr && is(TYPE_SYMBOLE, '('))
+        if (auto *name = dynamic_cast<Identifier *>(lhs); name != nullptr && is(tokenizer::TYPE_SYMBOL, '('))
         {
             consume(); // eat '('
 
             bool first = true;
             std::vector<Node *> arguments;
-            while (!is(TYPE_SYMBOLE, ')'))
+            while (!is(tokenizer::TYPE_SYMBOL, ')'))
             {
                 if (!first)
                 {
-                    if (!is(TYPE_SYMBOLE, ','))
+                    if (!is(tokenizer::TYPE_SYMBOL, ','))
                         throw std::logic_error("Expexted to find ','");
                     consume();
                 }
@@ -209,7 +228,7 @@ namespace ast
         if (lhs == nullptr)
             return nullptr;
 
-        if (is_any("+-*>"))
+        if (is_any("+-*<>/") || is(tokenizer::TYPE_SYMBOL, "==") || is(tokenizer::TYPE_SYMBOL, ">=") || is(tokenizer::TYPE_SYMBOL, "<=") || is(tokenizer::TYPE_SYMBOL, "!=") || is(tokenizer::TYPE_SYMBOL, "&&") || is(tokenizer::TYPE_SYMBOL, "||"))
         {
             lhs = BinOpRHS(0, lhs);
         }
@@ -220,13 +239,13 @@ namespace ast
     IfStatement *Parser::ParseIfStatement()
     {
         consume(); // eat 'if'
-        if (!is(TYPE_SYMBOLE, '('))
+        if (!is(tokenizer::TYPE_SYMBOL, '('))
             throw std::logic_error("Expected to find '('");
         consume(); // eat '('
 
         Node *condition = ParseExpression();
 
-        if (!is(TYPE_SYMBOLE, ')'))
+        if (!is(tokenizer::TYPE_SYMBOL, ')'))
             throw std::logic_error("Expected to find ')'");
         consume(); // eat ')'
 
@@ -236,12 +255,12 @@ namespace ast
         Block *thenBlock = new Block(block);
 
         // else block
-        if (is(TYPE_IDENTIFER, "else"))
+        if (is(tokenizer::TYPE_IDENTIFER, "else"))
         {
             consume(); // eat 'else'
 
             // handle if else.
-            if (is(TYPE_IDENTIFER, "if"))
+            if (is(tokenizer::TYPE_IDENTIFER, "if"))
             {
                 IfStatement *ifelse = ParseIfStatement();
                 return new IfStatement(condition, thenBlock, ifelse);
@@ -265,16 +284,16 @@ namespace ast
             throw std::logic_error("Expected to find identifier;");
 
         std::vector<Parameter *> parameters;
-        if (!is(TYPE_SYMBOLE, '('))
+        if (!is(tokenizer::TYPE_SYMBOL, '('))
             throw std::logic_error("Expected to find '(';");
 
         consume(); // eat '('
         bool first = true;
-        while (!is(TYPE_SYMBOLE, ')'))
+        while (!is(tokenizer::TYPE_SYMBOL, ')'))
         {
             if (!first)
             {
-                if (!is(TYPE_SYMBOLE, ','))
+                if (!is(tokenizer::TYPE_SYMBOL, ','))
                     throw std::logic_error("Expected to find ','");
                 consume();
             }
@@ -284,7 +303,7 @@ namespace ast
             if (param == nullptr)
                 throw std::logic_error("Expected to find identifier");
 
-            if (!is(TYPE_SYMBOLE, ':'))
+            if (!is(tokenizer::TYPE_SYMBOL, ':'))
                 throw std::logic_error("Expected to find ':'");
             consume(); // eat ':'
 
@@ -316,11 +335,11 @@ namespace ast
 
         bool first = true;
 
-        while (!is(TYPE_SYMBOLE, ';'))
+        while (!is(tokenizer::TYPE_SYMBOL, ';'))
         {
             if (!first)
             {
-                if (!is(TYPE_SYMBOLE, ","))
+                if (!is(tokenizer::TYPE_SYMBOL, ","))
                     throw std::logic_error("Expected to find ','");
                 consume(); // eat ','
             }
@@ -331,12 +350,12 @@ namespace ast
                 throw std::logic_error("Expected to find identifier");
             }
 
-            if (!is(TYPE_SYMBOLE, ':'))
+            if (!is(tokenizer::TYPE_SYMBOL, ':'))
                 throw std::logic_error("Expected to find ':'");
             consume(); // eat ':'
             Identifier *td = dynamic_cast<Identifier *>(ParseStatement());
 
-            if (!is(TYPE_SYMBOLE, '='))
+            if (!is(tokenizer::TYPE_SYMBOL, '='))
             {
                 // variable with no initializer
                 declarations.push_back(new VariableDeclaration(d, td, nullptr));
@@ -353,7 +372,7 @@ namespace ast
             first = false;
         }
 
-        if (!is(TYPE_SYMBOLE, ';'))
+        if (!is(tokenizer::TYPE_SYMBOL, ';'))
             throw std::logic_error("Expected to find ';'");
         consume(); // eat ';'
 
@@ -364,12 +383,12 @@ namespace ast
     {
         if (requireBrackets)
         {
-            if (!is(TYPE_SYMBOLE, '{'))
+            if (!is(tokenizer::TYPE_SYMBOL, '{'))
                 throw std::logic_error("Expected to find '{'");
             consume(); // eat '{'
         }
 
-        while ((!requireBrackets && !tokens->empty()) || (requireBrackets && !is(TYPE_SYMBOLE, '}')))
+        while ((!requireBrackets && !tokens->empty()) || (requireBrackets && !is(tokenizer::TYPE_SYMBOL, '}')))
         {
             // keyword parse
             if (int id = is_keyword(); id != -1)
@@ -400,7 +419,7 @@ namespace ast
                 {
                     consume(); // eat 'return'
                     auto expr = ParseExpression();
-                    if (!is(TYPE_SYMBOLE, ';'))
+                    if (!is(tokenizer::TYPE_SYMBOL, ';'))
                         throw std::logic_error("Expected to find ';'");
                     consume();
 
@@ -416,7 +435,7 @@ namespace ast
 
             if (auto statement = ParseExpression(); statement != nullptr)
             {
-                if (!is(TYPE_SYMBOLE, ';'))
+                if (!is(tokenizer::TYPE_SYMBOL, ';'))
                     throw std::logic_error("Expected to find ';'");
 
                 consume();
@@ -429,7 +448,7 @@ namespace ast
 
         if (requireBrackets)
         {
-            if (!is(TYPE_SYMBOLE, '}'))
+            if (!is(tokenizer::TYPE_SYMBOL, '}'))
                 throw std::logic_error("Expected to find '}'");
             consume(); // eat '}'
         }

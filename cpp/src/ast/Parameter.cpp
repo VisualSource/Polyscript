@@ -1,4 +1,4 @@
-#include "./Parameter.hpp"
+#include <vip/ast/Parameter.hpp>
 
 namespace ast
 {

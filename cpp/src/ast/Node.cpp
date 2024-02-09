@@ -1,4 +1,4 @@
-#include "./Node.hpp"
+#include <vip/ast/Node.hpp>
 
 namespace ast
 {

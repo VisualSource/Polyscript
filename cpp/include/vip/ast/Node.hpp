@@ -9,17 +9,20 @@ namespace ast
     private:
         unsigned int start;
         unsigned int end;
+        unsigned int kind;
 
     public:
-        Node() : start(0), end(0) {}
+        Node(unsigned int start, unsigned int end, unsigned int kind) : start(start), end(end), kind(kind) {}
         virtual ~Node() = default;
         /// @brief Get starting position of node from source
         /// @return
-        unsigned int getStart() { return start; }
+        inline unsigned int getStart() { return start; }
         /// @brief Get ending position of node from source
         /// @return
-        unsigned int getEnd() { return end; }
-
+        inline unsigned int getEnd() { return end; }
+        /// @brief Get the kind of this node.
+        /// @return
+        inline unsigned int getKind() { return kind; }
         /// @brief get string rep of node
         /// @param padding
         /// @return

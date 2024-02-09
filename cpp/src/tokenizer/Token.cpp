@@ -1,30 +1,33 @@
-#include "./Token.hpp"
+#include <vip/tokenizer/Token.hpp>
 
-std::string getTypeString(unsigned int type)
+namespace tokenizer
 {
-    switch (type)
+    std::string getTypeString(unsigned int type)
     {
-    case TYPE_IDENTIFER:
-        return "Identifer";
-    case TYPE_NUMBER:
-        return "Number";
-    case TYPE_STRING:
-        return "String";
-    case TYPE_SYMBOLE:
-        return "Symbole";
-    default:
-        return "UNKNOWN";
+        switch (type)
+        {
+        case TYPE_IDENTIFER:
+            return "Identifer";
+        case TYPE_NUMBER:
+            return "Number";
+        case TYPE_STRING:
+            return "String";
+        case TYPE_SYMBOL:
+            return "Symbol";
+        default:
+            return "UNKNOWN";
+        }
     }
-}
 
-Token::Token(char v, unsigned int type) : type(type)
-{
-    value = std::string(1, v);
-}
+    Token::Token(char v, unsigned int type) : type(type)
+    {
+        value = std::string(1, v);
+    }
 
-Token::Token(std::string value, unsigned int type) : type(type), value(value) {}
+    Token::Token(std::string value, unsigned int type) : type(type), value(value) {}
 
-std::string Token::toString()
-{
-    return "<" + getTypeString(type) + ":" + value + ">";
+    std::string Token::toString()
+    {
+        return "<" + getTypeString(type) + ":" + value + ">";
+    }
 }

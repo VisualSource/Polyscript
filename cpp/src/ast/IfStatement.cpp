@@ -1,4 +1,4 @@
-#include "./IfStatement.hpp"
+#include <vip/ast/IfStatement.hpp>
 
 namespace ast
 {

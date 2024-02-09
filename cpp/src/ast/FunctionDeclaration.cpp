@@ -1,4 +1,4 @@
-#include "./FunctionDeclaration.hpp"
+#include <vip/ast/FunctionDeclaration.hpp>
 
 namespace ast
 {

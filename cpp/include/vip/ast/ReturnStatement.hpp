@@ -1,4 +1,5 @@
 #pragma once
+#include "./Consts.hpp"
 #include "./Node.hpp"
 
 namespace ast
@@ -9,8 +10,9 @@ namespace ast
         Node *expression;
 
     public:
-        ReturnStatement(Node *expression) : expression(expression) {}
+        ReturnStatement(Node *expression) : Node(0, 0, consts::RETURN_STATEMENT), expression(expression) {}
         ~ReturnStatement() { delete expression; }
+        Node *getExpression() { return expression; }
         std::string toString(int padding = 0) override
         {
             auto tag = std::string("<ReturnStatement>\n").insert(0, padding, ' ');

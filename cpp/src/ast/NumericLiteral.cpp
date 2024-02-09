@@ -1,4 +1,4 @@
-#include "./NumericLiteral.hpp"
+#include <vip/ast/NumericLiteral.hpp>
 
 namespace ast
 {

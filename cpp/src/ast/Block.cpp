@@ -1,4 +1,4 @@
-#include "./Block.hpp"
+#include <vip/ast/Block.hpp>
 
 namespace ast
 {

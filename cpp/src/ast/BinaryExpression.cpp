@@ -1,4 +1,4 @@
-#include "./BinaryExpression.hpp"
+#include <vip/ast/BinaryExpression.hpp>
 
 namespace ast
 {

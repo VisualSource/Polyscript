@@ -11,8 +11,8 @@ namespace ast
     class Parser
     {
     private:
-        std::deque<Token> *tokens;
-        Token current;
+        std::deque<tokenizer::Token> *tokens;
+        tokenizer::Token current;
         /// @brief pops the first item in the deque and assigns it to the current prop.
         void consume();
         /// @brief Check if the next otken will be of the given type.
@@ -81,7 +81,7 @@ namespace ast
         IfStatement *ParseIfStatement();
 
     public:
-        Parser(std::deque<Token> *tokens);
+        Parser(std::deque<tokenizer::Token> *tokens);
         /// @brief Parse tokens from tokienizer into ast
         /// @return
         Program parse();
