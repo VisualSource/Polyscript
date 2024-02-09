@@ -19,6 +19,11 @@ namespace ast
         FunctionDeclartion(Identifier *name, std::vector<Parameter *> parameters, Block *body) : Node(0, 0, consts::FUNCTION_EXPRESSION), name(std::move(name)), parameters(std::move(parameters)), body(std::move(body)) {}
         ~FunctionDeclartion();
         inline std::vector<Parameter *> getParameters() { return parameters; }
+        inline void setBody(Block *body) { this->body = body; }
+        inline void clearParams()
+        {
+            parameters.clear();
+        }
         inline std::string &getName() { return name->getValue(); }
         inline Block *getBodyBlock() { return body; }
         inline std::vector<Node *> &getBody() { return body->getStatements(); }

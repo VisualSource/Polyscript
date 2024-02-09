@@ -1,15 +1,18 @@
 #include <vip/jit/runtime.hpp>
 #include <stdexcept>
 #include <vip/jit/components/InternalFunction.hpp>
+
 #include <vip/jit/components/Function.hpp>
 #include <vip/jit/components/String.hpp>
 #include <vip/jit/components/Number.hpp>
-#include <vip/ast/ReturnStatement.hpp>
 #include <vip/ast/BinaryExpression.hpp>
+#include <vip/jit/components/Null.hpp>
+#include <vip/ast/ReturnStatement.hpp>
 #include <vip/ast/CallExpression.hpp>
 #include <vip/ast/NumericLiteral.hpp>
 #include <vip/ast/StringLiteral.hpp>
 #include <vip/ast/Consts.hpp>
+#include <vip/jit/Consts.hpp>
 
 namespace jit
 {
@@ -36,7 +39,8 @@ namespace jit
     {
         auto statements = program.getStatements();
 
-        return visitStatements(statements, ctx, false, returnLast);
+        auto result = visitStatements(statements, ctx, returnLast);
+        return result.first;
     }
 
     std::pair<std::shared_ptr<Object>, bool> Runtime::visitStatement(ast::Node *statement, Context *context)
@@ -56,8 +60,7 @@ namespace jit
         { // if statement
             if (auto *v = dynamic_cast<ast::IfStatement *>(statement); v != nullptr)
             {
-                visitIfStatement(v, context);
-                break;
+                return visitIfStatement(v, context);
             }
             throw std::runtime_error("Expected a if statement.");
         }
@@ -92,24 +95,26 @@ namespace jit
 
         return std::make_pair(nullptr, false);
     }
-    std::shared_ptr<Object> Runtime::visitStatements(std::vector<ast::Node *> &statements, Context *context, bool returnable, bool returnLast)
+    std::pair<std::shared_ptr<Object>, bool> Runtime::visitStatements(std::vector<ast::Node *> &statements, Context *context, bool returnLast)
     {
         int last = statements.size() - 1;
         int idx = 0;
         for (auto &&i : statements)
         {
 
-            auto [ptr, wasReturned] = visitStatement(i, context);
-            if ((returnable && wasReturned) || (returnLast && (idx == last)))
-                return ptr;
-            else
+            auto result = visitStatement(i, context);
+            if (result.second || (returnLast && (idx == last)))
             {
+                if (context->canReturn() || returnLast)
+                    return result;
+
                 throw std::runtime_error("Uncaught SyntaxError: Illegal return statement");
             }
+
             idx++;
         }
 
-        return nullptr;
+        return std::make_pair(std::shared_ptr<Null>(new Null()), false);
     }
     std::shared_ptr<Object> Runtime::visitExpression(ast::Node *value, Context *context)
     {
@@ -267,25 +272,51 @@ namespace jit
         {
             auto name = dynamic_cast<ast::Identifier *>(call->getExpression());
 
-            if (!context->has(name->getValue()))
-            {
-                throw std::runtime_error("No function with given name exists.");
-            }
-
             auto fn = context->get(name->getValue());
+            if (fn == nullptr)
+                throw std::runtime_error("No function with give name exists.");
 
             if (auto fnc = std::dynamic_pointer_cast<Function>(fn); fnc != nullptr)
             {
                 auto fn_ctx = new Context("<function " + name->getValue() + ">", context, true);
 
-                if (call->getArguments().size() != fnc->getParams().size())
+                auto args = call->getArguments();
+                auto params = fnc->getParams();
+
+                if (args.size() != params.size())
                 {
                     throw std::runtime_error("Given params does not function sig.");
                 }
-                // set params
-                auto result = visitStatements(fnc->getBody()->getStatements(), fn_ctx, true);
+                // set arguments.
+                for (std::size_t i = 0; i < args.size(); i++)
+                {
+                    auto param = params.at(i);
+                    auto arg = args.at(i);
 
-                return result;
+                    auto var = visitExpression(arg, context);
+
+                    auto typedata = dynamic_cast<ast::Identifier *>(param->getType());
+                    if (typedata == nullptr)
+                        throw std::runtime_error("Unable to detrmine type");
+
+                    if (typedata->getValue() == "string" && var->getKind() == consts::ID_STRING)
+                    {
+                        fn_ctx->set(param->getName()->getValue(), var);
+                    }
+                    else if (typedata->getValue() == "number" && var->getKind() == consts::ID_NUMBER)
+                    {
+                        fn_ctx->set(param->getName()->getValue(), var);
+                    }
+                    else
+                    {
+                        throw std::runtime_error("Invalid type");
+                    }
+                }
+
+                // set params
+                auto result = visitStatements(fnc->getBody()->getStatements(), fn_ctx);
+
+                return result.first;
             }
             else if (auto ifn = std::dynamic_pointer_cast<InternalFunction>(fn); ifn != nullptr)
             {
@@ -359,15 +390,46 @@ namespace jit
         }
     }
 
-    void Runtime::visitIfStatement(ast::IfStatement *value, Context *context)
+    std::pair<std::shared_ptr<Object>, bool> Runtime::visitIfStatement(ast::IfStatement *value, Context *context)
     {
-        (void)value;
-        (void)context;
+        auto result = visitExpression(value->getExpression(), context);
+
+        if (auto exp = std::dynamic_pointer_cast<Number>(result); exp != nullptr)
+        {
+            if (exp->asBool())
+            {
+                auto if_ctx = new Context("<if>", context, context->canReturn());
+                return visitStatements(value->getThen()->getStatements(), if_ctx);
+            }
+        }
+
+        auto elseBlock = value->getElse();
+
+        if (elseBlock == nullptr)
+        {
+            return std::make_pair(std::shared_ptr<Null>(new Null()), false);
+        }
+
+        if (auto block = dynamic_cast<ast::Block *>(elseBlock); block != nullptr)
+        {
+            auto if_ctx = new Context("<if>", context, context->canReturn());
+            return visitStatements(block->getStatements(), if_ctx);
+        }
+
+        if (auto elseif = dynamic_cast<ast::IfStatement *>(elseBlock); elseif != nullptr)
+        {
+            return visitIfStatement(elseif, context);
+        }
+
+        return std::make_pair(std::shared_ptr<Null>(new Null()), false);
     }
 
     void Runtime::visitFunctionDeclartion(ast::FunctionDeclartion *value, Context *context)
     {
         auto fn = std::shared_ptr<Function>(new Function(value->getName(), value->getBodyBlock(), value->getParameters()));
+
+        value->setBody(nullptr);
+        value->clearParams();
 
         if (context->has(value->getName()))
         {

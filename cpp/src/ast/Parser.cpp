@@ -267,8 +267,8 @@ namespace ast
             }
 
             std::vector<Node *> elseBlockList = std::vector<Node *>();
-            ParseBlock(block, true);
-            Block *elseBlock = new Block(block);
+            ParseBlock(elseBlockList, true);
+            Block *elseBlock = new Block(elseBlockList);
             return new IfStatement(condition, thenBlock, elseBlock);
         }
 

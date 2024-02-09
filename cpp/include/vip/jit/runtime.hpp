@@ -17,10 +17,10 @@ namespace jit
     private:
         Context *ctx;
         void visitVariableStatement(ast::VariableStatement *value, Context *context);
-        void visitIfStatement(ast::IfStatement *value, Context *context);
+        std::pair<std::shared_ptr<Object>, bool> visitIfStatement(ast::IfStatement *value, Context *context);
         void visitFunctionDeclartion(ast::FunctionDeclartion *value, Context *context);
         void visitVariableDeclaration(ast::VariableDeclaration *value, Context *context);
-        std::shared_ptr<Object> visitStatements(std::vector<ast::Node *> &statements, Context *context, bool returnable, bool returnLast = false);
+        std::pair<std::shared_ptr<Object>, bool> visitStatements(std::vector<ast::Node *> &statements, Context *context, bool returnLast = false);
         std::pair<std::shared_ptr<Object>, bool> visitStatement(ast::Node *statement, Context *context);
         std::shared_ptr<Object> visitExpression(ast::Node *value, Context *context);
 

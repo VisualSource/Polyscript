@@ -1,5 +1,6 @@
 #pragma once
 #include "../Object.hpp"
+#include "../Consts.hpp"
 
 namespace jit
 {
@@ -10,8 +11,8 @@ namespace jit
         bool isBool;
 
     public:
-        Number(double value) : Object(2), value(value), isBool(false) {}
-        Number(bool value) : Object(2), value(value ? 1 : 0), isBool(true) {}
+        Number(double value) : Object(consts::ID_NUMBER), value(value), isBool(false) {}
+        Number(bool value) : Object(consts::ID_NUMBER), value(value ? 1 : 0), isBool(true) {}
         Number() : Object(2), value(0.0) {}
         inline bool isBoolean() const { return isBool; }
         inline double getValue() const { return value; }

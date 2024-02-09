@@ -1,5 +1,7 @@
 #pragma once
 #include "../Object.hpp"
+#include "../Consts.hpp"
+
 namespace jit
 {
     class String : public Object
@@ -8,7 +10,7 @@ namespace jit
         std::string value;
 
     public:
-        String(std::string value) : Object(3), value(value) {}
+        String(std::string value) : Object(consts::ID_STRING), value(value) {}
         String() : Object(3), value("") {}
         inline std::string getValue() const { return value; }
         void print(std::ostream &where) const override;
