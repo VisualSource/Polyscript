@@ -29,44 +29,25 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
   
   
 ## About The Project
 
-Vip (previously Polyscript) is my 3rd revision at creating an interpreted programing language.
+Vip (previously Polyscript) is my 4rd revision at creating an interpreted programing language.
 The language draws aspects from rust, c++, javascript/typescript, java, C#, and python.
 
 ### Built With
 
-The current implmetation of vip is build using rust 2021 and tokio
-
-## Getting Started
-
-There are two way to get the polyscript runtime, download the binary or compile from source.
-To compile from source follow the following steps
-
-### Prerequisites
-
-If building from source get rust
-
-### Installation
+Rust:
+  Rust 2021 and tokio
+Cpp:
+  Cpp 17 and cmake
 
 ## Usage
 
 To run scripts from files use `vip PATH_TO_YOUR_SCRIPT`
 
-## Roadmap
-
-## Contributing
-
 ## License
-
-## Contact
-
-## Acknowledgements
+  MIT
