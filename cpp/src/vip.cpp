@@ -12,7 +12,7 @@
 
 namespace vip
 {
-    static char ALLOWED_SYMBOLS[] = "{}()!;:+=,<>-*&|#";
+    static char ALLOWED_SYMBOLS[] = "{}()!;:+=/,<>-*&|#";
 
     bool isDoubleOperator(char input, char next)
     {
