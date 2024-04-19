@@ -1,12 +1,33 @@
 #include <vip/compiler/compiler.hpp>
-
+#include <vip/utils/load_file.hpp>
+#include <vip/ast/Program.hpp>
+#include <vip/vip.hpp>
+#include <stdexcept>
 namespace compiler
 {
-    Compiler::Compiler() {}
+    Compiler::~Compiler()
+    {
+        delete this->target;
+        if (this->file.is_open())
+            this->file.close();
+    }
 
-    Compiler::~Compiler() {}
+    // compile ast into target
+    void Compiler::compile()
+    {
+        // check if output is open
+        if (!this->file.is_open())
+            throw std::logic_error("Failed to open output file");
 
-    void Compiler::declare(std::string key, std::shared_ptr<Object> value) {}
+        // read entrypoint file
+        std::string content;
+        vip::utils::load_file(this->entrypoint, content);
 
-    void Compiler::compile(std::string output, std::string target) {}
+        // tokenize
+        ast::Program program = vip::tokenize(content);
+
+        auto statements = program.getStatements();
+
+        this->target->visitEntryPoint(statements, this);
+    }
 }

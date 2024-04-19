@@ -1,4 +1,4 @@
-let idx: uint = 0;
+let idx: u8 = 0;
 
 if(true){
 
@@ -10,16 +10,3 @@ while(idx < 10){
 
     idx = idx + 1;
 }
-
-/*
-$512 6XNN 0
-
-$513: 4XNN 10
-$514: 1NNN $517
-
-$515: 7XNN 0..8 01
-
-$516: 1NNN $513
-
-
-**/

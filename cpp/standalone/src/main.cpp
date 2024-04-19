@@ -1,85 +1,56 @@
-#include <vip/vip.hpp>
 #include <vip/version.h>
-#include <vip/jit/components/InternalFunction.hpp>
-#include <string>
-#include <memory>
 #include <iostream>
-#include <fstream>
-#include "./utils.hpp"
+#include <string.h>
+#include "./commands/interpreter.hpp"
+#include "./commands/compiler.hpp"
 
-std::shared_ptr<jit::Object> printLn(std::vector<std::shared_ptr<jit::Object>> args)
+void display_help()
 {
-    for (auto &&i : args)
-    {
-        std::cout << *i;
-    }
-
-    std::cout << std::endl;
-
-    return nullptr;
+    std::cout << "Unknown Command" << std::endl;
+    std::cout << "Valid Commands: " << std::endl;
+    std::cout << "  run or run SCRIPT" << std::endl;
+    std::cout << "  compile SOURCE TARGET" << std::endl;
+    std::cout << "  version" << std::endl;
 }
 
 int main(int argc, char *argv[])
 {
-    auto jit = vip::JustInTime(argc == 1);
-
-    jit.registerFn("println", printLn);
-
-    if (argc == 1)
+    if (argv[1] == nullptr)
     {
-        std::string input;
-        std::cout << "Vip " << VIP_VERSION << " | Use exit() to exit process." << std::endl;
-        while (true)
-        {
-            std::cout << "> ";
-            std::getline(std::cin, input);
-
-            utils::trim(input);
-
-            if (!utils::ends_with(input, ";"))
-                input.push_back(';');
-
-            if (input == "exit();")
-                break;
-
-            try
-            {
-                auto result = jit.execute(input);
-                if (result != nullptr)
-                {
-                    std::cout << *result << std::endl;
-                }
-            }
-            catch (const std::exception &e)
-            {
-                std::cerr << e.what() << '\n';
-            }
-        }
-
-        return 0;
-    }
-
-    std::ifstream file(argv[1]);
-
-    if (!file.is_open())
+        display_help();
         return 1;
-
-    std::string content;
-    std::string line;
-    while (std::getline(file, line))
-    {
-        content += line;
     }
-    file.close();
 
-    try
+    if (strcmp(argv[1], "run") == 0)
     {
-        jit.execute(content);
+        return command::run_interpreter(argc, argv);
     }
-    catch (const std::exception &e)
+    else if (strcmp(argv[1], "compile") == 0)
     {
-        std::cerr << e.what() << '\n';
+        return command::run_compiler(argc, argv);
+    }
+    else if (strcmp(argv[1], "version") == 0)
+    {
+        std::cout << "VIP: " << VIP_VERSION << std::endl;
+    }
+    else if (strcmp(argv[1], "help") == 0)
+    {
+        display_help();
+    }
+    else
+    {
+        display_help();
     }
 
     return 0;
+    /*if (strcmp(argv[1], "run"))
+    {
+        // return command::run_interpreter(argc, argv);
+        return 1;
+    }
+    else if (strcmp(argv[1], "compile"))
+    {
+        // return command::run_compiler(argc, argv);
+        return 1;
+    }*/
 }

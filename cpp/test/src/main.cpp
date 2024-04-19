@@ -1,17 +1,17 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include <doctest/doctest.h>
-#include <vip/vip.hpp>
 #include <vip/jit/Consts.hpp>
 #include <vip/jit/components/Number.hpp>
-
+#include <vip/jit/jit.hpp>
+#include <memory>
 #include <string>
 
 TEST_SUITE("Operations")
 {
     TEST_CASE("Binary Operations (ADD)")
     {
-        auto runtime = vip::JustInTime(true);
+        auto runtime = jit::JustInTime(true);
 
         auto result = runtime.execute("1 + 1;");
 
@@ -25,7 +25,7 @@ TEST_SUITE("Operations")
     }
     TEST_CASE("Binary Operations (MINUS)")
     {
-        auto runtime = vip::JustInTime(true);
+        auto runtime = jit::JustInTime(true);
 
         auto result = runtime.execute("1 - 1;");
 
@@ -39,7 +39,7 @@ TEST_SUITE("Operations")
     }
     TEST_CASE("Binary Operations (DIVIDE)")
     {
-        auto runtime = vip::JustInTime(true);
+        auto runtime = jit::JustInTime(true);
 
         auto result = runtime.execute("1 / 1;");
 
@@ -53,7 +53,7 @@ TEST_SUITE("Operations")
     }
     TEST_CASE("Binary Operations (MULT)")
     {
-        auto runtime = vip::JustInTime(true);
+        auto runtime = jit::JustInTime(true);
 
         auto result = runtime.execute("2 * 2;");
 
@@ -67,7 +67,7 @@ TEST_SUITE("Operations")
     }
     TEST_CASE("Binary Operations (DIV BY ZERO)")
     {
-        auto runtime = vip::JustInTime(true);
+        auto runtime = jit::JustInTime(true);
         CHECK_THROWS_AS(runtime.execute("2 / 0;"), const std::overflow_error &);
     }
 }

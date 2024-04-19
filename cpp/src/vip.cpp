@@ -3,11 +3,9 @@
 #include <string.h>
 #include <iostream>
 #include <ctype.h>
-#include <memory>
 #include <deque>
 
 #include <vip/tokenizer/Token.hpp>
-#include <vip/jit/runtime.hpp>
 #include <vip/ast/Parser.hpp>
 
 namespace vip
@@ -174,28 +172,5 @@ namespace vip
 
         return program;
     }
-
-    std::shared_ptr<jit::Object> JustInTime::execute(std::string input)
-    {
-        ast::Program program = tokenize(input);
-        return rt.execute(program, cliMode);
-    }
-
-    void JustInTime::registerFn(std::string name, jit::CallbackFunction callback)
-    {
-        auto fn = std::shared_ptr<jit::InternalFunction>(new jit::InternalFunction(name, callback));
-
-        rt.declare(name, fn);
-    }
-
-    /*void vipCompile(std::string input)
-    {
-        ast::Program program = tokenize(input);
-
-        std::vector<std::string> files = compile::astToCil(program, "../../", "vip_build/");
-        compile::compileCil(files, std::vector<std::string>(), "../../Program.o");
-
-        // std::cout << program.toString() << std::endl;
-    }*/
 
 } // namespace vip

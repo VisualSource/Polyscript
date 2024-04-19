@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.5)
 
 project(VipStandalone LANGUAGES CXX)
 
@@ -20,7 +20,7 @@ CPMAddPackage(NAME Vip SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 
 # ---- Create standalone executable ----
 
-file(GLOB sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 add_executable(${PROJECT_NAME} ${sources})
 
