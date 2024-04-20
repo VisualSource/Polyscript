@@ -1,5 +1,6 @@
 # Chip 8 opcoes
 https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set
+https://github.com/JohnEarnest/Octo/blob/gh-pages/docs/XO-ChipSpecification.md
 
 ## Functions
 Opcodes `Ret 00EE`,`Call 2NNN`
