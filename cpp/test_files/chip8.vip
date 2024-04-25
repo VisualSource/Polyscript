@@ -1,0 +1,4 @@
+pub extern clear_screen(): void;
+pub extern draw(x: u8, y: u8, height: u8): void;
+pub extern delay(ms: u8): void;
+

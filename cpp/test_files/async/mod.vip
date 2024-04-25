@@ -1,0 +1,47 @@
+pub struct Runner {
+    state: u8,
+    ctx: u8,
+    interrupt_count: usize,
+    set_event_loop: bool
+}
+
+struct Context {}
+
+const STATE_CREATED: u8 = 0;
+const STATE_INITIALIZED: u8 = 1;
+const STATE_CLOSED: u8 = 2;
+
+impl Runner {
+    pub fn new(){
+        return Runner {
+            state: STATE_CREATED,
+            interrupt_count: 0,
+            set_event_loop: false
+        }
+    }
+
+    pub fn close(self){}
+
+    pub fn get_loop(self){}
+
+    pub fn run(self, coro: Coroutine, context: Context|null = null){
+
+
+        self.lazy_init();
+
+        if context == null {
+            context = self.context;
+        }
+
+        self.loop.create_task(coro,context);
+
+        self.interrupt_count = 0;
+
+
+
+    }
+
+    fn lazy_init(self){}
+
+    fn on_sigint(self){}
+}

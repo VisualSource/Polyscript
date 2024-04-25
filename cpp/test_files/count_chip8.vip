@@ -1,0 +1,7 @@
+from chip8 import delay, draw;
+
+delay(100);
+
+while(true){
+    draw(0,0,4);
+}
